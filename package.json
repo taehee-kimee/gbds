@@ -1,0 +1,14 @@
+{
+  "name": "gs",
+  "private": true,
+  "workspaces": [
+    "tokens",
+    "react"
+  ],
+  "scripts": {
+    "build:tokens": "npm run build -w @gs/tokens",
+    "dev": "npm run dev -w @gs/react",
+    "typecheck": "npm run typecheck -w @gs/react",
+    "build:playground": "npm run build:tokens && npm run build:playground -w @gs/react"
+  }
+}

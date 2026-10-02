@@ -1,0 +1,21 @@
+{
+  "typography": {
+    "$type": "typography",
+    "$description": "Size + line-height pairs from the Figma `Text-{size}/{Weight}` styles. Weight is a separate axis: set font-weight next to font: var(--typography-sm).",
+    "xxs": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.xxs}", "lineHeight": "{font.leading.3}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "xs": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.xs}", "lineHeight": "{font.leading.4}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "sm": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.sm}", "lineHeight": "{font.leading.5}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "base": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.base}", "lineHeight": "{font.leading.6}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "lg": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.lg}", "lineHeight": "{font.leading.7}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.xl}", "lineHeight": "{font.leading.7}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "2xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.2xl}", "lineHeight": "{font.leading.8}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "3xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.3xl}", "lineHeight": "{font.leading.9}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "4xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.4xl}", "lineHeight": "{font.leading.10}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "5xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.5xl}", "lineHeight": "{font.leading.12}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "6xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.6xl}", "lineHeight": "{font.leading.15}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "7xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.7xl}", "lineHeight": "{font.leading.18}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "8xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.8xl}", "lineHeight": "{font.leading.24}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "9xl": { "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.9xl}", "lineHeight": "{font.leading.32}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } },
+    "timestamp": { "$value": { "fontFamily": "{font.family.timestamp}", "fontSize": "{font.size.base}", "lineHeight": "{font.leading.3}", "fontWeight": "{font.weight.normal}", "letterSpacing": "{font.tracking.normal}" } }
+  }
+}

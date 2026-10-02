@@ -1,0 +1,36 @@
+{
+  "name": "@gs/react",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gabrielle design system React components.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "dev": "vite playground",
+    "typecheck": "tsc --noEmit",
+    "build:playground": "vite build playground",
+    "preview": "vite preview playground"
+  },
+  "dependencies": {
+    "@gs/tokens": "0.1.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "lucide-react": "^1.49.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2"
+  }
+}

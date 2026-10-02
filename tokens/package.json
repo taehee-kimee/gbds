@@ -1,0 +1,16 @@
+{
+  "name": "@gs/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gabrielle design system foundation tokens — generated from Figma variables.",
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./dist/tokens.css",
+    "./fonts.css": "./fonts.css"
+  },
+  "sideEffects": ["*.css"],
+  "files": ["dist", "src", "fonts", "fonts.css"],
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}

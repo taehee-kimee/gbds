@@ -1,0 +1,113 @@
+{
+  "background": {
+    "$type": "color",
+    "default": { "$value": "{color.white}" },
+    "surface": { "$value": "{color.white}" },
+    "surface-secondary": { "$value": "{color.neutral.50}" },
+    "overlay": { "$value": "{color.white}" },
+    "backdrop": { "$value": "{color.black-a30}" },
+    "sheer": { "$value": "{color.white-a20}" },
+    "sheer-invert": { "$value": "{color.black-a20}" },
+    "subtlest": { "$value": "{color.neutral.50}" },
+    "subtler": { "$value": "{color.neutral.100}" },
+    "subtle": { "$value": "{color.neutral.200}" },
+    "bold": { "$value": "{color.neutral.900}" },
+    "bolder": { "$value": "{color.neutral.950}" },
+    "selected": { "$value": "{color.neutral.100}" },
+    "disabled": { "$value": "{color.neutral.100}" },
+    "disabled-bold": { "$value": "{color.neutral.500}" },
+    "mute": { "$value": "{color.neutral.500}" },
+    "mute-subtle": { "$value": "{color.neutral.450}" },
+    "mute-subtler": { "$value": "{color.neutral.200}" },
+    "static": {
+      "white": { "$value": "{color.white}" }
+    },
+    "error": {
+      "default": { "$value": "{color.red.600}" },
+      "subtle": { "$value": "{color.red.50}" }
+    },
+    "warning": {
+      "default": { "$value": "{color.red.400}" }
+    },
+    "info": {
+      "default": { "$value": "{color.blue.600}" },
+      "subtle": { "$value": "{color.blue.50}" }
+    },
+    "success": {
+      "default": { "$value": "{color.green.600}" },
+      "subtle": { "$value": "{color.green.50}" }
+    }
+  },
+
+  "text": {
+    "$type": "color",
+    "default": { "$value": "{color.neutral.950}" },
+    "bold": { "$value": "{color.neutral.900}" },
+    "emphasis": { "$value": "{color.neutral.900}" },
+    "subtle": { "$value": "{color.neutral.500}" },
+    "subtler": { "$value": "{color.neutral.450}" },
+    "subtlest": { "$value": "{color.neutral.400}" },
+    "invert": { "$value": "{color.neutral.50}" },
+    "selected": { "$value": "{color.neutral.100}" },
+    "popover": { "$value": "{color.white}" },
+    "static": {
+      "white": { "$value": "{color.white}" },
+      "gray": { "$value": "{color.neutral.500}" }
+    },
+    "error": { "$value": "{color.red.600}" },
+    "error-static": { "$value": "{color.red.600}" },
+    "warning": { "$value": "{color.red.400}" },
+    "info": { "$value": "{color.blue.600}" },
+    "success": { "$value": "{color.green.600}" }
+  },
+
+  "icon": {
+    "$type": "color",
+    "default": { "$value": "{color.neutral.950}" },
+    "bold": { "$value": "{color.neutral.900}" },
+    "emphasis": { "$value": "{color.neutral.900}" },
+    "subtle": { "$value": "{color.neutral.500}" },
+    "subtlest": { "$value": "{color.neutral.400}" },
+    "faint": { "$value": "{color.neutral.200}" },
+    "fainter": { "$value": "{color.neutral.100}" },
+    "invert": { "$value": "{color.neutral.50}" },
+    "selected": { "$value": "{color.neutral.100}" },
+    "pressed": { "$value": "{color.neutral.200}" },
+    "static": {
+      "white": { "$value": "{color.white}" },
+      "gray": { "$value": "{color.neutral.500}" }
+    },
+    "error": { "$value": "{color.red.600}" },
+    "error-static": { "$value": "{color.red.600}" },
+    "warning": { "$value": "{color.red.400}" },
+    "info": { "$value": "{color.blue.600}" },
+    "success": { "$value": "{color.green.600}" }
+  },
+
+  "border": {
+    "$type": "color",
+    "default": { "$value": "{color.neutral.200}" },
+    "default-strong": { "$value": "{color.neutral.50}" },
+    "subtle": { "$value": "{color.neutral.200}" },
+    "subtler": { "$value": "{color.neutral.100}" },
+    "bold": { "$value": "{color.neutral.500}" },
+    "bolder": { "$value": "{color.neutral.950}" },
+    "muted": { "$value": "{color.neutral.500}" },
+    "mute": { "$value": "{color.neutral.450}" },
+    "mute-subtle": { "$value": "{color.neutral.400}" },
+    "invert": { "$value": "{color.neutral.900}" },
+    "invert-strong": { "$value": "{color.neutral.900}" },
+    "contrast": { "$value": "{color.white}" },
+    "overlay": { "$value": "{color.white}" },
+    "selected": { "$value": "{color.neutral.100}" },
+    "static": {
+      "white": { "$value": "{color.white}" },
+      "gray": { "$value": "{color.neutral.500}" }
+    },
+    "error": { "$value": "{color.red.600}" },
+    "error-static": { "$value": "{color.red.600}" },
+    "warning": { "$value": "{color.red.400}" },
+    "info": { "$value": "{color.blue.600}" },
+    "success": { "$value": "{color.green.600}" }
+  }
+}

@@ -1,0 +1,190 @@
+/*
+ * Button — mirrors the Figma component set `Button` (73:3681).
+ * Figma State=active is the interaction state: :hover on pointer devices, :active everywhere,
+ * and the persistent look of isSelected (data-selected) — Figma has no separate selected state.
+ *
+ * Variants only reassign the --button-* properties below; layout rules live once in .root.
+ */
+
+.root {
+  --button-bg: transparent;
+  --button-fg: var(--gs-text-default);
+  --button-border: transparent;
+  --button-underline: transparent;
+  --button-opacity: 1;
+  --button-radius: var(--gs-radius-lg);
+  --button-height: var(--gs-space-36);
+  --button-icon-size: var(--gs-space-16);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gs-space-8);
+  box-sizing: border-box;
+  height: var(--button-height);
+  padding: 0 var(--gs-space-16);
+  margin: 0;
+  border: 0;
+  border-radius: var(--button-radius);
+  background: var(--button-bg);
+  color: var(--button-fg);
+  opacity: var(--button-opacity);
+  /* Figma strokes are INSIDE, so an inset shadow matches the hug width exactly; a border would add 2px. */
+  box-shadow: inset 0 0 0 var(--gs-stroke-1) var(--button-border);
+  font: var(--gs-typography-sm);
+  font-weight: var(--gs-font-weight-medium);
+  white-space: nowrap;
+  text-decoration-line: underline;
+  text-decoration-color: var(--button-underline);
+  text-decoration-thickness: var(--gs-stroke-1);
+  text-underline-offset: 4px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.root svg {
+  width: var(--button-icon-size);
+  height: var(--button-icon-size);
+  flex-shrink: 0;
+}
+
+.root:focus-visible {
+  outline: none;
+  box-shadow: var(--gs-ring-focus), inset 0 0 0 var(--gs-stroke-1) var(--button-border);
+}
+
+.root:disabled {
+  cursor: not-allowed;
+}
+
+/* ── Text variants ─────────────────────────────────────────────────────── */
+
+.root[data-variant="primary"] {
+  --button-bg: var(--gs-background-bold);
+  --button-fg: var(--gs-text-invert);
+}
+
+.root[data-variant="mute"] {
+  --button-bg: var(--gs-background-subtler);
+  --button-fg: var(--gs-text-default);
+}
+
+.root[data-variant="outline"] {
+  --button-bg: var(--gs-background-default);
+  --button-fg: var(--gs-text-default);
+  --button-border: var(--gs-border-default);
+}
+
+.root[data-variant="link"] {
+  --button-fg: var(--gs-text-bold);
+  --button-underline: var(--gs-icon-bold);
+  --button-height: var(--gs-font-leading-5);
+  padding: 0;
+}
+
+/* ── Icon variants: square, label-less ─────────────────────────────────── */
+
+.root[data-variant="icon"],
+.root[data-variant="ghost"],
+.root[data-variant="icon-rounded"] {
+  --button-fg: var(--gs-icon-default);
+  width: var(--button-height);
+  padding: 0;
+}
+
+.root[data-variant="icon"],
+.root[data-variant="icon-rounded"] {
+  --button-bg: var(--gs-background-default);
+  --button-border: var(--gs-border-default);
+}
+
+.root[data-variant="ghost"],
+.root[data-variant="icon-rounded"] {
+  --button-radius: var(--gs-radius-full);
+}
+
+/* ── State=active ──────────────────────────────────────────────────────── */
+
+@media (hover: hover) {
+  .root[data-variant]:not(:disabled):hover {
+    --button-bg: var(--gs-background-mute);
+    --button-fg: var(--gs-text-static-white);
+    --button-border: transparent;
+  }
+  .root:is([data-variant="icon"], [data-variant="icon-rounded"]):not(:disabled):hover {
+    --button-fg: var(--gs-icon-static-white);
+  }
+  .root[data-variant="ghost"]:not(:disabled):hover {
+    --button-bg: transparent;
+    --button-fg: var(--gs-icon-subtlest);
+    --button-radius: var(--gs-radius-md);
+  }
+  .root[data-variant="link"]:not(:disabled):hover {
+    --button-bg: transparent;
+    --button-fg: var(--gs-text-subtle);
+    --button-underline: var(--gs-border-mute-subtle);
+  }
+  .root:is([data-variant="primary"], [data-variant="mute"]):not(:disabled):hover {
+    --button-opacity: var(--gs-opacity-90);
+  }
+}
+
+/* :active everywhere, and isSelected (data-selected) holds the same look. */
+.root[data-variant]:not(:disabled):is(:active, [data-selected]) {
+  --button-bg: var(--gs-background-mute);
+  --button-fg: var(--gs-text-static-white);
+  --button-border: transparent;
+}
+.root:is([data-variant="icon"], [data-variant="icon-rounded"]):not(:disabled):is(:active, [data-selected]) {
+  --button-fg: var(--gs-icon-static-white);
+}
+.root[data-variant="ghost"]:not(:disabled):is(:active, [data-selected]) {
+  --button-bg: transparent;
+  --button-fg: var(--gs-icon-subtlest);
+  --button-radius: var(--gs-radius-md);
+}
+.root[data-variant="link"]:not(:disabled):is(:active, [data-selected]) {
+  --button-bg: transparent;
+  --button-fg: var(--gs-text-subtle);
+  --button-underline: var(--gs-border-mute-subtle);
+}
+.root:is([data-variant="primary"], [data-variant="mute"]):not(:disabled):is(:active, [data-selected]) {
+  --button-opacity: var(--gs-opacity-90);
+}
+
+/* ── State=disabled ────────────────────────────────────────────────────── */
+
+.root[data-variant]:disabled {
+  --button-bg: var(--gs-background-disabled);
+  --button-fg: var(--gs-text-static-gray);
+  --button-border: var(--gs-border-overlay);
+}
+
+.root:is([data-variant="icon"], [data-variant="ghost"]):disabled {
+  --button-fg: var(--gs-icon-subtlest);
+}
+
+.root[data-variant="ghost"]:disabled {
+  --button-radius: var(--gs-radius-lg);
+}
+
+.root[data-variant="icon-rounded"]:disabled {
+  --button-fg: var(--gs-icon-default);
+}
+
+.root[data-variant="link"]:disabled {
+  --button-bg: transparent;
+  --button-border: transparent;
+  --button-underline: var(--gs-border-static-gray);
+}
+
+/* Windows High Contrast drops box-shadow; keep the button outline visible. */
+@media (forced-colors: active) {
+  .root {
+    border: var(--gs-stroke-1) solid ButtonText;
+  }
+  .root[data-variant="link"] {
+    border-color: transparent;
+  }
+}
