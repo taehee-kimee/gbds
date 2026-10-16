@@ -22,10 +22,14 @@
   overflow: auto;
 }
 
-.root[open] {
-  display: flex;
+/* Column layout on the closed state too, so the dialog keeps its shape while the exit fade plays. */
+.root {
   flex-direction: column;
   gap: var(--gb-space-16);
+}
+
+.root[open] {
+  display: flex;
 }
 
 .root::backdrop {

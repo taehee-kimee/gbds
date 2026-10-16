@@ -1,0 +1,340 @@
+/*
+ * Dropdown — shared by Select and Menu (not exported on its own). Mirrors the Figma component sets
+ * `select` (614:2466), `Dropdown slot` (8094:1187) and `Part/dropdown slot` (8094:1231).
+ * Select and Menu compose these classes, so their elements carry both names (gb-select gb-dropdown).
+ * Type → data-type · Style → data-variant · Status: default = placeholder (no data-filled), filled = data-filled,
+ * hovered = :hover, pressed = open (data-open, aria-expanded), disabled = :disabled.
+ */
+
+.root {
+  /* Trigger colours per Style; Status=default (placeholder) dims fg/icon. */
+  --select-bg: var(--gb-background-default);
+  --select-border: var(--gb-border-default);
+  --select-ring: 0 0 0 0 transparent;
+  --select-fg: var(--gb-text-default);
+  --select-icon: var(--gb-icon-default);
+  --select-placeholder: var(--gb-text-subtle);
+  --select-placeholder-icon: var(--gb-icon-subtle);
+
+  display: inline-flex;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+/* Type=default: 36 tall, padding 12, gap 8, radius md, Text-sm/Medium, 16px chevron. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gb-space-8);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: var(--gb-space-36);
+  margin: 0;
+  padding: 0 var(--gb-space-12);
+  border: 0;
+  border-radius: var(--gb-radius-md);
+  background: var(--select-bg);
+  /* Figma stroke is INSIDE; open / hover add effect style Box Shadow/Focus ring. */
+  box-shadow: var(--select-ring), inset 0 0 0 var(--gb-stroke-1) var(--select-border);
+  color: var(--select-fg);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  width: var(--gb-space-16);
+  height: var(--gb-space-16);
+  color: var(--select-icon);
+}
+
+/* Figma Type=icon (Menu): 36 × 36, the icon centred. */
+.root[data-type="icon"] .trigger {
+  justify-content: center;
+  width: var(--gb-space-36);
+  padding: 0;
+}
+
+.triggerIcon {
+  display: inline-flex;
+  color: var(--select-icon);
+}
+
+.triggerIcon > svg {
+  width: var(--gb-space-16);
+  height: var(--gb-space-16);
+}
+
+/* ── Style ─────────────────────────────────────────────────────────────── */
+
+.root[data-variant="reverse"] {
+  --select-bg: var(--gb-background-bold);
+  --select-border: transparent;
+  --select-fg: var(--gb-text-invert);
+  --select-icon: var(--gb-icon-invert);
+  --select-placeholder: var(--gb-text-selected);
+  --select-placeholder-icon: var(--gb-icon-selected);
+}
+
+.root[data-variant="mute"] {
+  --select-bg: var(--gb-background-surface-secondary);
+  --select-border: transparent;
+}
+
+.root[data-variant="ghost"] {
+  --select-bg: transparent;
+  --select-border: transparent;
+}
+
+/* Status=default — nothing picked: the placeholder is dimmer. After the Styles so it wins over their fg. */
+.root:not([data-filled]) {
+  --select-fg: var(--select-placeholder);
+  --select-icon: var(--select-placeholder-icon);
+}
+
+/* ── Status=pressed (open) and keyboard focus: static-gray border + focus ring ─ */
+
+.root[data-open],
+.root:has(.trigger:focus-visible) {
+  --select-border: var(--gb-border-static-gray);
+  --select-ring: var(--gb-ring-focus);
+  --select-placeholder: var(--gb-text-default);
+  --select-placeholder-icon: var(--gb-icon-default);
+}
+
+.root[data-variant="ghost"]:is([data-open], :has(.trigger:focus-visible)) {
+  --select-bg: var(--gb-background-default);
+}
+
+.root[data-variant="reverse"]:is([data-open], :has(.trigger:focus-visible)) {
+  --select-placeholder: var(--gb-text-invert);
+  --select-placeholder-icon: var(--gb-icon-invert);
+}
+
+.trigger:focus-visible {
+  outline: none;
+}
+
+/* ── Status=hovered: background/mute, white text, static-gray border + focus ring ─ */
+
+@media (hover: hover) {
+  .root:is([data-type="default"], [data-type="icon"]):not([data-open], [data-disabled]):has(.trigger:hover) {
+    --select-bg: var(--gb-background-mute);
+    --select-border: var(--gb-border-static-gray);
+    --select-ring: var(--gb-ring-focus);
+    --select-fg: var(--gb-text-static-white);
+    --select-icon: var(--gb-icon-static-white);
+    --select-placeholder: var(--gb-text-static-white);
+    --select-placeholder-icon: var(--gb-icon-static-white);
+  }
+}
+
+/* ── Error (Field error / invalid). Not in Figma — Input's border/warning. ─ */
+
+.root[data-invalid] {
+  --select-border: var(--gb-border-warning);
+}
+
+/* ── Status=disabled (Figma: primary only — applied to every Style) ───── */
+
+.root[data-disabled] {
+  --select-bg: var(--gb-background-disabled);
+  --select-border: var(--gb-border-overlay);
+  --select-ring: 0 0 0 0 transparent;
+  --select-fg: var(--gb-text-static-gray);
+  --select-icon: var(--gb-icon-static-gray);
+  --select-placeholder: var(--gb-text-static-gray);
+  --select-placeholder-icon: var(--gb-icon-static-gray);
+}
+
+.trigger:disabled {
+  cursor: not-allowed;
+}
+
+/* ── Type=side: 24 tall, padding 8, gap 2, Text-xs/Medium, no fill; list opens beside it ─ */
+
+.root[data-type="side"] .trigger {
+  gap: var(--gb-space-2);
+  height: var(--gb-space-24);
+  padding: 0 var(--gb-space-8);
+  background: transparent;
+  box-shadow: var(--select-ring);
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-medium);
+}
+
+.root[data-type="side"]:not([data-disabled]) {
+  --select-bg: transparent;
+  --select-fg: var(--gb-text-default);
+  --select-icon: var(--gb-icon-default);
+}
+
+/* Figma side Style=reverse puts the chevron before the text. */
+.root[data-type="side"][data-variant="reverse"] .trigger {
+  flex-direction: row-reverse;
+}
+
+/* Figma side Status=hovered dims to static gray. */
+@media (hover: hover) {
+  .root[data-type="side"]:not([data-open], [data-disabled]):has(.trigger:hover) {
+    --select-fg: var(--gb-text-static-gray);
+    --select-icon: var(--gb-icon-static-gray);
+    --select-placeholder: var(--gb-text-static-gray);
+    --select-placeholder-icon: var(--gb-icon-static-gray);
+  }
+}
+
+/* ── Dropdown slot: the list panel ─────────────────────────────────────── */
+
+/* background/surface, 1px inside border/default, shadow-md, radius md, padding 4, rows 4 apart.
+   At most 6 rows show (Figma 220 tall), then it scrolls. */
+.list {
+  /* Read by Dropdown/popup.ts: gap to the trigger, side shift, viewport margin. */
+  --popup-offset: var(--gb-space-8);
+  --popup-shift: var(--gb-space-8);
+  --popup-margin: var(--gb-space-8);
+  /* Component tier: Figma panel width 210; never narrower than the trigger. */
+  --select-list-width: 210px;
+
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  min-width: max(var(--select-list-width), var(--popup-anchor-width, 0px));
+  max-width: calc(100vw - 2 * var(--popup-margin));
+  max-height: calc(6 * var(--gb-space-32) + 5 * var(--gb-space-4) + 2 * var(--gb-space-4));
+  margin: 0;
+  padding: var(--gb-space-4);
+  border: 0;
+  border-radius: var(--gb-radius-md);
+  background: var(--gb-background-surface);
+  box-shadow: var(--gb-shadow-md), inset 0 0 0 var(--gb-stroke-1) var(--gb-border-default);
+  color: var(--gb-text-default);
+  /* Scrolling and the Figma Scroll bar (Type=Thick) come from ScrollArea's class, added in the TSX. */
+}
+
+/* Column layout on the closed state too, so the list keeps its shape while the exit fade plays. */
+.list {
+  flex-direction: column;
+  gap: var(--gb-space-4);
+}
+
+.list:popover-open {
+  display: flex;
+}
+
+.list[data-placement="right-start"],
+.list[data-placement="left-start"] {
+  --popup-offset: var(--gb-space-4);
+}
+
+/* Part/dropdown slot: 32 tall, padding 8, gap 8, radius sm, Text-sm/Regular. */
+.option {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--gb-space-8);
+  box-sizing: border-box;
+  height: var(--gb-space-32);
+  padding: 0 var(--gb-space-8);
+  border-radius: var(--gb-radius-sm);
+  color: var(--gb-text-default);
+  font: var(--gb-typography-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Status=active — the highlighted option (pointer or arrow keys; a focused menu item). */
+.option:is([data-active], :focus) {
+  outline: none;
+  background: var(--gb-background-mute);
+  color: var(--gb-text-static-white);
+}
+
+/* Status=disabled. */
+.option[aria-disabled="true"] {
+  color: var(--gb-text-static-gray);
+  cursor: default;
+}
+
+.optionIcon {
+  display: inline-flex;
+  flex: none;
+}
+
+.optionIcon > svg {
+  width: var(--gb-space-16);
+  height: var(--gb-space-16);
+}
+
+/* Figma code column (`-> Placeholder1`, e.g. "+82"): fixed 50 wide (no 50 space token — component tier). */
+.code {
+  --select-code-width: 50px;
+
+  flex: none;
+  width: var(--select-code-width);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .trigger {
+    border: 1px solid ButtonText;
+  }
+  .list {
+    border: 1px solid CanvasText;
+  }
+  .option:is([data-active], :focus) {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * State changes ease over --gb-duration-100; the list fades in over --gb-duration-150. Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .trigger,
+  .option {
+    transition-property: background-color, color, border-color, box-shadow, opacity;
+    transition-duration: var(--gb-duration-100);
+    transition-timing-function: var(--gb-easing-standard);
+  }
+
+  .list {
+    transition:
+      opacity var(--gb-duration-100) var(--gb-easing-exit),
+      overlay var(--gb-duration-100) allow-discrete,
+      display var(--gb-duration-100) allow-discrete;
+    opacity: 0;
+  }
+
+  .list:popover-open {
+    opacity: 1;
+    transition-duration: var(--gb-duration-150);
+    transition-timing-function: var(--gb-easing-enter);
+  }
+
+  @starting-style {
+    .list:popover-open {
+      opacity: 0;
+    }
+  }
+}

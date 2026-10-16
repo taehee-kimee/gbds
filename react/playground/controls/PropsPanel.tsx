@@ -445,7 +445,7 @@ function elementName(type: unknown) {
 }
 
 /**
- * Prints an element as JSX. `style` is skipped — the playground only uses it to freeze states.
+ * Prints an element as JSX. `style` and `ref` are skipped — the playground only uses them to freeze states.
  * Handlers named in `hidden` are skipped too: they are wired only to feed the Actions log.
  */
 function toJsx(node: ReactNode, indent = "", hidden: Set<string> = new Set()): string {
@@ -455,7 +455,8 @@ function toJsx(node: ReactNode, indent = "", hidden: Set<string> = new Set()): s
   if (!isValidElement(node)) return ""
 
   const name = elementName(node.type)
-  const { children, style: _style, ...props } = node.props as Record<string, unknown> & { children?: ReactNode }
+  // style and ref are playground plumbing (frozen states, scroll positions) — not printed.
+  const { children, style: _style, ref: _ref, ...props } = node.props as Record<string, unknown> & { children?: ReactNode }
   const attrs = Object.entries(props)
     // false is printed (clearable={false}, showSend={false}); stories pass undefined for "not set".
     .filter(([k, v]) => v !== undefined && !(typeof v === "function" && hidden.has(k)))
@@ -467,6 +468,11 @@ function toJsx(node: ReactNode, indent = "", hidden: Set<string> = new Set()): s
       if (typeof v === "function") return `${k}={${k.replace(/^on/, "handle")}}`
       if (v instanceof Date) return `${k}={${printDate(v)}}`
       if (v && typeof v === "object" && !Array.isArray(v)) return `${k}={${printObject(v as Record<string, unknown>, k)}}`
+      // Arrays of objects (Select options, Menu items): one item per line, elements as JSX.
+      if (Array.isArray(v) && v.some((x) => x && typeof x === "object" && !(x instanceof Date))) {
+        const items = v.map((x) => (x && typeof x === "object" && !isValidElement(x) ? printObject(x as Record<string, unknown>, k) : isValidElement(x) ? toJsx(x) : JSON.stringify(x)))
+        return `${k}={[\n${items.map((x) => `${indent}    ${x},`).join("\n")}\n${indent}  ]}`
+      }
       return `${k}={${JSON.stringify(v)}}`
     })
   const open = [name, ...attrs].join(" ")

@@ -269,6 +269,7 @@ api:
       description: Present while modal.
 
   tokensUsed:
+    motion: [--gb-duration-150, --gb-duration-200, --gb-easing-enter, --gb-easing-exit]   # under prefers-reduced-motion: no-preference only
     color:
       - --gb-background-default
       - --gb-background-backdrop
@@ -325,7 +326,7 @@ examples:
 #      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
 #      class names stay gb-{component} (root) and gb-{component}-{local}
 #    - Priority: High before the first external consumer
-# 2. No open / close animation (none in Figma).
+# 2. Motion is code-only (Figma has no motion spec): enter 200ms enter-easing, exit 150ms exit-easing, fade + scale 0.96.
 #
 # ═══════════════════════════════════════════════════════════════════════════════
 

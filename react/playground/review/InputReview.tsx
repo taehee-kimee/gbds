@@ -1,4 +1,4 @@
-import { Field, Input } from "../../src"
+import { Field, Input, Select } from "../../src"
 import { inputActive } from "../stories/input"
 import { Spec, type ReviewItem } from "./Review"
 
@@ -102,11 +102,22 @@ export const items: ReviewItem[] = [
   },
   {
     id: "5",
-    title: "Select 줄은 Select 이후",
+    title: "Select 줄 = Field 안의 Select",
     status: "info",
     figma: "Input(필드)의 Select 줄(MBTI 드롭다운 목록)은 Select 컴포넌트를 씀.",
-    code: "아직 없음 — Select 페이지를 만든 뒤 추가. (Input time · Input phone은 type=\"time\" · \"tel\"로 만들었음 — 8 · 9번)",
-    columns: [],
+    code: "<Field label><Select options /></Field> — 라벨 · 설명 · 에러가 Select 트리거에 연결됨 (2026-10-16). (Input time · Input phone은 type=\"time\" · \"tel\" — 8 · 9번)",
+    columns: [
+      {
+        label: "코드",
+        render: () => (
+          <Spec label="Select row">
+            <Field label="MBTI" style={w}>
+              <Select options={["ISTJ", "ISFJ", "INFJ", "INTJ", "ENFP", "ENTP"].map((l) => ({ value: l, label: l }))} placeholder="Choose your MBTI" />
+            </Field>
+          </Spec>
+        ),
+      },
+    ],
   },
   {
     id: "6",
@@ -163,7 +174,7 @@ export const items: ReviewItem[] = [
     title: "type=\"tel\" (Figma Input phone) — libphonenumber-js",
     status: "decided",
     figma: "국가번호 select(88, chevron-down) + 번호 입력, gap 10. Status=default에서는 \"+1\"도 흐린 색(text/subtle), filled에서 기본색. 목록은 쓰는 쪽이 공급.",
-    code: "결정(2026-10-16): 국가 데이터는 libphonenumber-js — 245개국 전체가 기본, countries로 제한, preferredCountries로 맨 위 고정, 나라 이름은 locale (Intl). 목록은 '대한민국 +82', 상자는 '+82'. 번호는 blur 때 나라 형식으로 정리 (010-1234-5678), onPhoneChange로 { country, callingCode, national, e164, valid }. 선택 UI는 Figma select 모양의 네이티브 <select> — 검색은 Select 컴포넌트가 생기면. 측정: 88 + 222 @98 (Figma와 같음).",
+    code: "결정(2026-10-16): 국가 데이터는 libphonenumber-js — 245개국 전체가 기본, countries로 제한, preferredCountries로 맨 위 고정, 나라 이름은 locale (Intl). 목록은 '대한민국 +82', 상자는 '+82'. 번호는 blur 때 나라 형식으로 정리 (010-1234-5678), onPhoneChange로 { country, callingCode, national, e164, valid }. 국가 선택은 GB Select (상자 '+82', 목록은 Figma Dropdown slot phone number '+82  대한민국', 글자 입력으로 이동). 측정: 88 + 222 @98 (Figma와 같음).",
     columns: [
       {
         label: "코드",
@@ -176,7 +187,7 @@ export const items: ReviewItem[] = [
       },
     ],
     options: [
-      { id: "library", label: "libphonenumber-js — 전체 목록 + 제한 · 우선 옵션, 검색은 Select 이후", recommended: true },
+      { id: "library", label: "libphonenumber-js — 전체 목록 + 제한 · 우선 옵션", recommended: true },
       { id: "native", label: "넘겨준 목록만 (이전 방식)" },
       { id: "other", label: "기타 (메모에 기록)" },
     ],

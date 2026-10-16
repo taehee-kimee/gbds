@@ -1,7 +1,8 @@
 import { AsYouType, getCountries, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js"
-import { ChevronDown, Eye, EyeOff, Globe, Plus, Search, X } from "lucide-react"
-import { useCallback, useRef, useState, type ChangeEvent, type ComponentPropsWithRef, type CSSProperties, type MouseEvent, type ReactNode } from "react"
+import { Eye, EyeOff, Globe, Plus, Search, X } from "lucide-react"
+import { useCallback, useId, useRef, useState, type ChangeEvent, type ComponentPropsWithRef, type CSSProperties, type MouseEvent, type ReactNode } from "react"
 
+import { Select } from "../Select/Select"
 import { useField } from "./Field"
 import styles from "./Input.module.css"
 
@@ -361,6 +362,8 @@ function PhoneInput(props: InputProps) {
     ...rest
   } = props
   const [innerCountry, setInnerCountry] = useState<CountryCode>(defaultCountry)
+  // Its own id — the surrounding Field's id belongs to the number input.
+  const countryId = `${useId()}-country`
   const country = countryProp ?? innerCountry
   const [inner, setInner] = useState(String(defaultValue ?? ""))
   const value = valueProp !== undefined ? String(valueProp) : inner
@@ -377,37 +380,22 @@ function PhoneInput(props: InputProps) {
 
   return (
     <div className={className ? `${styles.row} ${styles.phone} ${className}` : `${styles.row} ${styles.phone}`} style={style}>
-      {/* Native <select> styled as the Figma select box: the list says "대한민국 +82", the box shows "+82". */}
-      <div className={styles.selectBox} data-disabled={disabled || undefined}>
-        <span className={styles.selectValue} aria-hidden="true">
-          +{getCountryCallingCode(country)}
-        </span>
-        <select
-          className={styles.select}
-          aria-label={countryLabel}
-          value={country}
-          disabled={disabled}
-          onChange={(e) => {
-            const next = e.target.value as CountryCode
-            if (countryProp === undefined) setInnerCountry(next)
-            onCountryChange?.(next)
-            onPhoneChange?.(readPhone(next, value))
-          }}
-        >
-          {preferred.map((o) => (
-            <option key={`p-${o.c}`} value={o.c}>
-              {o.name} +{o.code}
-            </option>
-          ))}
-          {preferred.length > 0 && <option disabled>──────────</option>}
-          {others.map((o) => (
-            <option key={o.c} value={o.c}>
-              {o.name} +{o.code}
-            </option>
-          ))}
-        </select>
-        <ChevronDown />
-      </div>
+      {/* Figma Input phone: the select box shows "+82"; its list (Dropdown slot Type=phone number) shows "+82  대한민국". */}
+      <Select
+        id={countryId}
+        className={styles.country}
+        aria-label={countryLabel}
+        options={[...preferred, ...others].map((o) => ({ value: o.c, label: o.name, code: `+${o.code}` }))}
+        value={country}
+        renderValue={(o) => o.code}
+        disabled={disabled}
+        onValueChange={(v) => {
+          const next = v as CountryCode
+          if (countryProp === undefined) setInnerCountry(next)
+          onCountryChange?.(next)
+          onPhoneChange?.(readPhone(next, value))
+        }}
+      />
       <InputBox
         {...(rest as InputProps)}
         type="tel"

@@ -181,6 +181,7 @@ api:
       values: [in progress, completed]
 
   tokensUsed:
+    motion: [--gb-duration-300, --gb-easing-standard]   # under prefers-reduced-motion: no-preference only
     color:
       - --gb-text-subtle
       - --gb-background-subtler
@@ -206,7 +207,7 @@ examples:
 # ================================================================
 # 1. ⚠ needs design decision — completed label is fixed "Completed" in Figma, not tied to -> Placeholder / Text.
 # 2. ⚠ needs design decision — progress / completion is not announced (no live region).
-# 3. ⚠ needs design decision — no fill animation (no motion tokens exist).
+# 3. decided (2026-10-16) — fill grows over --gb-duration-300 / --gb-easing-standard (new motion tokens); off under reduced motion.
 # 4. Measured: 226 × 32, label 16 tall, bar @24 8 tall — matches Figma.
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -232,4 +233,4 @@ metadata:
   status: draft
   notes: |
     Drafted from code (Progress.tsx, Progress.module.css) and Figma component sets 3539:7160, 3311:1341.
-    Open design questions: Review Notes 1–3.
+    Open design questions: Review Notes 1–2.

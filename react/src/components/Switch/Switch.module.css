@@ -1,0 +1,131 @@
+/*
+ * Switch — mirrors the Figma component set `Switch` (76:10618).
+ * On → :checked · Type=default | reversed → data-label-position end | start · Size → data-size ·
+ * Status=disabled → :disabled · Label → children.
+ */
+
+.root {
+  /* Size=default: 44 × 24 track, 2 padding, 20 thumb. */
+  --switch-width: var(--gb-space-44);
+  --switch-height: var(--gb-space-24);
+  --switch-padding: var(--gb-space-2);
+  --switch-thumb: calc(var(--switch-height) - 2 * var(--switch-padding));
+  /* On=off. */
+  --switch-track: var(--gb-background-selected);
+  --switch-thumb-bg: var(--gb-background-static-white);
+  --switch-ring: 0 0 0 0 transparent;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gb-space-6);
+  color: var(--gb-text-default);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Size=small: 40 × 22 track, 18 thumb (22 has no space token — component tier). */
+.root[data-size="small"] {
+  --switch-width: var(--gb-space-40);
+  --switch-height: 22px;
+}
+
+/* Type=reversed — the label comes first. */
+.root[data-label-position="start"] {
+  flex-direction: row-reverse;
+}
+
+.control {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  width: var(--switch-width);
+  height: var(--switch-height);
+}
+
+/* The track — Figma outer Switch frame: radius full, shadow-xs. */
+.input {
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: var(--gb-radius-full);
+  background: var(--switch-track);
+  box-shadow: var(--switch-ring), var(--gb-shadow-xs);
+  cursor: inherit;
+}
+
+/* The thumb — Figma inner Switch frame. */
+.thumb {
+  position: absolute;
+  top: var(--switch-padding);
+  left: var(--switch-padding);
+  width: var(--switch-thumb);
+  height: var(--switch-thumb);
+  border-radius: var(--gb-radius-full);
+  background: var(--switch-thumb-bg);
+  pointer-events: none;
+}
+
+/* On=on: track background/bold, thumb background/subtlest at the far end. */
+.root:has(.input:checked) {
+  --switch-track: var(--gb-background-bold);
+  --switch-thumb-bg: var(--gb-background-subtlest);
+}
+
+.input:checked ~ .thumb {
+  transform: translateX(calc(var(--switch-width) - var(--switch-thumb) - 2 * var(--switch-padding)));
+}
+
+.root:has(.input:focus-visible) {
+  --switch-ring: var(--gb-ring-focus);
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+/* Status=disabled: everything at opacity 50; the off track turns background/disabled. */
+.root:has(.input:disabled) {
+  opacity: var(--gb-opacity-50);
+  cursor: not-allowed;
+}
+
+.root:has(.input:disabled:not(:checked)) {
+  --switch-track: var(--gb-background-disabled);
+}
+
+/* Windows High Contrast drops backgrounds and shadows — outline the track and draw the thumb. */
+@media (forced-colors: active) {
+  .input {
+    border: 1px solid CanvasText;
+  }
+  .thumb {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+  .input:checked {
+    background: Highlight;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * The thumb slides and the colours change over --gb-duration-150 (small control switching state).
+ * Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .thumb {
+    transition:
+      transform var(--gb-duration-150) var(--gb-easing-standard),
+      background-color var(--gb-duration-150) var(--gb-easing-standard);
+  }
+  .input {
+    transition:
+      background-color var(--gb-duration-150) var(--gb-easing-standard),
+      box-shadow var(--gb-duration-100) var(--gb-easing-standard);
+  }
+}

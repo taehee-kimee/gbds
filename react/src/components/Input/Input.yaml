@@ -111,8 +111,8 @@ states_and_behaviors:
       from libphonenumber-js (user decision 2026-10-16): all 245 countries
       by default, countries limits, preferredCountries pins to the top,
       names in locale via Intl. The list reads "대한민국 +82", the box shows
-      "+82" (native <select> styled as the Figma select box — searchable
-      list once Select exists). The number is formatted for the country on
+      "+82" (a GB Select with renderValue; its list is Dropdown slot Type=phone number,
+      "+82  대한민국", and typing letters jumps to a country). The number is formatted for the country on
       blur; onPhoneChange reports { country, callingCode, national, e164,
       valid }.
   trailing-icon:
@@ -187,7 +187,7 @@ props:
     description: Input "Description" + "-> Description". Code — Field description.
   rows:
     type: booleans
-    description: Input "Textfield", "Upload", "Select", "Link" — row kinds (Input, Input type=file, Select, Input type=url + globe). Select row not built yet.
+    description: Input "Textfield", "Upload", "Select", "Link" — row kinds (Input, Input type=file, Select, Input type=url + globe). Select row = <Select> inside <Field> (Field gives it the label, description and error).
 
 default:
   name: Part/Input Status=default
@@ -344,6 +344,7 @@ api:
     - name: data-file
 
   tokensUsed:
+    motion: [--gb-duration-100, --gb-easing-standard]   # under prefers-reduced-motion: no-preference only
     color:
       - --gb-background-default
       - --gb-background-disabled
@@ -411,11 +412,11 @@ examples:
 # 2. ⚠ needs design decision — error replaces the description.
 # 3. ⚠ needs design decision — one Figma label over four inputs; code makes it a group.
 # 4. ⚠ needs design decision — no hover state.
-# 5. Select row comes with Select.
+# 5. Select row — use <Select> in <Field> (2026-10-16).
 # 6. Status mapping, error + focus, click-to-focus, file type; width fills the parent (Figma 320).
 # 7. Input search = type="search" (merged 2026-10-16); matches Figma (icon @12,10, text x40); native clear hidden.
 # 9. ⚠ needs design decision — type="time": mask + AM/PM built in; error judgement left to the page (Field error).
-# 10. ✅ decided 2026-10-16 — type="tel" uses libphonenumber-js (all countries, limit / preferred, formatting, validation); native select until Select exists.
+# 10. ✅ decided 2026-10-16 — type="tel" uses libphonenumber-js (all countries, limit / preferred, formatting, validation); the country picker is the GB Select (2026-10-16).
 # 11. ✅ decided 2026-10-16 — type="time" hourCycle 12 | 24, default 12.
 # 12. ✅ decided 2026-10-16 — text / search show a clear X only while there is text (not in Figma yet).
 # 13. ✅ decided 2026-10-16 — type="password" has a built-in show / hide eye button (not in Figma yet).

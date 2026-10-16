@@ -256,6 +256,7 @@ api:
       description: On the wrapper while disabled.
 
   tokensUsed:
+    motion: [--gb-duration-100, --gb-easing-standard]   # under prefers-reduced-motion: no-preference only
     color:
       - --gb-background-bold
       - --gb-background-surface-secondary

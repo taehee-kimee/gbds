@@ -1,0 +1,70 @@
+/*
+ * ScrollArea — mirrors the Figma component set `Scroll bar` (7792:522).
+ * Type=Thick | Thin → data-scrollbar. Position=Start | Center | End is just where the thumb sits —
+ * the browser places it from the scroll position.
+ *
+ * Also used by Select / Menu lists (Figma Dropdown slot holds a Scroll bar Type=Thick): any element with
+ * this class and data-scrollbar gets the same bar.
+ */
+
+.root {
+  /* Figma: Thick 10, Thin 5 (component tier — no 5/10 space tokens). */
+  --scrollbar-size: 10px;
+  --scrollbar-track: var(--gb-background-subtler);
+  --scrollbar-thumb: var(--gb-background-subtle);
+
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.root[data-orientation="vertical"] {
+  overflow-x: hidden;
+}
+
+.root[data-orientation="horizontal"] {
+  overflow-y: hidden;
+}
+
+.root[data-scrollbar="thin"] {
+  --scrollbar-size: 5px;
+}
+
+.root:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-ring-focus);
+}
+
+/* Chrome, Edge, Safari: exact Figma size and rounded track + thumb. */
+.root::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+.root::-webkit-scrollbar-track {
+  border-radius: var(--gb-radius-full);
+  background: var(--scrollbar-track);
+}
+
+.root::-webkit-scrollbar-thumb {
+  border-radius: var(--gb-radius-full);
+  background: var(--scrollbar-thumb);
+}
+
+.root::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox has no ::-webkit-scrollbar: the standard properties give the colours; width is the browser's
+   "thin" (≈ 8px) for both Types. Kept out of Chromium, where they would switch off the rules above. */
+@supports not selector(::-webkit-scrollbar) {
+  .root {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+}
+
+@media (forced-colors: active) {
+  .root::-webkit-scrollbar-thumb {
+    background: CanvasText;
+  }
+}

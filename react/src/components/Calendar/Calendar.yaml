@@ -375,6 +375,7 @@ api:
       description: Range preview while only the start is chosen.
 
   tokensUsed:
+    motion: [--gb-duration-100, --gb-easing-standard]   # under prefers-reduced-motion: no-preference only
     color:
       - --gb-background-overlay
       - --gb-background-bold

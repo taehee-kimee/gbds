@@ -1,0 +1,87 @@
+/*
+ * Spinner — mirrors the Figma component sets `Spinner` (1202:731) and `Part/Spinner` (3492:9739).
+ * Type=outline | reversed | primary → data-variant. Part/Spinner Progress=-90 … 180 are frames of the turn.
+ */
+
+.root {
+  --spinner-bg: transparent;
+  --spinner-border: var(--gb-border-default);
+  --spinner-fg: var(--gb-text-default);
+  --spinner-ring: var(--gb-icon-default);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gb-space-4);
+  box-sizing: border-box;
+  padding: var(--gb-space-2) var(--gb-space-8);
+  border-radius: var(--gb-radius-md);
+  background: var(--spinner-bg);
+  /* Figma stroke is INSIDE. */
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--spinner-border);
+  color: var(--spinner-fg);
+  vertical-align: middle;
+}
+
+.root[data-variant="reversed"] {
+  --spinner-bg: var(--gb-background-surface-secondary);
+  --spinner-border: transparent;
+}
+
+.root[data-variant="primary"] {
+  --spinner-bg: var(--gb-background-bold);
+  --spinner-border: transparent;
+  --spinner-fg: var(--gb-text-invert);
+  --spinner-ring: var(--gb-icon-invert);
+}
+
+/* Figma Part/Spinner: a 12px ring arc — 144° (40%) from 12 o'clock, inner radius 80% (≈ 1.2px thick). */
+.ring {
+  /* Component tier: Figma 12px dot, 1.2px thickness (no 12 / 1.2 tokens). */
+  --spinner-size: 12px;
+  --spinner-thickness: 1.2px;
+
+  flex: none;
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  border-radius: var(--gb-radius-full);
+  background: conic-gradient(var(--spinner-ring) 0deg 144deg, transparent 144deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--spinner-thickness)), #000 calc(100% - var(--spinner-thickness)));
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--spinner-thickness)), #000 calc(100% - var(--spinner-thickness)));
+}
+
+/* Text-xs/Medium. */
+.label {
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-medium);
+  white-space: nowrap;
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * One turn every 2 × --gb-duration-500 (1s), linear. The turning is the message, so under reduced
+ * motion it keeps turning but three times slower instead of stopping (a still ring reads as stuck). */
+
+.ring {
+  animation: gb-spinner-turn calc(6 * var(--gb-duration-500)) var(--gb-easing-linear) infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ring {
+    animation-duration: calc(2 * var(--gb-duration-500));
+  }
+}
+
+@keyframes gb-spinner-turn {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (forced-colors: active) {
+  .root {
+    border: 1px solid CanvasText;
+  }
+  .ring {
+    background: conic-gradient(CanvasText 0deg 144deg, transparent 144deg);
+    forced-color-adjust: none;
+  }
+}

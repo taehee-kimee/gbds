@@ -1,0 +1,202 @@
+# ================================================================
+# Spinner Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-spinner
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-spinner
+  description: |
+    Indeterminate loading for work whose duration is unknown: a turning ring
+    and a label in a small pill. Use Skeleton when the layout to come is known,
+    and Progress when real progress can be shown.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Spinner (1196:1174) · component sets Spinner (1202:731), Part/Spinner (3492:9739)"
+    code: "react/src/components/Spinner/Spinner.tsx"
+
+usage:
+  when_to_use:
+    - Saving, sending, processing — no measurable progress, no known layout
+  when_not_to_use:
+    - Known layout loading → Skeleton
+    - Measurable progress → Progress
+
+  rules:
+    - id: say-what
+      rule: Say what is happening
+      severity: warning
+      message: "The default label is \"Processing\" — pass label (e.g. \"저장 중\") in the page's language."
+    - id: mounted-region
+      rule: Announcements need a live region that already exists
+      severity: info
+      message: "Spinner is role=status; for reliable announcements render it inside an aria-live container that is already on the page."
+
+  common_mistakes:
+    - mistake: Showing a spinner for known progress
+      correct: Use Progress with a value.
+      example:
+        wrong: |
+          <Spinner label="Uploading 3 / 12" />
+        right: |
+          <Progress value={3} max={12} label="Uploading 3 / 12" />
+
+variant_guidelines:
+  outline:
+    description: 1px inside border/default, no fill. Figma Type=outline (default).
+  reversed:
+    description: background/surface-secondary. Figma Type=reversed.
+  primary:
+    description: background/bold, text/invert and icon/invert. Figma Type=primary.
+
+states_and_behaviors:
+  turning:
+    description: |
+      One turn every 2 × --gb-duration-500 (1s), linear. Under reduced motion it turns three times slower
+      instead of stopping (a still ring reads as stuck) — Review Note 2.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: div
+    description: role=status. Padding 2 / 8, gap 4, radius md, hug.
+  ring:
+    type: decoration
+    element: span
+    description: Figma Part/Spinner — 12px, 144° arc from 12 o'clock, ≈1.2px thick (CSS conic-gradient + radial mask). aria-hidden.
+  label:
+    type: text
+    element: span
+    description: Figma "-> Label". Text-xs/Medium.
+
+props:
+  label:
+    type: string
+    default: Processing
+    description: Figma "-> Label". Code — label.
+  type:
+    type: enum
+    default: outline
+    enum: [outline, reversed, primary]
+    description: Figma "Type". Code — variant.
+
+default:
+  name: Type=outline
+  layout:
+    - root:
+        - ring
+        - label
+  styles:
+    root:
+      padding: var(--gb-space-2) var(--gb-space-8)
+      gap: var(--gb-space-4)
+      borderRadius: var(--gb-radius-md)
+      border: 1px inside var(--gb-border-default)
+      color: var(--gb-text-default)
+    ring:
+      size: 12px                                    # component tier --spinner-size
+      thickness: 1.2px                              # component tier --spinner-thickness
+      color: var(--gb-icon-default)
+    label:
+      textStyle: Text-xs/Medium                     # var(--gb-typography-xs) + var(--gb-font-weight-medium)
+
+variants:
+  - name: reversed
+    configuration: { type: reversed }
+    styles:
+      root: { backgroundColor: var(--gb-background-surface-secondary), border: none }
+  - name: primary
+    configuration: { type: primary }
+    styles:
+      root: { backgroundColor: var(--gb-background-bold), border: none, color: var(--gb-text-invert) }
+      ring: { color: var(--gb-icon-invert) }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Spinner
+  import: 'import { Spinner } from "@gb/react"'
+  element: HTMLDivElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  props:
+    - name: label
+      type: ReactNode
+      default: Processing
+      figma: "-> Label"
+    - name: variant
+      type: '"outline" | "reversed" | "primary"'
+      default: outline
+      figma: Type
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"div">'
+      figma: none
+
+  slots: []
+  events: []
+  methods: []
+
+  dataAttributes:
+    - name: data-variant
+      values: [outline, reversed, primary]
+
+  tokensUsed:
+    motion: [--gb-duration-500, --gb-easing-linear]   # 1s per turn; 3s under reduced motion
+    color:
+      - --gb-border-default
+      - --gb-background-surface-secondary
+      - --gb-background-bold
+      - --gb-text-default
+      - --gb-text-invert
+      - --gb-icon-default
+      - --gb-icon-invert
+    dimension:
+      - --gb-space-2
+      - --gb-space-4
+      - --gb-space-8
+      - --gb-radius-md
+      - --gb-radius-full
+      - --gb-stroke-1
+    other:
+      - --gb-typography-xs
+      - --gb-font-weight-medium
+
+examples:
+  saving:
+    code: |
+      <div aria-live="polite">{saving && <Spinner label="저장 중" />}</div>
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/spinner/review
+# ================================================================
+# 1. ⚠ needs design decision — no ring-only form (for buttons, list ends).
+# 2. ⚠ needs design decision — turn speed undefined; reduced motion slows instead of stopping.
+# 3. Measured: 95.6 × 20 (Figma 96 — Inter rendering), ring @8,4 12px, label @24 Text-xs/Medium — matches.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 1. Library Build — see Select.yaml.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Spinner.tsx, Spinner.module.css) and Figma sets 1202:731, 3492:9739.
+    Open design questions: Review Notes 1–2.

@@ -1,0 +1,283 @@
+# ================================================================
+# Switch Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-switch
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-switch
+  description: |
+    A single on/off control with a sliding thumb, for settings that apply
+    at once. Different from Toggle (a group of buttons, each on or off) and
+    from Checkbox (a choice that only counts when the form is submitted).
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Switch (73:2897) · component set Switch (76:10618)"
+    code: "react/src/components/Switch/Switch.tsx"
+
+usage:
+  when_to_use:
+    - Settings that take effect immediately (notifications, dark mode)
+  when_not_to_use:
+    - Choices confirmed on submit → Checkbox
+    - Picking between several options → Toggle / Select
+
+  rules:
+    - id: name-it
+      rule: Every switch needs a name
+      severity: error
+      message: "Pass a label (children) or aria-label."
+    - id: label-the-setting
+      rule: The label names the setting, not the state
+      severity: warning
+      message: "\"알림 받기\", not \"켜짐 / 꺼짐\" — the switch shows the state."
+
+  common_mistakes:
+    - mistake: Using a switch inside a form that needs Save
+      correct: Use Checkbox when nothing happens until submit.
+      example:
+        wrong: |
+          <form><Switch name="terms">I agree</Switch><Button type="submit">Save</Button></form>
+        right: |
+          <form><Checkbox name="terms">I agree</Checkbox><Button type="submit">Save</Button></form>
+
+variant_guidelines:
+  default:
+    description: Label after the switch. Figma Type=default.
+  reversed:
+    description: labelPosition="start" — label before the switch (setting lists). Figma Type=reversed.
+  small:
+    description: 40 × 22 track, 18 thumb. Figma Size=small.
+
+states_and_behaviors:
+  "on":
+    description: Track background/bold, thumb background/subtlest at the far end. Figma On=on.
+  "off":
+    description: Track background/selected, thumb background/static/white. Figma On=off.
+  disabled:
+    description: opacity 50; the off track is background/disabled. Figma Status=disabled.
+  focus:
+    description: ring/focus on the track. Not in Figma (Review Note 1).
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: label
+    description: Row, gap 6; data-size, data-label-position.
+  track:
+    type: control
+    element: input
+    description: type="checkbox" role="switch", appearance none — Figma outer Switch frame (radius full, shadow-xs).
+  thumb:
+    type: decoration
+    element: span
+    description: Figma inner Switch frame — circle, padding 2 from the track.
+  label:
+    type: text
+    element: span
+    nullable: true
+    description: Figma "-> Label". Text-sm/Medium, text/default.
+
+props:
+  label:
+    type: string
+    default: switch
+    description: Figma "-> Label" + "Label" boolean. Code — children (or aria-label).
+  "on":
+    type: enum
+    default: "off"
+    enum: ["off", "on"]
+    description: Figma "On". Code — checked / defaultChecked.
+  type:
+    type: enum
+    default: default
+    enum: [default, reversed]
+    description: Figma "Type". Code — labelPosition end | start.
+  status:
+    type: enum
+    default: default
+    enum: [default, disabled]
+    description: Figma "Status". Code — disabled.
+  size:
+    type: enum
+    default: default
+    enum: [default, small]
+    description: Figma "Size". Code — size.
+
+default:
+  name: On=off, Type=default, Status=default, Size=default
+  layout:
+    - root:
+        - track:
+            - thumb
+        - label
+  styles:
+    root:
+      gap: var(--gb-space-6)
+    track:
+      width: var(--gb-space-44)
+      height: var(--gb-space-24)
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-selected)
+      shadow: var(--gb-shadow-xs)
+    thumb:
+      size: var(--gb-space-20)
+      offset: var(--gb-space-2)
+      backgroundColor: var(--gb-background-static-white)
+    label:
+      textStyle: Text-sm/Medium
+      color: var(--gb-text-default)
+
+variants:
+  - name: "on"
+    configuration: { "on": "on" }
+    styles:
+      track: { backgroundColor: var(--gb-background-bold) }
+      thumb: { backgroundColor: var(--gb-background-subtlest), x: "track width − thumb − 2 × padding" }
+  - name: small
+    configuration: { size: small }
+    styles:
+      track: { width: var(--gb-space-40), height: 22px }          # 22 component tier
+      thumb: { size: 18px }
+  - name: disabled
+    configuration: { status: disabled }
+    styles:
+      root: { opacity: var(--gb-opacity-50) }
+      track: { backgroundColor: "var(--gb-background-disabled) (off only)" }
+  - name: focus
+    configuration: { state: focus-visible }
+    styles:
+      track: { ring: var(--gb-ring-focus) }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Switch
+  import: 'import { Switch } from "@gb/react"'
+  element: HTMLInputElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  props:
+    - name: children
+      type: ReactNode
+      figma: "-> Label / Label"
+      description: Without it, aria-label (or aria-labelledby) is required.
+    - name: checked
+      type: boolean
+      figma: On
+    - name: defaultChecked
+      type: boolean
+      figma: none
+    - name: onCheckedChange
+      type: "(checked: boolean) => void"
+      figma: none
+    - name: onChange
+      type: ChangeEventHandler
+      figma: none
+      description: Native.
+    - name: labelPosition
+      type: '"end" | "start"'
+      default: end
+      figma: Type
+    - name: size
+      type: '"default" | "small"'
+      default: default
+      figma: Size
+    - name: disabled
+      type: boolean
+      figma: Status=disabled
+    - name: name
+      type: string
+      figma: none
+      description: Submitted with forms (value "on" when checked, or your value).
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"input">'
+      figma: none
+      description: To the input; className / style to the label.
+
+  slots:
+    - name: children
+      description: The label
+
+  events:
+    # Logged in the playground Actions panel: onCheckedChange, onFocus, onBlur.
+    - name: onCheckedChange
+      payload: { checked: boolean }
+
+  keyboard: "Space toggles (native checkbox). Clicking the label toggles too."
+
+  methods:
+    - name: focus
+      signature: "ref.current.focus(): void"
+
+  dataAttributes:
+    - name: data-size
+      values: [default, small]
+    - name: data-label-position
+      values: [end, start]
+
+  tokensUsed:
+    motion: [--gb-duration-150, --gb-duration-100, --gb-easing-standard]   # under prefers-reduced-motion: no-preference only
+    color:
+      - --gb-background-selected
+      - --gb-background-bold
+      - --gb-background-static-white
+      - --gb-background-subtlest
+      - --gb-background-disabled
+      - --gb-text-default
+    dimension:
+      - --gb-space-2
+      - --gb-space-6
+      - --gb-space-24
+      - --gb-space-40
+      - --gb-space-44
+      - --gb-radius-full
+    other:
+      - --gb-typography-sm
+      - --gb-font-weight-medium
+      - --gb-shadow-xs
+      - --gb-opacity-50
+      - --gb-ring-focus
+
+examples:
+  setting:
+    code: |
+      <Switch labelPosition="start" checked={notify} onCheckedChange={setNotify}>알림 받기</Switch>
+  bare:
+    code: |
+      <Switch aria-label="Dark mode" checked={dark} onCheckedChange={setDark} />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/switch/review
+# ================================================================
+# 1. ⚠ needs design decision — no focus / hover states in Figma (code: focus ring on the track).
+# 2. ⚠ needs design decision — off track (background/selected #f5f5f5) vs white thumb separated only by shadow-xs.
+# 3. Measured: 44 × 24 / 40 × 22, thumb 20 / 18 at 2 (on: 22 / 20), gap 6 — matches Figma; width 94 vs 95 (Inter rendering).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 1. Library Build — see Select.yaml.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Switch.tsx, Switch.module.css) and Figma component set 76:10618.
+    Open design questions: Review Notes 1–2.

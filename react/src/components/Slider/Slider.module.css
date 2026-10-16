@@ -1,0 +1,112 @@
+/*
+ * Slider — mirrors the Figma component `Slider` (76:10520): a 6px track (background/subtler), the filled
+ * Bar up to the value (background/bold) and a 16px round Button (background/default, 1px inside border/bolder).
+ * Drawn on a native <input type="range">; --slider-fill (0 … 1) is set from the value by Slider.tsx.
+ */
+
+.root {
+  --slider-track: var(--gb-background-subtler);
+  --slider-bar: var(--gb-background-bold);
+  --slider-thumb: var(--gb-background-default);
+  --slider-thumb-border: var(--gb-border-bolder);
+  --slider-thumb-ring: 0 0 0 0 transparent;
+  --slider-height: 6px; /* Figma track height — component tier, no 6 space token */
+  --slider-thumb-size: var(--gb-space-16);
+  /* The bar ends under the button's centre: the button travels from half its size to 100% minus half. */
+  --slider-bar-end: calc(var(--slider-thumb-size) / 2 + var(--slider-fill, 0) * (100% - var(--slider-thumb-size)));
+
+  appearance: none;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--slider-thumb-size);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.root:focus-visible {
+  outline: none;
+  --slider-thumb-ring: var(--gb-ring-focus);
+}
+
+.root:disabled {
+  --slider-bar: var(--gb-background-disabled-bold);
+  --slider-thumb-border: var(--gb-border-default);
+  cursor: not-allowed;
+}
+
+/* ── Chrome, Edge, Safari ──────────────────────────────────────────────── */
+
+.root::-webkit-slider-runnable-track {
+  height: var(--slider-height);
+  border-radius: var(--gb-radius-full);
+  background: linear-gradient(to right, var(--slider-bar) var(--slider-bar-end), var(--slider-track) var(--slider-bar-end));
+}
+
+.root::-webkit-slider-thumb {
+  appearance: none;
+  box-sizing: border-box;
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  /* Centre the 16px button on the 6px track. */
+  margin-top: calc((var(--slider-height) - var(--slider-thumb-size)) / 2);
+  border: 0;
+  border-radius: var(--gb-radius-full);
+  background: var(--slider-thumb);
+  /* Figma stroke is INSIDE. */
+  box-shadow: var(--slider-thumb-ring), inset 0 0 0 var(--gb-stroke-1) var(--slider-thumb-border);
+}
+
+/* ── Firefox ───────────────────────────────────────────────────────────── */
+
+.root::-moz-range-track {
+  height: var(--slider-height);
+  border-radius: var(--gb-radius-full);
+  background: var(--slider-track);
+}
+
+.root::-moz-range-progress {
+  height: var(--slider-height);
+  border-radius: var(--gb-radius-full);
+  background: var(--slider-bar);
+}
+
+.root::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border: 0;
+  border-radius: var(--gb-radius-full);
+  background: var(--slider-thumb);
+  box-shadow: var(--slider-thumb-ring), inset 0 0 0 var(--gb-stroke-1) var(--slider-thumb-border);
+}
+
+/* Windows High Contrast drops box-shadow and custom colours — keep the button and bar visible. */
+@media (forced-colors: active) {
+  .root::-webkit-slider-thumb {
+    border: 1px solid ButtonText;
+    background: ButtonFace;
+  }
+  .root::-moz-range-thumb {
+    border: 1px solid ButtonText;
+  }
+  .root::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, Highlight var(--slider-bar-end), GrayText var(--slider-bar-end));
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * The focus ring on the button eases in over --gb-duration-100. Off under reduced motion.
+ * (The bar itself follows the pointer with no delay.) */
+
+@media (prefers-reduced-motion: no-preference) {
+  .root::-webkit-slider-thumb {
+    transition: box-shadow var(--gb-duration-100) var(--gb-easing-standard);
+  }
+  .root::-moz-range-thumb {
+    transition: box-shadow var(--gb-duration-100) var(--gb-easing-standard);
+  }
+}

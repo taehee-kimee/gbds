@@ -1,0 +1,9 @@
+/*
+ * Select — the trigger, list and option styles are shared with Menu in Dropdown/Dropdown.module.css,
+ * imported directly by Select.tsx (not composed — composes would copy that file into every importer).
+ * The root carries both classes: gb-select gb-dropdown.
+ */
+
+.root {
+  display: inline-flex;
+}

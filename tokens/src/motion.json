@@ -1,5 +1,5 @@
 {
-  "$description": "Motion — code-only (Figma variables have no easing type). Durations from the Tailwind / Polaris ms scale; easing curves follow Material 3 (standard) and the Tailwind/CSS decelerate-accelerate pair, named by role.",
+  "$description": "Motion — mirrored in Figma GB_Foundation (Dlnn5…) collection `motion` as TIMING (seconds) and EASING variables (2026-10-16). Durations from the Tailwind / Polaris ms scale; easing curves follow Material 3 (standard) and the Tailwind/CSS decelerate-accelerate pair, named by role.",
   "duration": {
     "$type": "duration",
     "50": { "$value": { "value": 50, "unit": "ms" }, "$description": "Instant feedback: press." },

@@ -1,0 +1,421 @@
+# ================================================================
+# Select Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-select
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-select
+  description: |
+    A dropdown for picking one value from a list. The trigger shows the
+    picked value, or the placeholder while nothing is picked. Figma's
+    select set also holds an action menu (Type=icon, Dropdown slot
+    Type=menu) — that is <Menu> in code (user decision 2026-10-16).
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Select (73:1986) · component sets select (614:2466), Dropdown slot (8094:1187), Part/dropdown slot (8094:1231)"
+    code: "react/src/components/Select/Select.tsx (styles shared with Menu: Dropdown/Dropdown.module.css, position: Dropdown/popup.ts)"
+
+usage:
+  when_to_use:
+    - One choice from about 4–250 known options (role, MBTI, country, timeframe)
+  when_not_to_use:
+    - Free text → Input
+    - Running an action → Menu
+    - 2–3 options always visible → radio buttons / Toggle
+    - Several choices → Checkbox list / Chip filters
+
+  rules:
+    - id: name-it
+      rule: Give every Select a name
+      severity: error
+      message: "Put it in <Field label> or pass aria-label — the placeholder is not a name."
+    - id: placeholder-is-a-prompt
+      rule: The placeholder prompts; it is not a default value
+      severity: warning
+      message: "Use value / defaultValue for a real default."
+
+  common_mistakes:
+    - mistake: Using Select for actions
+      correct: Use Menu (role=menu, onAction).
+      example:
+        wrong: |
+          <Select options={[{ value: "delete", label: "Delete" }]} onValueChange={run} />
+        right: |
+          <Menu label="Actions" items={[{ id: "delete", label: "Delete" }]} onAction={run} />
+
+variant_guidelines:
+  primary:
+    description: background/default, 1px inside border/default. Figma Style=primary.
+  reverse:
+    description: background/bold, text/invert (placeholder text/selected). On type="side" it opens to the left instead. Figma Style=reverse.
+  mute:
+    description: background/surface-secondary, no border. Figma Style=mute.
+  ghost:
+    description: No fill or border. Figma Style=ghost.
+  side:
+    description: type="side" — 24 tall, Text-xs/Medium, chevron beside the text, list opens to the side. Figma Type=side.
+
+states_and_behaviors:
+  default:
+    description: Nothing picked — placeholder in text/subtle (reverse text/selected). Figma Status=default.
+  filled:
+    description: A value is picked — text/default. Figma Status=filled.
+  hovered:
+    description: background/mute, white text, static-gray border + Focus ring (Figma — Review Note 3). Side dims to static gray.
+  pressed:
+    description: Open — static-gray border + Focus ring, chevron up (side flips). Also the keyboard-focus look.
+  disabled:
+    description: background/disabled, border/overlay, text static gray — every Style (Figma primary only, Review Note 4).
+  invalid:
+    description: border/warning (Field error) — not in Figma.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: div
+    description: Classes gb-select gb-dropdown; data-type, data-variant, data-open, data-filled, data-invalid, data-disabled.
+  trigger:
+    type: control
+    element: button
+    description: role=combobox, aria-haspopup=listbox, aria-expanded, aria-controls, aria-activedescendant (focus stays here). Figma select frame.
+  value:
+    type: text
+    element: span
+    description: Picked label (or renderValue) or placeholder. Ellipsis when narrow.
+  chevron:
+    type: icon
+    element: svg
+    description: lucide chevron-down / chevron-up (side — chevron-right / chevron-left).
+  list:
+    type: container
+    element: div
+    description: popover="auto" role=listbox — Figma Dropdown slot. Top layer, fixed, positioned by popup.ts.
+  option:
+    type: control
+    element: div
+    description: role=option aria-selected — Figma Part/dropdown slot (icon, code column, label).
+
+props:
+  placeholder:
+    type: string
+    default: Data Scientist
+    description: Figma "-> Placeholder". Code — placeholder.
+  dropdown:
+    type: slot
+    description: |
+      Figma "Dropdown" (SLOT). Code — options array. The six Dropdown slot Types (menu, self, mbti,
+      phone number, timeframe, social media) are Figma showcases, not a variant axis — the playground
+      shows one basic list (user, 2026-10-16); menu lists are <Menu>.
+  type:
+    type: enum
+    default: default
+    enum: [default, side, icon]
+    description: Figma "Type". Code — type (default | side); icon → <Menu type="icon">.
+  style:
+    type: enum
+    default: primary
+    enum: [primary, reverse, mute, ghost]
+    description: Figma "Style". Code — variant.
+  status:
+    type: enum
+    default: filled
+    enum: [default, hovered, pressed, disabled, filled]
+    description: Figma "Status". Code — value (default/filled), :hover, open, disabled.
+
+default:
+  name: Type=default, Style=primary, Status=filled
+  layout:
+    - root:
+        - trigger:
+            - value
+            - chevron
+        - list:
+            - option
+  styles:
+    trigger:
+      height: var(--gb-space-36)
+      padding: 0 var(--gb-space-12)
+      gap: var(--gb-space-8)
+      borderRadius: var(--gb-radius-md)
+      backgroundColor: var(--gb-background-default)
+      border: 1px inside var(--gb-border-default)
+      textStyle: Text-sm/Medium                    # var(--gb-typography-sm) + var(--gb-font-weight-medium)
+      color: var(--gb-text-default)
+    chevron:
+      size: var(--gb-space-16)
+      color: var(--gb-icon-default)
+    list:
+      offset: var(--gb-space-8)                    # below the trigger (side: 4 beside, shifted up 8)
+      minWidth: "max(210px, trigger width)"        # component tier --select-list-width
+      maxHeight: "6 rows (220)"
+      padding: var(--gb-space-4)
+      gap: var(--gb-space-4)
+      borderRadius: var(--gb-radius-md)
+      backgroundColor: var(--gb-background-surface)
+      border: 1px inside var(--gb-border-default)
+      shadow: var(--gb-shadow-md)
+      scrollbar: "ScrollArea Type=Thick (10px, background/subtle thumb on background/subtler)"
+    option:
+      height: var(--gb-space-32)
+      padding: 0 var(--gb-space-8)
+      gap: var(--gb-space-8)
+      borderRadius: var(--gb-radius-sm)
+      textStyle: Text-sm/Regular
+      color: var(--gb-text-default)
+      codeWidth: 50px                              # component tier --select-code-width
+
+variants:
+  - name: reverse
+    configuration: { style: reverse }
+    styles:
+      trigger: { backgroundColor: var(--gb-background-bold), color: var(--gb-text-invert), border: none }
+  - name: mute
+    configuration: { style: mute }
+    styles:
+      trigger: { backgroundColor: var(--gb-background-surface-secondary), border: none }
+  - name: ghost
+    configuration: { style: ghost }
+    styles:
+      trigger: { backgroundColor: transparent, border: none }
+  - name: placeholder
+    configuration: { status: default }
+    styles:
+      trigger: { color: var(--gb-text-subtle) }
+      chevron: { color: var(--gb-icon-subtle) }
+  - name: hovered
+    configuration: { status: hovered }
+    styles:
+      trigger: { backgroundColor: var(--gb-background-mute), color: var(--gb-text-static-white), border: 1px inside var(--gb-border-static-gray), ring: var(--gb-ring-focus) }
+  - name: pressed
+    configuration: { status: pressed }
+    styles:
+      trigger: { border: 1px inside var(--gb-border-static-gray), ring: var(--gb-ring-focus) }
+  - name: disabled
+    configuration: { status: disabled }
+    styles:
+      trigger: { backgroundColor: var(--gb-background-disabled), border: 1px inside var(--gb-border-overlay), color: var(--gb-text-static-gray) }
+  - name: side
+    configuration: { type: side }
+    styles:
+      trigger: { height: var(--gb-space-24), padding: 0 var(--gb-space-8), gap: var(--gb-space-2), textStyle: Text-xs/Medium, backgroundColor: transparent }
+  - name: option-active
+    configuration: { option: active }
+    styles:
+      option: { backgroundColor: var(--gb-background-mute), color: var(--gb-text-static-white) }
+  - name: option-disabled
+    configuration: { option: disabled }
+    styles:
+      option: { color: var(--gb-text-static-gray) }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Select
+  import: 'import { Select, type SelectOption } from "@gb/react"'
+  element: HTMLButtonElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'lucide-react (peer dependency) — icons: chevron-down, chevron-up, chevron-right, chevron-left'
+    - 'Browser Popover API (Chrome 114+, Safari 17+, Firefox 125+)'
+
+  props:
+    - name: options
+      type: "readonly SelectOption[]  // { value: string; label: string; icon?: ReactNode; code?: ReactNode; disabled?: boolean }"
+      required: true
+      figma: "Dropdown (SLOT) — Part/dropdown slot rows"
+    - name: value
+      type: string | null
+      figma: Status=filled / default
+      description: Controlled. null shows the placeholder.
+    - name: defaultValue
+      type: string | null
+      default: "null"
+      figma: none
+    - name: onValueChange
+      type: "(value: string) => void"
+      figma: none
+    - name: placeholder
+      type: string
+      default: Select
+      figma: "-> Placeholder"
+    - name: variant
+      type: '"primary" | "reverse" | "mute" | "ghost"'
+      default: primary
+      figma: Style
+    - name: type
+      type: '"default" | "side"'
+      default: default
+      figma: Type
+    - name: renderValue
+      type: "(option: SelectOption) => ReactNode"
+      figma: none
+      description: What the trigger shows for the picked option (Input tel shows only the code).
+    - name: invalid
+      type: boolean
+      figma: none
+      description: Also set by a surrounding Field with an error.
+    - name: disabled
+      type: boolean
+      figma: Status=disabled
+    - name: name
+      type: string
+      figma: none
+      description: Submitted through a hidden input.
+    - name: onOpenChange
+      type: "(open: boolean) => void"
+      figma: Status=pressed
+    - name: className
+      type: string
+      figma: none
+      description: On the root.
+    - name: style
+      type: CSSProperties
+      figma: none
+      description: On the root (e.g. width).
+    - name: ref
+      type: Ref<HTMLButtonElement>
+      figma: none
+      description: The trigger.
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"button">'
+      figma: none
+      description: To the trigger (aria-label, id, onFocus …).
+
+  slots: []
+
+  events:
+    # Logged in the playground Actions panel: onValueChange, onOpenChange, onFocus, onBlur.
+    - name: onValueChange
+      payload: { value: string }
+      description: Only when the value actually changes.
+    - name: onOpenChange
+      payload: { open: boolean }
+
+  keyboard:
+    closed: "↓ / ↑ / Enter / Space open (on the picked option); Home / End open on first / last; letters jump."
+    open: "↑ ↓ move (skip disabled) · Home / End · PageUp / PageDown (10) · letters jump (repeat a letter to cycle) · Enter / Space pick · Tab picks and moves on · Esc / outside click close."
+
+  methods:
+    - name: focus
+      signature: "ref.current.focus(): void"
+
+  dataAttributes:
+    - name: data-type
+      values: [default, side]
+    - name: data-variant
+      values: [primary, reverse, mute, ghost]
+    - name: data-open
+    - name: data-filled
+    - name: data-invalid
+    - name: data-disabled
+
+  tokensUsed:
+    motion: [--gb-duration-100, --gb-duration-150, --gb-easing-standard, --gb-easing-enter, --gb-easing-exit]   # under prefers-reduced-motion: no-preference only
+    color:
+      - --gb-background-default
+      - --gb-background-bold
+      - --gb-background-surface-secondary
+      - --gb-background-mute
+      - --gb-background-disabled
+      - --gb-background-surface
+      - --gb-background-subtle
+      - --gb-background-subtler
+      - --gb-border-default
+      - --gb-border-static-gray
+      - --gb-border-overlay
+      - --gb-border-warning
+      - --gb-text-default
+      - --gb-text-subtle
+      - --gb-text-invert
+      - --gb-text-selected
+      - --gb-text-static-white
+      - --gb-text-static-gray
+      - --gb-icon-default
+      - --gb-icon-subtle
+      - --gb-icon-invert
+      - --gb-icon-selected
+      - --gb-icon-static-white
+      - --gb-icon-static-gray
+    dimension:
+      - --gb-space-2
+      - --gb-space-4
+      - --gb-space-8
+      - --gb-space-12
+      - --gb-space-16
+      - --gb-space-24
+      - --gb-space-32
+      - --gb-space-36
+      - --gb-radius-sm
+      - --gb-radius-md
+      - --gb-stroke-1
+    other:
+      - --gb-typography-sm
+      - --gb-typography-xs
+      - --gb-font-weight-medium
+      - --gb-shadow-md
+      - --gb-ring-focus
+
+examples:
+  in-field:
+    code: |
+      <Field label="MBTI">
+        <Select options={mbti} value={value} onValueChange={setValue} placeholder="Choose" name="mbti" />
+      </Field>
+  country-code:
+    description: What Input type="tel" does
+    code: |
+      <Select aria-label="Country code" options={countries.map((c) => ({ value: c.iso, label: c.name, code: `+${c.code}` }))} value={iso} renderValue={(o) => o.code} />
+  side:
+    code: |
+      <Select type="side" options={roles} defaultValue="Data Scientist" aria-label="Role" />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/select/review
+# ================================================================
+# 1. decided — Select (value) and Menu (actions) are separate components; options are an array (user, 2026-10-16).
+# 2. ⚠ needs design decision — no "picked" mark in the list (Part/dropdown slot has default/active/disabled only).
+# 3. ⚠ needs design decision — hovered looks heavier than pressed (mute fill + focus ring on hover).
+# 4. ⚠ needs design decision — disabled exists for primary only; no error state.
+# 5. ⚠ needs design decision — side chevron flips direction when open.
+# 6. Measured: trigger 141.4 × 36 (Figma 142 — Inter rendering), list 210 × 220 @8 below, rows 202 × 32 @4,4; side list 4 beside, −8.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+# 2. Scrollbar — the list reuses ScrollArea's class (data-scrollbar="thick"), so it has the Figma Scroll bar (2026-10-16).
+# 3. No search box for long lists (typeahead only); Korean typeahead needs an input (IME), so it does not work on the button.
+# 4. No option groups / separators (Input tel's preferred countries are just listed first).
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Select.tsx, Dropdown/Dropdown.module.css, Dropdown/popup.ts) and Figma sets 614:2466, 8094:1187, 8094:1231.
+    Open design questions: Review Notes 2–5.

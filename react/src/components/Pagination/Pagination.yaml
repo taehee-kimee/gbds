@@ -243,6 +243,7 @@ api:
       description: On ellipsis items.
 
   tokensUsed:
+    motion: [--gb-duration-100, --gb-easing-standard]   # under prefers-reduced-motion: no-preference only
     color:
       - --gb-text-default
       - --gb-icon-default

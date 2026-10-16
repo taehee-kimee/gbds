@@ -1,0 +1,213 @@
+# ================================================================
+# ScrollArea Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-scroll-area
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-scroll-area
+  description: |
+    A scrolling container whose scrollbar has the Figma "Scroll bar" look
+    (rounded track and thumb, thick 10 / thin 5). Purely visual — scrolling
+    itself stays the browser's. A web page cannot draw a scrollbar on its own,
+    so the component is the area that scrolls (Figma calls it Scroll bar).
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Scrollbar (7792:262) · component set Scroll bar (7792:522)"
+    code: "react/src/components/ScrollArea/ScrollArea.tsx"
+
+usage:
+  when_to_use:
+    - Panels, lists and side areas that scroll inside the page
+    - Select / Menu lists (built in)
+  when_not_to_use:
+    - The page itself — leave the document scrollbar to the browser
+    - Short content that never overflows (no bar shows anyway)
+
+  rules:
+    - id: give-it-a-size
+      rule: Give the area a height (or width for horizontal)
+      severity: error
+      message: "Without a fixed size nothing overflows and no bar appears."
+    - id: name-it
+      rule: Name a focusable area
+      severity: warning
+      message: "It is focusable (tabIndex 0) so keyboard users can scroll; pass aria-label so screen readers announce what it is."
+
+  common_mistakes:
+    - mistake: Hiding the scrollbar to get the look
+      correct: Keep the bar — ScrollArea restyles it.
+      example:
+        wrong: |
+          <div style={{ overflow: "auto", scrollbarWidth: "none" }}>…</div>
+        right: |
+          <ScrollArea style={{ height: 240 }} aria-label="Notes">…</ScrollArea>
+
+variant_guidelines:
+  thick:
+    description: 10px bar. Figma Type=Thick (Dropdown slot uses this).
+  thin:
+    description: 5px bar. Figma Type=Thin.
+
+states_and_behaviors:
+  position:
+    description: Figma Position=Start / Center / End is where the thumb sits — the browser places it from the scroll position.
+  focus:
+    description: ring/focus when the area itself is focused for keyboard scrolling.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: div
+    description: overflow auto (per orientation), tabIndex 0, data-scrollbar, data-orientation.
+  track:
+    type: decoration
+    element: "::-webkit-scrollbar-track"
+    description: Figma Scroll bar frame — background/subtler, radius full.
+  thumb:
+    type: decoration
+    element: "::-webkit-scrollbar-thumb"
+    description: Figma Indicator — background/subtle, radius full.
+
+props:
+  type:
+    type: enum
+    default: Thick
+    enum: [Thick, Thin]
+    description: Figma "Type". Code — type.
+  position:
+    type: enum
+    default: Start
+    enum: [Start, Center, End]
+    description: Figma "Position". Code — none (scroll position).
+
+default:
+  name: Type=Thick, Position=Start
+  layout:
+    - root:
+        - track:
+            - thumb
+  styles:
+    root:
+      scrollbarSize: 10px                          # component tier --scrollbar-size (thin 5px)
+    track:
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-subtler)
+    thumb:
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-subtle)
+
+variants:
+  - name: thin
+    configuration: { type: Thin }
+    styles:
+      root: { scrollbarSize: 5px }
+  - name: firefox
+    configuration:
+      supports: "not selector(::-webkit-scrollbar)"
+    styles:
+      root: { scrollbarWidth: thin, scrollbarColor: "var(--gb-background-subtle) var(--gb-background-subtler)" }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: ScrollArea
+  import: 'import { ScrollArea } from "@gb/react"'
+  element: HTMLDivElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  props:
+    - name: type
+      type: '"thick" | "thin"'
+      default: thick
+      figma: Type
+    - name: orientation
+      type: '"vertical" | "horizontal" | "both"'
+      default: vertical
+      figma: none
+    - name: tabIndex
+      type: number
+      default: 0
+      figma: none
+      description: Pass -1 when the content has its own focusable items.
+    - name: children
+      type: ReactNode
+      figma: none
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"div">'
+      figma: none
+      description: style (give it a height), aria-label, onScroll, ref …
+
+  slots:
+    - name: children
+      description: The scrolling content
+
+  events:
+    # Logged in the playground Actions panel: onScroll.
+    - name: onScroll
+      description: Native scroll event.
+
+  methods:
+    - name: scrollTo
+      signature: "ref.current.scrollTo({ top, behavior }): void"
+
+  dataAttributes:
+    - name: data-scrollbar
+      values: [thick, thin]
+      description: Also set on Select / Menu lists, which reuse this class.
+    - name: data-orientation
+      values: [vertical, horizontal, both]
+
+  tokensUsed:
+    color:
+      - --gb-background-subtler
+      - --gb-background-subtle
+    dimension:
+      - --gb-radius-full
+    other:
+      - --gb-ring-focus
+
+examples:
+  panel:
+    code: |
+      <ScrollArea style={{ height: 320 }} aria-label="Activity">{items}</ScrollArea>
+  thin-horizontal:
+    code: |
+      <ScrollArea type="thin" orientation="horizontal" aria-label="Templates">{cards}</ScrollArea>
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/scroll-area/review
+# ================================================================
+# 1. info — Figma Scroll bar → code ScrollArea (the scrolling area restyles its bar); Position = scroll position.
+# 2. ⚠ needs design decision — Figma track has 16 top / bottom padding the thumb ignores; code uses the full track.
+# 3. ⚠ needs design decision — no hover / drag state for the thumb.
+# 4. info — Chrome / Edge / Safari match Figma (measured bar 10 / 5px); Firefox shows its thin width (≈ 8px) in Figma colours.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 1. Library Build — see Select.yaml.
+# 2. ::-webkit-scrollbar is non-standard; if Chromium drops it, the @supports fallback (standard properties) takes over.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (ScrollArea.tsx, ScrollArea.module.css) and Figma component set 7792:522.
+    Open design questions: Review Notes 2–3.

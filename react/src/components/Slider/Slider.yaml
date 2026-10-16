@@ -1,0 +1,230 @@
+# ================================================================
+# Slider Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-slider
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-slider
+  description: |
+    A track the user drags to pick a value from a continuous range. Min, max
+    and step are set by the caller. When an exact number must be typed, use Input.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Slider (73:2895) · component Slider (76:10520)"
+    code: "react/src/components/Slider/Slider.tsx"
+
+usage:
+  when_to_use:
+    - Adjusting a value where the rough position matters more than the exact number (volume, opacity, size)
+  when_not_to_use:
+    - An exact number → Input type="number"
+    - A few named choices → Select / Toggle
+
+  rules:
+    - id: name-it
+      rule: Give it a name
+      severity: error
+      message: "Put it in <Field label> or pass aria-label."
+    - id: show-the-value
+      rule: Show the value when it matters
+      severity: warning
+      message: "The slider has no value label — show it next to it (e.g. in the Field label)."
+
+  common_mistakes:
+    - mistake: Using a slider for precise numbers
+      correct: Use Input, or pair the slider with one.
+      example:
+        wrong: |
+          <Slider max={10000} aria-label="Price" />
+        right: |
+          <Field label="Price"><Input type="number" /></Field>
+
+variant_guidelines:
+  default:
+    description: The only Figma variant.
+
+states_and_behaviors:
+  value:
+    description: The bar fills from the start to the button's centre (Figma Bar ends under the Button).
+  focus:
+    description: ring/focus on the button. Not in Figma (Review Note 1).
+  disabled:
+    description: Bar background/disabled-bold, button border/default. Not in Figma (Review Note 2).
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: control
+    element: input
+    description: type="range". 16 tall (the button), fills its parent's width.
+  track:
+    type: decoration
+    element: "::-webkit-slider-runnable-track / ::-moz-range-track"
+    description: Figma Slider frame — 6 tall, radius full, background/subtler.
+  bar:
+    type: decoration
+    element: "track gradient / ::-moz-range-progress"
+    description: Figma Bar — background/bold, up to the button's centre (--slider-fill).
+  button:
+    type: decoration
+    element: "::-webkit-slider-thumb / ::-moz-range-thumb"
+    description: Figma Button — 16 circle, background/default, 1px inside border/bolder.
+
+props: {}
+
+default:
+  name: Slider
+  layout:
+    - root:
+        - track:
+            - bar
+        - button
+  styles:
+    track:
+      height: 6px                                   # component tier --slider-height
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-subtler)
+    bar:
+      backgroundColor: var(--gb-background-bold)
+    button:
+      size: var(--gb-space-16)
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-default)
+      border: 1px inside var(--gb-border-bolder)
+
+variants:
+  - name: focus
+    configuration: { state: focus-visible }
+    styles:
+      button: { ring: var(--gb-ring-focus) }
+  - name: disabled
+    configuration: { state: disabled }
+    styles:
+      bar: { backgroundColor: var(--gb-background-disabled-bold) }
+      button: { border: 1px inside var(--gb-border-default) }
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      button: { border: 1px solid ButtonText }
+      bar: { backgroundColor: Highlight }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Slider
+  import: 'import { Slider } from "@gb/react"'
+  element: HTMLInputElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  props:
+    - name: value
+      type: number
+      figma: Bar width
+      description: Controlled.
+    - name: defaultValue
+      type: number
+      default: min
+      figma: none
+    - name: onValueChange
+      type: "(value: number) => void"
+      figma: none
+    - name: min
+      type: number
+      default: 0
+      figma: none
+    - name: max
+      type: number
+      default: 100
+      figma: none
+    - name: step
+      type: number
+      default: 1
+      figma: none
+    - name: disabled
+      type: boolean
+      figma: none
+    - name: name
+      type: string
+      figma: none
+      description: Submitted with forms (native).
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"input">'
+      figma: none
+      description: aria-label, onChange, onFocus, ref …
+
+  slots: []
+
+  events:
+    # Logged in the playground Actions panel: onValueChange, onFocus, onBlur.
+    - name: onValueChange
+      payload: { value: number }
+    - name: onChange
+      description: Native input event.
+
+  keyboard: "← ↓ / → ↑ one step · PageDown / PageUp ten steps (browser) · Home / End min / max."
+
+  methods:
+    - name: focus
+      signature: "ref.current.focus(): void"
+
+  dataAttributes: []
+
+  tokensUsed:
+    motion: [--gb-duration-100, --gb-easing-standard]   # focus ring only; under prefers-reduced-motion: no-preference
+    color:
+      - --gb-background-subtler
+      - --gb-background-bold
+      - --gb-background-default
+      - --gb-background-disabled-bold
+      - --gb-border-bolder
+      - --gb-border-default
+    dimension:
+      - --gb-space-16
+      - --gb-radius-full
+      - --gb-stroke-1
+    other:
+      - --gb-ring-focus
+
+examples:
+  in-field:
+    code: |
+      <Field label={`Opacity ${v}%`}>
+        <Slider value={v} onValueChange={setV} step={10} />
+      </Field>
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/slider/review
+# ================================================================
+# 1. ⚠ needs design decision — no hover / focus / pressed states in Figma (code: focus ring only).
+# 2. ⚠ needs design decision — no disabled in Figma.
+# 3. ⚠ needs design decision — no value label, ticks or range (two buttons).
+# 4. Measured: 435 × 16, track 6, button 16 centred on the bar end (at 20%: 84–100) — matches Figma.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 1. Library Build — see Select.yaml.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Slider.tsx, Slider.module.css) and Figma component 76:10520.
+    Open design questions: Review Notes 1–3.

@@ -314,6 +314,7 @@ api:
       description: On the root when disabled.
 
   tokensUsed:
+    motion: [--gb-duration-100, --gb-easing-standard]   # under prefers-reduced-motion: no-preference only
     color:
       - --gb-background-default
       - --gb-border-default

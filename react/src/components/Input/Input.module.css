@@ -270,76 +270,10 @@
   gap: var(--gb-space-10);
 }
 
-/* Figma select box: padding 8 / 12, chevron-down 16, Text-sm/Medium. */
-.selectBox {
-  position: relative;
-  display: flex;
+/* Figma select box (88 wide) — a GB Select whose trigger shows only "+82". */
+.country {
   flex-shrink: 0;
-  align-items: center;
-  box-sizing: border-box;
   width: 88px;
-  height: var(--gb-space-36);
-  border-radius: var(--gb-radius-md);
-  background: var(--gb-background-default);
-  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-default);
-  color: var(--gb-icon-default);
-}
-
-.selectBox:focus-within {
-  box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--gb-border-static-gray);
-}
-
-/* The box shows only "+82"; the real <select> sits on top, its own text hidden, so it opens on click. */
-.selectValue {
-  position: absolute;
-  left: var(--gb-space-12);
-  color: var(--gb-text-default);
-  font: var(--gb-typography-sm);
-  font-weight: var(--gb-font-weight-medium);
-  pointer-events: none;
-}
-
-.select {
-  appearance: none;
-  position: relative;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0 var(--gb-space-36) 0 var(--gb-space-12);
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: transparent;
-  font: var(--gb-typography-sm);
-  font-weight: var(--gb-font-weight-medium);
-  cursor: pointer;
-}
-
-.selectBox > svg {
-  position: absolute;
-  right: var(--gb-space-12);
-  width: var(--gb-space-16);
-  height: var(--gb-space-16);
-  pointer-events: none;
-}
-
-.selectBox[data-disabled] {
-  background: var(--gb-background-disabled);
-  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-overlay);
-  color: var(--gb-icon-static-gray);
-}
-
-.select option {
-  color: var(--gb-text-default);
-  background: var(--gb-background-overlay);
-}
-
-.selectBox[data-disabled] .select {
-  cursor: not-allowed;
-}
-
-.selectBox[data-disabled] .selectValue {
-  color: var(--gb-text-static-gray);
 }
 
 /* ── Motion ─────────────────────────────────────────────────────────────
@@ -349,8 +283,7 @@
   .root,
   .iconButton,
   .search,
-  .periodOption,
-  .selectBox {
+  .periodOption {
     transition-property: background-color, color, border-color, box-shadow, opacity;
     transition-duration: var(--gb-duration-100);
     transition-timing-function: var(--gb-easing-standard);

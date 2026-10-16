@@ -1,0 +1,239 @@
+# ================================================================
+# Menu Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-menu
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-menu
+  description: |
+    A button that opens a list of actions ("Create a Post", "Move to Archive").
+    Choosing one runs it and closes the list. Built from the action half of
+    Figma's select set — Type=icon trigger and Dropdown slot Type=menu — split
+    from Select at the user's request (2026-10-16). Shares Select's trigger,
+    list and row styles.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Select (73:1986) · select Type=icon (614:2466), Dropdown slot Type=menu (8094:1187), Part/dropdown slot (8094:1231)"
+    code: "react/src/components/Menu/Menu.tsx (styles: Dropdown/Dropdown.module.css)"
+
+usage:
+  when_to_use:
+    - A compact set of actions behind one button (add, more, row actions)
+  when_not_to_use:
+    - Picking a value that stays shown → Select
+    - One or two actions → Buttons
+    - Navigation between pages → links / Tabs
+
+  rules:
+    - id: name-icon-trigger
+      rule: An icon trigger needs a label
+      severity: error
+      message: "type=\"icon\" requires label — it becomes the button's accessible name."
+    - id: verbs
+      rule: Item labels are actions
+      severity: info
+      message: "Start with a verb: \"Create a Post\", \"Move to Archive\"."
+
+  common_mistakes:
+    - mistake: Putting links or form controls inside items
+      correct: Items are plain actions; navigate in onAction.
+      example:
+        wrong: |
+          { id: "help", label: <a href="/help">Help</a> }
+        right: |
+          { id: "help", label: "Help" }  // onAction: (id) => id === "help" && navigate("/help")
+
+variant_guidelines:
+  icon:
+    description: type="icon" — 36 × 36 trigger with only the icon (Figma Type=icon, lucide/plus).
+  default:
+    description: Text trigger with a chevron — Select's trigger look, always "filled".
+
+states_and_behaviors:
+  open:
+    description: Focus moves to the first item (↑ opens on the last). Esc or outside click closes and focus returns to the trigger.
+  item:
+    description: Focused / hovered item — background/mute, white text (Part/dropdown slot Status=active). Disabled items are skipped.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: div
+    description: Classes gb-menu gb-dropdown.
+  trigger:
+    type: control
+    element: button
+    description: aria-haspopup=menu, aria-expanded, aria-controls.
+  list:
+    type: container
+    element: div
+    description: popover="auto" role=menu — Figma Dropdown slot Type=menu (210 wide, padding 4, gap 4).
+  item:
+    type: control
+    element: div
+    description: role=menuitem tabIndex=-1 — Part/dropdown slot with Leading Icon.
+
+props:
+  type:
+    type: enum
+    default: icon
+    enum: [icon, default]
+    description: Figma select "Type". Code — type.
+  icon:
+    type: instance
+    default: lucide/plus
+    description: Figma Type=icon's icon. Code — icon.
+  style:
+    type: enum
+    default: primary
+    enum: [primary, reverse, mute, ghost]
+    description: Figma "Style" (Type=icon has primary only). Code — variant.
+
+default:
+  name: Type=icon, Style=primary, Status=default
+  layout:
+    - root:
+        - trigger
+        - list:
+            - item
+  styles:
+    trigger:
+      size: var(--gb-space-36)
+      borderRadius: var(--gb-radius-md)
+      backgroundColor: var(--gb-background-default)
+      border: 1px inside var(--gb-border-default)
+      iconSize: var(--gb-space-16)
+    list: "same as Select list"
+    item: "same as Select option; icon 16, gap 8"
+
+variants:
+  - name: hovered
+    configuration: { status: hovered }
+    styles:
+      trigger: { backgroundColor: var(--gb-background-mute), border: 1px inside var(--gb-border-static-gray), ring: var(--gb-ring-focus) }
+  - name: pressed
+    configuration: { status: pressed }
+    styles:
+      trigger: { border: 1px inside var(--gb-border-static-gray), ring: var(--gb-ring-focus) }
+  - name: disabled
+    configuration: { status: disabled }
+    styles:
+      trigger: { backgroundColor: var(--gb-background-disabled), border: 1px inside var(--gb-border-overlay), iconColor: var(--gb-icon-static-gray) }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Menu
+  import: 'import { Menu, type MenuItem } from "@gb/react"'
+  element: HTMLButtonElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'lucide-react (peer dependency) — chevron-down / chevron-up; item and trigger icons are yours'
+    - 'Browser Popover API'
+
+  props:
+    - name: items
+      type: "readonly MenuItem[]  // { id: string; label: string; icon?: ReactNode; code?: ReactNode; disabled?: boolean }"
+      required: true
+      figma: "Dropdown slot Type=menu rows"
+    - name: onAction
+      type: "(id: string) => void"
+      figma: none
+    - name: type
+      type: '"default" | "icon"'
+      default: default
+      figma: Type
+    - name: label
+      type: string
+      required: true
+      figma: none
+      description: Trigger text, or the icon trigger's accessible name.
+    - name: icon
+      type: ReactNode
+      figma: "Type=icon icon"
+      description: Required with type="icon".
+    - name: variant
+      type: '"primary" | "reverse" | "mute" | "ghost"'
+      default: primary
+      figma: Style
+    - name: disabled
+      type: boolean
+      figma: Status=disabled
+    - name: onOpenChange
+      type: "(open: boolean) => void"
+      figma: Status=pressed
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"button">'
+      figma: none
+      description: To the trigger; className / style to the root.
+
+  slots: []
+
+  events:
+    # Logged in the playground Actions panel: onAction, onOpenChange.
+    - name: onAction
+      payload: { id: string }
+    - name: onOpenChange
+      payload: { open: boolean }
+
+  keyboard:
+    trigger: "Enter / Space / ↓ open on the first item, ↑ on the last."
+    menu: "↑ ↓ wrap (skip disabled) · Home / End · letters jump · Enter / Space run and close · Esc close (focus back to trigger) · Tab close and move on."
+
+  methods: []
+
+  dataAttributes:
+    - name: data-type
+      values: [default, icon]
+    - name: data-variant
+      values: [primary, reverse, mute, ghost]
+    - name: data-open
+
+  tokensUsed:
+    motion: [--gb-duration-100, --gb-duration-150, --gb-easing-standard, --gb-easing-enter, --gb-easing-exit]   # under prefers-reduced-motion: no-preference only
+    color: "same as Select"
+    dimension: "same as Select"
+    other: "same as Select"
+
+examples:
+  add:
+    code: |
+      <Menu type="icon" icon={<Plus />} label="Add" items={[{ id: "post", label: "Create a Post", icon: <FileText /> }]} onAction={handle} />
+  row-actions:
+    code: |
+      <Menu label="Actions" variant="ghost" items={[{ id: "archive", label: "Move to Archive", icon: <Archive /> }]} onAction={handle} />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/menu/review
+# ================================================================
+# 1. ⚠ needs design decision — Type=icon has Style=primary only; code allows every Style.
+# 2. Menu button pattern (WAI-ARIA); measured list 210 × 148 for 4 items (Figma 210 × 148).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 1. Library Build — see Select.yaml.
+# 2. No submenus, separators, checkable items or destructive item style (none in Figma).
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Menu.tsx, Dropdown/Dropdown.module.css) and Figma sets 614:2466, 8094:1187.
+    Open design question: Review Note 1.

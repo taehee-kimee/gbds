@@ -831,6 +831,7 @@ api:
       description: Set by the component while isSelected is true. Drives the selected styles.
 
   tokensUsed:
+    motion: [--gb-duration-100, --gb-easing-standard]   # under prefers-reduced-motion: no-preference only
     color:
       - --gb-background-bold
       - --gb-background-bolder

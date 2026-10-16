@@ -1,0 +1,197 @@
+# ================================================================
+# Skeleton Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-skeleton
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-skeleton
+  description: |
+    A placeholder shape shown while content loads, with a shimmer sweeping
+    across. One segment stands in for one piece of content (a line of text,
+    an avatar, an image block); combine several to match the layout that is
+    about to appear.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Skeleton (73:1989) · component set Skeleton Loader Segment (3017:2922)"
+    code: "react/src/components/Skeleton/Skeleton.tsx"
+
+usage:
+  when_to_use:
+    - Loading content whose layout you already know (cards, lists, profiles)
+  when_not_to_use:
+    - No known layout, or an action in progress → Spinner
+    - Measurable progress → Progress
+
+  rules:
+    - id: announce-loading
+      rule: Announce loading on the region, not the segments
+      severity: error
+      message: "Segments are aria-hidden. Put aria-busy=\"true\" (and a hidden \"Loading\" text) on the region that is loading."
+    - id: match-layout
+      rule: Match the final layout
+      severity: warning
+      message: "Size segments like the content they replace so nothing jumps when it arrives."
+
+  common_mistakes:
+    - mistake: One big rectangle for a whole card
+      correct: Compose segments in the card's shape.
+      example:
+        wrong: |
+          <Skeleton width={226} height={300} />
+        right: |
+          <Skeleton /><Skeleton type="circle" /><Skeleton type="text" />
+
+variant_guidelines:
+  rectangle:
+    description: Image / block, radius 2xl. Figma Type=rectangle.
+  text:
+    description: A line of text, radius md. Figma Type=text.
+  circle:
+    description: Avatar / icon, radius full. Figma Type=circle.
+
+states_and_behaviors:
+  shimmer:
+    description: |
+      A 110° shine sweeps left → right every 3 × --gb-duration-500 (1.5s), linear (Figma Progress 0 → 33 → 66).
+      background-attachment fixed lines the shine up across all segments. Under reduced motion: flat base colour.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: decoration
+    element: div
+    description: aria-hidden, data-type. The only element.
+
+props:
+  type:
+    type: enum
+    default: rectangle
+    enum: [rectangle, text, circle]
+    description: Figma "Type". Code — type.
+  progress:
+    type: enum
+    default: "0"
+    enum: ["0", "33", "66"]
+    description: Figma "Progress" — frames of the shimmer. Code — the animation.
+
+default:
+  name: Type=rectangle
+  layout:
+    - root
+  styles:
+    root:
+      width: 226px                                  # component tier --skeleton-width (width prop)
+      height: 157px                                 # component tier --skeleton-height (height prop)
+      borderRadius: var(--gb-radius-2xl)
+      backgroundColor: var(--gb-background-subtle)  # Figma: unbound #dbdbdb (review 1)
+      shine: var(--gb-background-subtler)
+
+variants:
+  - name: text
+    configuration: { type: text }
+    styles:
+      root: { height: 27px, borderRadius: var(--gb-radius-md) }
+  - name: circle
+    configuration: { type: circle }
+    styles:
+      root: { width: 27px, height: "= width", borderRadius: var(--gb-radius-full) }
+  - name: reduced-motion
+    configuration:
+      media: "(prefers-reduced-motion: reduce)"
+    styles:
+      root: { backgroundImage: none, animation: none }
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      root: { background: GrayText }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Skeleton
+  import: 'import { Skeleton } from "@gb/react"'
+  element: HTMLDivElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  props:
+    - name: type
+      type: '"rectangle" | "text" | "circle"'
+      default: rectangle
+      figma: Type
+    - name: width
+      type: number | string
+      default: "226 (circle 27)"
+      figma: none
+      description: Number → px. Never wider than the parent.
+    - name: height
+      type: number | string
+      default: "rectangle 157, text 27, circle = width"
+      figma: none
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"div">'
+      figma: none
+
+  slots: []
+  events: []
+  methods: []
+
+  dataAttributes:
+    - name: data-type
+      values: [rectangle, text, circle]
+
+  tokensUsed:
+    motion: [--gb-duration-500, --gb-easing-linear]   # under prefers-reduced-motion: no-preference only
+    color:
+      - --gb-background-subtle
+      - --gb-background-subtler
+    dimension:
+      - --gb-radius-2xl
+      - --gb-radius-md
+      - --gb-radius-full
+
+examples:
+  card:
+    code: |
+      <div aria-busy="true">
+        <span className="sr-only">Loading</span>
+        <Skeleton />
+        <Skeleton type="circle" /> <Skeleton type="text" width={140} height={16} />
+        <Skeleton type="text" height={16} />
+      </div>
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/skeleton/review
+# ================================================================
+# 1. ⚠ needs design decision — Figma fill is an unbound #dbdbdb gradient (same in Dark); code uses background/subtle + subtler.
+# 2. ⚠ needs design decision — shimmer speed / shape not defined; code 1.5s linear, synchronised across segments.
+# 3. Measured: 226 × 157 r18, 226 × 27 r8, 27 × 27 — matches Figma.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 1. Library Build — see Select.yaml.
+# 2. background-attachment: fixed is ignored on iOS Safari — segments there shimmer one by one.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Skeleton.tsx, Skeleton.module.css) and Figma component set 3017:2922.
+    Open design questions: Review Notes 1–2.

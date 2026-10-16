@@ -40,16 +40,11 @@ export const items: ReviewItem[] = [
   },
   {
     id: "3",
-    title: "채워질 때 애니메이션 없음",
-    status: "open",
-    figma: "모션 정의 없음 (모션 토큰도 없음).",
-    code: "값이 바뀌면 바로 그 너비로 바뀜.",
+    title: "채워질 때 애니메이션",
+    status: "decided",
+    figma: "모션 정의 없음.",
+    code: "결정(2026-10-16): 모션 토큰을 새로 만들고 적용 — 바가 새 값까지 --gb-duration-300 · --gb-easing-standard로 차오름. 화면 동작 줄이기(prefers-reduced-motion) 설정이면 바로 바뀜.",
     columns: [],
-    options: [
-      { id: "none", label: "없음 유지" },
-      { id: "add", label: "모션 토큰(duration · easing)을 만들고 부드럽게 채우기 (reduced-motion이면 끔)", recommended: true },
-      { id: "other", label: "기타 (메모에 기록)" },
-    ],
   },
   {
     id: "4",
