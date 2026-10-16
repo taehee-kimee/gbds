@@ -4,6 +4,7 @@
 //   src/primitives.json      tier 1, mode-less
 //   src/effects.json         shadows, rings, blur
 //   src/typography.json      size + line-height composites
+//   src/motion.json          durations and easing curves (code-only — Figma has no easing variables)
 //   src/semantic.light.json  tier 2, Light mode
 //   src/semantic.dark.json   tier 2, Dark mode — must have exactly the same keys
 //
@@ -35,6 +36,7 @@ const constant = [
   ...flatten(read("primitives.json")),
   ...flatten(read("effects.json")),
   ...flatten(read("typography.json")),
+  ...flatten(read("motion.json")),
 ]
 const light = flatten(read("semantic.light.json"))
 const dark = flatten(read("semantic.dark.json"))
@@ -86,6 +88,10 @@ function cssValue({ type, value }) {
         .flat()
         .map((s) => `${s.inset ? "inset " : ""}${s.offsetX} ${s.offsetY} ${s.blur} ${s.spread} ${ref(s.color)}`)
         .join(", ")
+    case "duration":
+      return typeof value === "object" ? `${value.value}${value.unit}` : ref(value)
+    case "cubicBezier":
+      return Array.isArray(value) ? (value.join() === "0,0,1,1" ? "linear" : `cubic-bezier(${value.join(", ")})`) : ref(value)
     case "typography":
       // `font` shorthand: weight size/line-height family
       return ref(`${value.fontWeight} ${value.fontSize}/${value.lineHeight} ${value.fontFamily}`)

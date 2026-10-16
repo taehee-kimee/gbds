@@ -1,0 +1,141 @@
+/*
+ * Chatbox — mirrors the Figma component set `Chatbox` (7219:5418).
+ * Figma Status=default | active | disabled | filled → :focus on the textarea (active), data-filled,
+ * data-disabled. Status only reassigns the --chatbox-* properties below.
+ */
+
+.root {
+  --chatbox-border: var(--gb-border-default);
+  --chatbox-ring: 0 0 0 0 transparent;
+  --chatbox-fg: var(--gb-text-default);
+  --chatbox-placeholder: var(--gb-text-subtle);
+  /* Text-base 16/24 in every size (user decision 2026-10-16; Figma text is Text-xs 12/16). */
+  --chatbox-font: var(--gb-typography-base);
+  --chatbox-leading: var(--gb-font-leading-6);
+  /* Size=sm */
+  --chatbox-padding: var(--gb-space-16);
+  --chatbox-radius: var(--gb-radius-2xl);
+  /* Component-tier value (no global token): the box's fixed height per size — user decision 2026-10-16. */
+  --chatbox-height: 240px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--gb-space-28);
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--chatbox-height);
+  padding: var(--chatbox-padding);
+  border-radius: var(--chatbox-radius);
+  background: var(--gb-background-default);
+  /* Figma stroke is INSIDE; Status=active adds effect style Box Shadow/Focus ring. */
+  box-shadow: var(--chatbox-ring), inset 0 0 0 var(--gb-stroke-1) var(--chatbox-border);
+  cursor: text;
+}
+
+/* Figma Slot: content above the text, sized by what goes in. Items sit in a wrapping row, 8 apart. */
+.slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gb-space-8);
+  cursor: default;
+}
+
+/* Text takes the space between the slot and the button row. */
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--gb-space-28);
+  min-height: 0;
+}
+
+/* Fills the free height of the box; text that does not fit scrolls here, the buttons stay put. */
+.input {
+  display: block;
+  flex: 1;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--chatbox-leading);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  overflow-y: auto;
+  background: transparent;
+  color: var(--chatbox-fg);
+  font: var(--chatbox-font);
+}
+
+.input::placeholder {
+  color: var(--chatbox-placeholder);
+  opacity: 1;
+}
+
+/* start (+) on the left, end (send) on the right; each side can hold several buttons. */
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: default;
+}
+
+.side {
+  display: flex;
+  align-items: center;
+  gap: var(--gb-space-8);
+}
+
+/* ── Size (code only) ──────────────────────────────────────────────────── */
+
+.root[data-size="md"] {
+  --chatbox-height: 280px;
+}
+
+/* size="custom" sets --chatbox-height (and width) inline from the height / width props. */
+
+.root[data-size="lg"] {
+  --chatbox-padding: var(--gb-space-20);
+  --chatbox-radius: var(--gb-radius-3xl);
+  --chatbox-height: 320px;
+}
+
+/* ── Status=active: the text has focus ─────────────────────────────────── */
+
+.root:has(.input:focus) {
+  --chatbox-border: var(--gb-border-static-gray);
+  --chatbox-ring: var(--gb-ring-focus);
+}
+
+/* ── Status=disabled ───────────────────────────────────────────────────── */
+
+.root[data-disabled] {
+  --chatbox-fg: var(--gb-text-static-gray);
+  --chatbox-placeholder: var(--gb-text-static-gray);
+  cursor: not-allowed;
+}
+
+.root[data-disabled] .input {
+  cursor: not-allowed;
+}
+
+@media (forced-colors: active) {
+  .root {
+    border: var(--gb-stroke-1) solid CanvasText;
+  }
+  .root:has(.input:focus) {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * State changes (hover, press, focus, selected) ease over --gb-duration-100. Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .root {
+    transition-property: background-color, color, border-color, box-shadow, opacity;
+    transition-duration: var(--gb-duration-100);
+    transition-timing-function: var(--gb-easing-standard);
+  }
+}

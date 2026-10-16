@@ -1,0 +1,448 @@
+# ================================================================
+# Input Component Specification (Input · Field)
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-input
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-input
+  description: |
+    One-line text entry. Input is the bare box (border, padding, placeholder,
+    type-driven icons and buttons: search, clear, show password). Field adds the
+    label above and the description or error below. type="search" is the
+    Figma Input search look (search icon, shadow-xs); type="time" is Figma
+    Input time (hh:mm + AM/PM) and type="tel" is Figma Input phone (country
+    code + number).
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Input (73:1977) · Part/Input (520:3062), Input (5084:3716), Input search (3981:19811), Input time (588:108), Input phone (3525:8236)"
+    code: "react/src/components/Input/Input.tsx, Field.tsx"
+
+usage:
+  when_to_use:
+    - Short free text — names, email, URLs, codes
+    - Picking a file (type="file" — the Figma Upload row)
+    - A search query (type="search")
+
+  when_not_to_use:
+    - Several lines → Textarea or Chatbox
+    - Choosing from a fixed list → Select
+    - A date → Calendar / Date select
+
+  rules:
+    - id: label
+      rule: Every Input needs a name
+      severity: error
+      message: "Wrap it in a Field with label, or pass aria-label. A placeholder is not a label."
+
+    - id: one-label-per-input
+      rule: One Field label per input in real screens
+      severity: warning
+      message: "A Field with several Inputs becomes a group; each Input then needs its own aria-label (Review Note 3)."
+
+    - id: error-text
+      rule: Say what is wrong and how to fix it
+      severity: warning
+      message: "Field error is read with the input. \"이메일 형식이 아니에요\" beats \"잘못된 입력\"."
+
+  common_mistakes:
+    - mistake: Placeholder as the only label
+      correct: Use Field label (the placeholder disappears when typing).
+      example:
+        wrong: |
+          <Input placeholder="Email" />
+        right: |
+          <Field label="Email"><Input type="email" placeholder="name@example.com" /></Field>
+
+    - mistake: Building the error state by hand
+      correct: Pass error to Field — it sets invalid and aria-describedby.
+      example:
+        wrong: |
+          <Input invalid /><p style={{ color: "red" }}>필수 항목</p>
+        right: |
+          <Field label="Email" error="필수 항목이에요"><Input /></Field>
+
+variant_guidelines:
+  input:
+    description: Part/Input — the box. Optional trailing icon (Figma), leading icon (code).
+  field:
+    description: |
+      Figma Input — Text-sm/Semi Bold label, the input(s), then Text-xs/Medium
+      description or Text-sm/Medium error (text/warning), 12 apart.
+  search:
+    description: |
+      type="search" = Figma Input search — lucide/search on the left
+      (icon/default, replaceable with leadingIcon), gap 12, shadow-xs; no
+      native clear button. Submitting is up to the page. (A separate
+      InputSearch component was merged into type on 2026-10-16 — the two
+      overlapped.)
+
+states_and_behaviors:
+  default:
+    description: background/default, border/default, placeholder text/subtle. Figma Status=default.
+  active:
+    description: Focus — border/static/gray + ring/focus (search drops shadow-xs). Figma Status=active.
+  filled:
+    description: The value shows in text/default (the native placeholder handles empty vs filled). Figma Status=filled.
+  error:
+    description: invalid (or Field error) — border/warning, aria-invalid. Figma Status=error.
+  disabled:
+    description: background/disabled, border/overlay, text and icon static/gray. Figma Status=disabled.
+  file:
+    description: type="file" — the box opens the file picker and shows the chosen file names.
+  click-to-focus:
+    description: A press anywhere on the box (padding, a decorative icon) focuses the input.
+  time:
+    description: |
+      type="time" — text input masked to hh:mm (digits only, colon added,
+      impossible hours/minutes cannot be typed). hourCycle 12 (default,
+      Figma): 1–12 + AM/PM radio group (arrow keys switch); hourCycle 24:
+      00–23, no toggle (user decision 2026-10-16). Placeholder "11:00" idle,
+      "_ _:_ _" focused. Figma Delete (X) is intentionally not built (user
+      decision 2026-10-16). Validation messages come from Field error.
+  tel:
+    description: |
+      type="tel" — country select (88 wide) + number, gap 10. Country data
+      from libphonenumber-js (user decision 2026-10-16): all 245 countries
+      by default, countries limits, preferredCountries pins to the top,
+      names in locale via Intl. The list reads "대한민국 +82", the box shows
+      "+82" (native <select> styled as the Figma select box — searchable
+      list once Select exists). The number is formatted for the country on
+      blur; onPhoneChange reports { country, callingCode, national, e164,
+      valid }.
+  trailing-icon:
+    description: |
+      Decided by type (user decision 2026-10-16): file → lucide/plus, url →
+      lucide/globe — decorative; search → none (search icon on the left);
+      text, time, tel → none.
+  clear:
+    description: |
+      type="text" and "search" show an X (lucide/x, 24px hit area) at the
+      right end only while there is text (user decision 2026-10-16). It
+      empties the box, fires onChange with "" (controlled inputs follow)
+      and returns focus. None when disabled or readOnly; clearable={false}
+      turns it off; clearLabel names it (default "Clear"). Not in Figma yet.
+  password:
+    description: |
+      type="password" has a built-in eye button (lucide eye / eye-off,
+      24px hit area) that switches between hidden and readable text,
+      keeping the value. Named "Show password" / "Hide password"
+      (showPasswordLabel / hidePasswordLabel). User decision 2026-10-16;
+      not in Figma yet.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: div
+    description: Part/Input frame (height 36, padding 0 12, gap 8, radius md, 1px inside border).
+  input:
+    type: control
+    element: input
+    description: Text-sm/Medium. Figma "-> Text" is the placeholder (default) or the value (filled).
+  leading-icon:
+    type: icon
+    nullable: true
+    description: 16px, code only (type="search" fills it with the search icon).
+  trailing-icon:
+    type: "icon | button"
+    nullable: true
+    description: 16px, icon/subtle. Figma "Trailing icon" — chosen by type (file +, url globe, password eye button, text / search clear button).
+  field-label:
+    type: text
+    element: "label (one input) | span (group)"
+  field-help:
+    type: text
+    element: p
+    description: Description (Text-xs/Medium, text/subtle) or error (Text-sm/Medium, text/warning).
+
+props:
+  text:
+    type: string
+    default: Email or Username
+    description: Part/Input "-> Text". Code — placeholder / value.
+  trailingIcon:
+    type: boolean + instance
+    default: "true, lucide/plus"
+    description: Part/Input "Trailing icon" + "-> Trailing icon". Code — decided by type (file → +, url → globe; password eye, text / search clear). No custom slot (trailingAction removed 2026-10-16).
+  status:
+    type: enum
+    default: default
+    enum: [default, active, filled, error, disabled]
+    description: Part/Input "Status".
+  title:
+    type: string
+    default: File Upload
+    description: Input "-> Title". Code — Field label.
+  description:
+    type: boolean + string
+    description: Input "Description" + "-> Description". Code — Field description.
+  rows:
+    type: booleans
+    description: Input "Textfield", "Upload", "Select", "Link" — row kinds (Input, Input type=file, Select, Input type=url + globe). Select row not built yet.
+
+default:
+  name: Part/Input Status=default
+  styles:
+    root:
+      height: var(--gb-space-36)
+      padding: 0 var(--gb-space-12)
+      gap: var(--gb-space-8)
+      borderRadius: var(--gb-radius-md)
+      backgroundColor: var(--gb-background-default)
+      border: 1px inside var(--gb-border-default)
+      width: 100%                                  # Figma 320 fixed
+    input:
+      textStyle: Text-sm/Medium                    # var(--gb-typography-sm) + var(--gb-font-weight-medium)
+      color: var(--gb-text-default)
+      placeholderColor: var(--gb-text-subtle)
+    icon:
+      size: var(--gb-space-16)
+      color: var(--gb-icon-subtle)
+
+variants:
+  - name: active
+    configuration: { status: active }
+    styles:
+      root: { border: 1px inside var(--gb-border-static-gray), boxShadow: var(--gb-ring-focus) }
+  - name: error
+    configuration: { status: error }
+    styles:
+      root: { border: 1px inside var(--gb-border-warning) }
+  - name: disabled
+    configuration: { status: disabled }
+    styles:
+      root: { backgroundColor: var(--gb-background-disabled), border: 1px inside var(--gb-border-overlay) }
+      input: { color: var(--gb-text-static-gray) }
+      icon: { color: var(--gb-icon-static-gray) }
+  - name: search
+    configuration: { type: search }
+    styles:
+      root: { gap: var(--gb-space-12), boxShadow: var(--gb-shadow-xs) }
+      leading-icon: { color: var(--gb-icon-default) }
+  - name: field
+    configuration: { component: Field }
+    styles:
+      field: { gap: var(--gb-space-12) }
+      label: { textStyle: Text-sm/Semi Bold, color: var(--gb-text-default) }
+      description: { textStyle: Text-xs/Medium, color: var(--gb-text-subtle) }
+      error: { textStyle: Text-sm/Medium, color: var(--gb-text-warning) }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Input
+  import: 'import { Field, Input } from "@gb/react"'
+  element: HTMLInputElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'lucide-react (peer dependency) — icons: search, plus, globe, x, eye, eye-off, chevron-down'
+    - 'libphonenumber-js (dependency) — type="tel" country data, formatting, validation'
+
+  props:
+    - name: placeholder
+      type: string
+      figma: "-> Text (Status=default)"
+    - name: value / defaultValue
+      type: string
+      figma: "-> Text (Status=filled)"
+    - name: clearable
+      type: boolean
+      default: true
+      figma: none
+      description: type="text" | "search" — X while there is text.
+    - name: clearLabel
+      type: string
+      default: Clear
+      figma: none
+    - name: showPasswordLabel / hidePasswordLabel
+      type: string
+      default: '"Show password" / "Hide password"'
+      figma: none
+      description: type="password" only — names of the eye button.
+    - name: leadingIcon
+      type: ReactNode
+      figma: none
+      description: Code only; type="search" defaults it to the search icon.
+    - name: invalid
+      type: boolean
+      figma: Status=error
+      description: Also inherited from Field error. Sets aria-invalid.
+    - name: disabled
+      type: boolean
+      figma: Status=disabled
+    - name: type
+      type: string
+      default: text
+      figma: "Upload row → file, Link row → url, Input search → search, Input time → time, Input phone → tel"
+    - name: period / defaultPeriod / onPeriodChange
+      type: '"AM" | "PM"'
+      figma: "Input time toggle"
+      description: type="time" only.
+    - name: country / defaultCountry / onCountryChange
+      type: CountryCode (ISO 3166-1 alpha-2, from libphonenumber-js)
+      default: US
+      figma: "Input phone select"
+      description: type="tel" only.
+    - name: countries / preferredCountries
+      type: CountryCode[]
+      figma: none
+      description: type="tel" only — limit the list / pin to the top. Default all 245.
+    - name: locale
+      type: string
+      default: en
+      figma: none
+      description: type="tel" only — language of the country names (Intl.DisplayNames).
+    - name: countryLabel
+      type: string
+      default: Country code
+      figma: none
+    - name: onPhoneChange
+      type: "(phone: { country, callingCode, national, e164?, valid }) => void"
+      figma: none
+      description: type="tel" only — every country or number change, parsed.
+    - name: className / style
+      type: "string / CSSProperties"
+      figma: none
+      description: Applied to the box (e.g. width).
+    - name: ref
+      type: Ref<HTMLInputElement>
+      figma: none
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"input">'
+      figma: none
+      description: name, required, autoComplete, onChange … go to the input.
+
+  subcomponents:
+    - name: Field
+      props:
+        - { name: label, type: ReactNode, required: true, figma: "-> Title" }
+        - { name: description, type: ReactNode, figma: "Description + -> Description" }
+        - { name: error, type: ReactNode, figma: "none (Input time Status=error has the look)", description: "Marks inputs invalid; replaces the description." }
+        - { name: children, type: ReactNode, description: "One Input → <label for>; several → role=group named by the label." }
+  events:
+    # Native input events pass through. Logged in the playground: onChange, onFocus, onBlur.
+    - name: onChange / onFocus / onBlur / onKeyDown
+      payload: React synthetic events
+
+  methods:
+    - name: focus
+      signature: "ref.current.focus(): void"
+
+  dataAttributes:
+    - name: data-invalid
+    - name: data-file
+
+  tokensUsed:
+    color:
+      - --gb-background-default
+      - --gb-background-disabled
+      - --gb-border-default
+      - --gb-border-static-gray
+      - --gb-border-warning
+      - --gb-border-overlay
+      - --gb-text-default
+      - --gb-text-subtle
+      - --gb-text-static-gray
+      - --gb-text-warning
+      - --gb-icon-subtle
+      - --gb-icon-default
+      - --gb-icon-static-gray
+    dimension:
+      - --gb-space-8
+      - --gb-space-12
+      - --gb-space-4
+      - --gb-space-16
+      - --gb-space-24
+      - --gb-space-36
+      - --gb-radius-sm
+      - --gb-radius-md
+      - --gb-stroke-1
+    other:
+      - --gb-typography-sm
+      - --gb-typography-xs
+      - --gb-font-weight-medium
+      - --gb-font-weight-semibold
+      - --gb-ring-focus
+      - --gb-shadow-xs
+
+examples:
+  field:
+    code: |
+      <Field label="Email" description="로그인에 쓰는 주소">
+        <Input type="email" placeholder="name@example.com" />
+      </Field>
+  error:
+    code: |
+      <Field label="Email" error="이메일 형식이 아니에요.">
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </Field>
+  file:
+    code: |
+      <Input type="file" placeholder="File upload" aria-label="File upload" />   {/* + from the type */}
+  password:
+    description: Built-in show / hide
+    code: |
+      <Field label="Password"><Input type="password" autoComplete="current-password" /></Field>
+  url:
+    code: |
+      <Input type="url" placeholder="https://gabrielle.ai" aria-label="Website" />   {/* globe from the type */}
+  search:
+    code: |
+      <form role="search" onSubmit={search}>
+        <Input type="search" name="q" aria-label="Search" placeholder="Search placeholder" />
+      </form>
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/input/review
+# ================================================================
+# 1. ⚠ needs design decision — Field error has no Figma Input variant (look borrowed from Input time).
+# 2. ⚠ needs design decision — error replaces the description.
+# 3. ⚠ needs design decision — one Figma label over four inputs; code makes it a group.
+# 4. ⚠ needs design decision — no hover state.
+# 5. Select row comes with Select.
+# 6. Status mapping, error + focus, click-to-focus, file type; width fills the parent (Figma 320).
+# 7. Input search = type="search" (merged 2026-10-16); matches Figma (icon @12,10, text x40); native clear hidden.
+# 9. ⚠ needs design decision — type="time": mask + AM/PM built in; error judgement left to the page (Field error).
+# 10. ✅ decided 2026-10-16 — type="tel" uses libphonenumber-js (all countries, limit / preferred, formatting, validation); native select until Select exists.
+# 11. ✅ decided 2026-10-16 — type="time" hourCycle 12 | 24, default 12.
+# 12. ✅ decided 2026-10-16 — text / search show a clear X only while there is text (not in Figma yet).
+# 13. ✅ decided 2026-10-16 — type="password" has a built-in show / hide eye button (not in Figma yet).
+# 8. Trailing icon decided by type (file +, url globe; password eye, text / search clear); custom trailing buttons (trailingAction) removed — user decisions 2026-10-16.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Input.tsx, Field.tsx, Input.module.css) and Figma sets 520:3062, 5084:3716, 3981:19811.
+    Input time and Input phone are type="time" / type="tel" composites (AM/PM toggle and select drawn in place until Toggle / Select exist).
+    Open design questions: Review Notes 1–4, 9.

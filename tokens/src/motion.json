@@ -1,0 +1,19 @@
+{
+  "$description": "Motion — code-only (Figma variables have no easing type). Durations from the Tailwind / Polaris ms scale; easing curves follow Material 3 (standard) and the Tailwind/CSS decelerate-accelerate pair, named by role.",
+  "duration": {
+    "$type": "duration",
+    "50": { "$value": { "value": 50, "unit": "ms" }, "$description": "Instant feedback: press." },
+    "100": { "$value": { "value": 100, "unit": "ms" }, "$description": "Colour / border changes on hover and focus." },
+    "150": { "$value": { "value": 150, "unit": "ms" }, "$description": "Small controls switching state (checkbox, toggle). Small surfaces leaving." },
+    "200": { "$value": { "value": 200, "unit": "ms" }, "$description": "Small surfaces appearing (tooltip, dropdown, dialog)." },
+    "300": { "$value": { "value": 300, "unit": "ms" }, "$description": "Things that travel or grow (progress fill, panels)." },
+    "500": { "$value": { "value": 500, "unit": "ms" }, "$description": "Large surfaces and page-level movement." }
+  },
+  "easing": {
+    "$type": "cubicBezier",
+    "standard": { "$value": [0.2, 0, 0, 1], "$description": "Material 3 standard — for something that stays on screen and changes (state, size, position)." },
+    "enter": { "$value": [0, 0, 0.2, 1], "$description": "Decelerate — for something appearing; it arrives fast and settles." },
+    "exit": { "$value": [0.4, 0, 1, 1], "$description": "Accelerate — for something leaving; it starts slow and goes." },
+    "linear": { "$value": [0, 0, 1, 1], "$description": "Constant speed — loops such as a spinner." }
+  }
+}

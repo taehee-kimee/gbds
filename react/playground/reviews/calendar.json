@@ -1,0 +1,32 @@
+{
+  "items": {
+    "1": {
+      "choice": "add",
+      "note": "hover 추가 (사용자, 2026-10-16) → 10번 결정으로 background-subtlest. Figma Part/Calendar에 Status=hover 변형 추가."
+    },
+    "2": {
+      "choice": "keep",
+      "note": "그냥 둠 (사용자, 2026-10-16)"
+    },
+    "3": {
+      "choice": "six",
+      "note": "7줄/4줄 질문 → 최대 6 · 최소 4줄, 항상 6줄로 고정 (사용자: 크기 일정)"
+    },
+    "4": {
+      "choice": "fixed",
+      "note": "크기 일정하게 (사용자, 2026-10-16) — 264×324 / range 488×308"
+    },
+    "5": {
+      "choice": "keep"
+    },
+    "10": {
+      "choice": "subtlest",
+      "note": "사용자: subtler로 구분 → subtler는 라이트=띠(n100)·다크=배경(n800)이라 안 보임 → 사용자가 subtlest 선택 (2026-10-16)"
+    },
+    "6": {
+      "choice": "preview",
+      "note": "띠 미리보기 추가 (사용자, 2026-10-16) — hover · 키보드 포커스, auto-selected 모양"
+    }
+  },
+  "updatedAt": "2026-10-16T06:58:55.964Z"
+}

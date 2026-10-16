@@ -13,10 +13,11 @@ const pairs: [string, string, string][] = [
 
 function Menu({ testid, disabled, current }: { testid?: string; disabled?: boolean; current?: string }) {
   return (
-    <ButtonGroup variant="menu" disabled={disabled} aria-label="주 메뉴" data-testid={testid}>
-      <Button variant="ghost-rounded" icon={<House />} aria-label="Home" />
+    // The items are real links; the demo cancels navigation so the playground stays put.
+    <ButtonGroup variant="menu" disabled={disabled} aria-label="주 메뉴" data-testid={testid} onClick={(e) => e.preventDefault()}>
+      <Button variant="ghost-rounded" icon={<House />} aria-label="Home" href="/" />
       {["Assets", "Compass", "Content Studio"].map((name) => (
-        <Button key={name} variant="ghost" isSelected={current === name || undefined} aria-current={current === name ? "page" : undefined}>
+        <Button key={name} variant="ghost" href={`/${name.toLowerCase().replace(/ /g, "-")}`} isSelected={current === name || undefined} aria-current={current === name ? "page" : undefined}>
           {name}
         </Button>
       ))}

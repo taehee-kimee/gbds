@@ -216,6 +216,16 @@
   --gb-typography-8xl: var(--gb-font-weight-normal) var(--gb-font-size-8xl)/var(--gb-font-leading-24) var(--gb-font-family-sans);
   --gb-typography-9xl: var(--gb-font-weight-normal) var(--gb-font-size-9xl)/var(--gb-font-leading-32) var(--gb-font-family-sans);
   --gb-typography-timestamp: var(--gb-font-weight-normal) var(--gb-font-size-base)/var(--gb-font-leading-3) var(--gb-font-family-timestamp);
+  --gb-duration-50: 50ms;
+  --gb-duration-100: 100ms;
+  --gb-duration-150: 150ms;
+  --gb-duration-200: 200ms;
+  --gb-duration-300: 300ms;
+  --gb-duration-500: 500ms;
+  --gb-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --gb-easing-enter: cubic-bezier(0, 0, 0.2, 1);
+  --gb-easing-exit: cubic-bezier(0.4, 0, 1, 1);
+  --gb-easing-linear: linear;
 }
 
 :root,

@@ -270,9 +270,9 @@ other_options:
 anatomy:
   root:
     type: container
-    element: button
+    element: button | a
     description: |
-      The only container. Holds background, border (drawn as inset
+      <button>, or <a> when href is passed. The only container. Holds background, border (drawn as inset
       box-shadow), radius, padding and the horizontal layout of its content.
       Figma: the variant frame itself (auto layout HORIZONTAL; VERTICAL for
       Type=icon). data-type and data-variant carry the Figma Type and Style.
@@ -657,7 +657,7 @@ variants:
 api:
   component: Button
   import: 'import { Button } from "@gb/react"'
-  element: HTMLButtonElement
+  element: HTMLButtonElement (HTMLAnchorElement with href)
   requires:
     - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
   types: |
@@ -665,6 +665,7 @@ api:
     TextButtonProps  — variant?: "default" | "mute" | "outline" | "link"; children; icon?   (Figma Type=default)
     PlainButtonProps — variant: "ghost" | "google"; children; no icon                       (Type=default Style=ghost, Type=google)
     IconButtonProps  — variant?: "default" | "ghost" | "ghost-rounded"; icon; no children; aria-label or aria-labelledby required  (Type=icon)
+    Each shape takes either <button> props, or href + <a> props.
 
   # figma: the Figma property this prop comes from, or "none" for code-only props.
   # Every prop below with a Figma source or a playground control is editable in the
@@ -700,6 +701,18 @@ api:
       default: false
       figma: Status=disabled
       description: Native disabled. Blocks click and focus. (Figma Status=active has no prop — it is :hover / :active.)
+
+    - name: href
+      type: string
+      default: undefined
+      figma: none
+      description: |
+        Renders an <a href> with the same look — real navigation (new tab,
+        copy link, middle click). Native <a> props (target, rel, download)
+        apply instead of button props. disabled (or a disabled ButtonGroup)
+        drops the href and sets aria-disabled="true" + role="link", since <a>
+        has no disabled. isSelected never adds aria-pressed to a link; mark
+        the current page with aria-current="page".
 
     - name: isSelected
       type: boolean
@@ -1003,6 +1016,11 @@ examples:
 #             + "Continue with Google" (gap 6). The text is not bound to
 #             "-> Label", so instances cannot change it
 #    - Code: variant="google" + children; the mark is built in with fixed brand colors
+#
+# 14. **Links (href)**
+#    - Figma: Button has no link variant
+#    - Code: href renders <a> with the same styles (ButtonGroup review 2, decided 2026-10-16);
+#            disabled link = no href + aria-disabled; :disabled styles also match [aria-disabled="true"]
 #
 # 13. **API change for the Figma restructure**
 #    - Figma 2026-10-16: Type × Style × Status, 27 variants; Trailing icon → Show icon

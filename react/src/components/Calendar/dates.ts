@@ -42,17 +42,17 @@ export function clampDay(d: Date, min?: Date, max?: Date): Date {
 }
 
 /**
- * The weeks shown for one month: whole weeks from the week containing the 1st to the week containing
- * the last day. 4–6 rows, as Figma shows only the rows a month needs.
+ * The weeks shown for one month: always 6, starting with the week that holds the 1st. A month needs
+ * 4–6 rows (never 7: 6 leading days + 31 = 37 ≤ 42); the spare rows show next month's days so the
+ * calendar keeps one height (user decision 2026-10-16, review 3).
  */
+export const WEEKS = 6
+
 export function monthWeeks(month: Date, weekStartsOn: number): Date[][] {
   const first = startOfMonth(month)
   const offset = (first.getDay() - weekStartsOn + 7) % 7
-  const last = new Date(first.getFullYear(), first.getMonth() + 1, 0)
-  const days = offset + last.getDate()
-  const rows = Math.ceil(days / 7)
   const start = addDays(first, -offset)
-  return Array.from({ length: rows }, (_, r) => Array.from({ length: 7 }, (_, c) => addDays(start, r * 7 + c)))
+  return Array.from({ length: WEEKS }, (_, r) => Array.from({ length: 7 }, (_, c) => addDays(start, r * 7 + c)))
 }
 
 /** First year of the 12-year page that holds `year` — Figma shows 2019–2030 for 2026 (the year sits 8th). */

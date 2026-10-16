@@ -6,6 +6,12 @@
  */
 
 .root {
+  /* One month = 7 × 32 wide; weekday row 16 + 6 weeks × (4 + 32) tall. */
+  --calendar-width: calc(7 * var(--gb-space-32));
+  --calendar-height: calc(var(--gb-space-16) + 6 * (var(--gb-space-4) + var(--gb-space-32)));
+
+  /* Anchors the visually hidden live region (.srOnly) inside the calendar instead of the page. */
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   gap: var(--gb-space-16);
@@ -19,9 +25,21 @@
   font: var(--gb-typography-sm);
 }
 
-/* Type=range: two months side by side, tighter padding. */
-.root[data-mode="range"][data-view="day"] {
+/* Type=range: two months side by side, tighter padding — in every view, so the size never changes. */
+.root[data-mode="range"] {
   padding: var(--gb-space-12);
+}
+
+/* Header + day grid or picker. The picker views keep the day view's size (review 4). */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gb-space-16);
+  width: var(--calendar-width);
+}
+
+.body[data-span="two"] {
+  width: calc(2 * var(--calendar-width) + var(--gb-space-16));
 }
 
 .panels {
@@ -110,6 +128,15 @@
   box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--day-border);
 }
 
+/* Hover — added 2026-10-16 (review 1); background/subtlest — the only subtle* token that differs from both the surface and the range band in light and dark (review 10). */
+@media (hover: hover) {
+  .day:not([aria-disabled="true"], [data-selected], [data-outside], [data-preview]):hover,
+  .pick:not(:disabled, [data-selected]):hover {
+    --day-bg: var(--gb-background-subtlest);
+    background: var(--gb-background-subtlest);
+  }
+}
+
 /* Type=today */
 .day[data-today] {
   --day-border: var(--gb-border-static-gray);
@@ -140,6 +167,18 @@
   --day-radius: 0;
 }
 
+/* Range preview (review 6, 2026-10-16): while only the start is chosen, the days up to the pointer or
+   focused day take the auto-selected look. Not a selection — aria-selected is unchanged. */
+.day[data-preview] {
+  --day-bg: var(--gb-background-selected);
+  --day-fg: var(--gb-text-bold);
+  --day-radius: 0;
+}
+
+.day[data-preview="end"] {
+  --day-radius: var(--gb-radius-md);
+}
+
 /* Data=true: a 4px dot 4px above the bottom edge (Figma Ellipse at y 24). */
 .day[data-marker]::after {
   content: "";
@@ -164,12 +203,17 @@
   background: var(--gb-icon-warning);
 }
 
-/* ── Month / year picker: 3 × 70px columns (Figma Type=month & year cell) ─ */
+/* ── Month / year picker: 3 × 4 cells (Figma Type=month & year, 70 × 32) in the day grid's 224 × 232 ─ */
 
 .picker {
   display: grid;
   grid-template-columns: repeat(3, 70px);
-  row-gap: var(--gb-space-4);
+  grid-template-rows: repeat(4, var(--gb-space-32));
+  justify-content: space-between;
+  /* 16 + 4 × 32 + 3 × 24 + 16 = 232 — the same numbers Figma binds (sp-16 padding, sp-24 gap). */
+  align-content: center;
+  row-gap: var(--gb-space-24);
+  height: var(--calendar-height);
 }
 
 .pick {
@@ -215,5 +259,17 @@
   .day:is([data-selected="single"], [data-selected="start"], [data-selected="end"]),
   .pick[data-selected] {
     outline: 2px solid Highlight;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * State changes (hover, press, focus, selected) ease over --gb-duration-100. Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .day,
+  .pick {
+    transition-property: background-color, color, border-color, box-shadow, opacity;
+    transition-duration: var(--gb-duration-100);
+    transition-timing-function: var(--gb-easing-standard);
   }
 }

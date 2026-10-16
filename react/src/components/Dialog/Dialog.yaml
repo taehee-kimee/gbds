@@ -1,0 +1,341 @@
+# ================================================================
+# Dialog Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-dialog
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-dialog
+  description: |
+    A centred modal that stops the user to confirm something or warn them, and
+    waits for an answer (Cancel / Confirm). It has no trigger and is not anchored
+    to anything — the parent decides when it opens. Figma calls it Popover; code
+    calls it Dialog because a web "popover" usually means a panel attached to a trigger.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Popover (7269:240) · component set Popover (7269:451)"
+    code: "react/src/components/Dialog/Dialog.tsx"
+
+usage:
+  when_to_use:
+    - Confirming an action before it runs (leave the page, delete, publish)
+    - A warning the user must acknowledge (variant="warning")
+
+  when_not_to_use:
+    - A short hint attached to a control → Tooltip
+    - A dropdown or panel attached to a field (e.g. a date picker) → an anchored popover (not built yet)
+    - Messages that need no answer → a toast / inline message
+
+  rules:
+    - id: title-is-question
+      rule: Make the title the question or the consequence
+      severity: info
+      message: "The title is the dialog's accessible name and is read first."
+    - id: label-buttons-by-action
+      rule: Name the buttons after what they do
+      severity: warning
+      message: "Prefer confirmLabel=\"삭제\" over \"Confirm\" so the choice reads on its own."
+    - id: way-out
+      rule: Keep a way to close it
+      severity: error
+      message: "With actions={null} only Escape closes it — put your own buttons in actions."
+
+  common_mistakes:
+    - mistake: Closing on outside click
+      correct: The dialog waits for an answer; only Cancel, Confirm or Escape close it.
+      example:
+        wrong: |
+          <div onClick={() => setOpen(false)}><Dialog open={open} … /></div>
+        right: |
+          <Dialog open={open} onOpenChange={setOpen} onConfirm={remove} … />
+
+variant_guidelines:
+  notification:
+    description: border/subtle, title text/default. Figma Type=notification.
+  warning:
+    description: border/warning, title text/error (icon follows the title). Figma Type=warning.
+
+states_and_behaviors:
+  open:
+    description: |
+      open={true} → native <dialog>.showModal(): top layer, background/backdrop behind,
+      the page inert and not scrollable, focus on Cancel. modal={false} shows it in
+      place instead (no backdrop).
+  close:
+    description: |
+      Cancel or Escape → onCancel, then onOpenChange(false). Confirm → onConfirm, then
+      onOpenChange(false). Outside clicks do nothing. Focus returns to the element that
+      had it before opening.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: dialog
+    description: role=alertdialog, aria-labelledby title, aria-describedby description. 560 wide, padding 24, gap 16.
+  icon:
+    type: decoration
+    element: span
+    nullable: true
+    description: Figma "-> Leading Icon" (24px lucide). aria-hidden; takes the title colour.
+  title:
+    type: text
+    element: h2
+    description: Figma "-> Title". Text-lg/Semi Bold.
+  description:
+    type: text
+    element: p
+    nullable: true
+    description: Figma "-> Description". Text-sm/Regular, text/subtle. 8 below the title row.
+  checkbox:
+    type: slot
+    nullable: true
+    description: Figma "Checkbox" (Checkbox Type=mute "Do not ask again."). 8 above the buttons.
+  actions:
+    type: slot
+    nullable: true
+    description: Figma "Button" — Button group Type=confirm (outline Cancel + default Confirm, equal widths, gap 10).
+
+props:
+  title:
+    type: string
+    default: "Heading to ‘Content Studio’ to create your post?"
+    description: Figma "-> Title". Code — title.
+  description:
+    type: string
+    description: Figma "-> Description" + "Description" boolean. Code — description.
+  leadingIcon:
+    type: instance
+    default: lucide/circle-dashed
+    description: Figma "-> Leading Icon" + "Leading Icon" boolean. Code — icon.
+  checkbox:
+    type: boolean
+    default: false
+    description: Figma "Checkbox". Code — checkbox (ReactNode).
+  button:
+    type: boolean
+    default: true
+    description: Figma "Button". Code — actions (undefined = default, null = none).
+  type:
+    type: enum
+    default: notification
+    enum: [notification, warning]
+    description: Figma "Type". Code — variant.
+
+default:
+  name: Type=notification
+  layout:
+    - root:
+        - icon
+        - title
+        - description
+        - checkbox
+        - actions
+  styles:
+    root:
+      width: "min(560px, 100% − 32px)"            # component tier --dialog-width
+      padding: "calc(var(--gb-space-24) − 1px)"     # Figma stroke is inside the 24 padding
+      gap: var(--gb-space-16)
+      border: 1px var(--gb-border-subtle)
+      borderRadius: var(--gb-radius-lg)
+      backgroundColor: var(--gb-background-default)
+      shadow: var(--gb-shadow-lg)
+      backdrop: var(--gb-background-backdrop)
+    title:
+      textStyle: Text-lg/Semi Bold                  # var(--gb-typography-lg) + var(--gb-font-weight-semibold)
+      color: var(--gb-text-default)
+    icon:
+      size: var(--gb-space-24)
+      gap: var(--gb-space-8)
+    description:
+      textStyle: Text-sm/Regular
+      color: var(--gb-text-subtle)
+
+variants:
+  - name: warning
+    configuration: { type: warning }
+    styles:
+      root: { borderColor: var(--gb-border-warning) }
+      title: { color: var(--gb-text-error) }
+  - name: inline
+    configuration: { modal: false }
+    styles:
+      root: { position: static, width: "min(560px, 100%)", backdrop: none }
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      root: { borderColor: CanvasText }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Dialog
+  import: 'import { Dialog } from "@gb/react"'
+  element: HTMLDialogElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'Button, ButtonGroup (default actions); Checkbox for the checkbox slot'
+    - 'lucide-react (peer dependency) — for icon; Figma default lucide/circle-dashed is a placeholder, no default in code'
+
+  props:
+    - name: open
+      type: boolean
+      required: true
+      figma: none
+    - name: onOpenChange
+      type: "(open: boolean) => void"
+      figma: none
+      description: Called with false on Cancel, Confirm or Escape.
+    - name: modal
+      type: boolean
+      default: true
+      figma: none
+      description: false — shown in place in the page, no backdrop.
+    - name: variant
+      type: '"notification" | "warning"'
+      default: notification
+      figma: Type
+    - name: title
+      type: ReactNode
+      required: true
+      figma: "-> Title"
+    - name: description
+      type: ReactNode
+      figma: "-> Description / Description"
+    - name: icon
+      type: ReactNode
+      figma: "-> Leading Icon / Leading Icon"
+    - name: checkbox
+      type: ReactNode
+      figma: Checkbox
+    - name: actions
+      type: ReactNode | null
+      figma: Button
+      description: Leave out for Cancel + Confirm; your own Buttons replace them; null hides them.
+    - name: onConfirm
+      type: "() => void"
+      figma: none
+    - name: onCancel
+      type: "() => void"
+      figma: none
+      description: Default Cancel and Escape.
+    - name: confirmLabel
+      type: ReactNode
+      default: Confirm
+      figma: "Button group → Confirm label"
+    - name: cancelLabel
+      type: ReactNode
+      default: Cancel
+      figma: "Button group → Cancel label"
+    - name: ref
+      type: Ref<HTMLDialogElement>
+      figma: none
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"dialog">'
+      figma: none
+      description: e.g. role="dialog" to drop alertdialog, onClose.
+
+  slots:
+    - name: icon
+    - name: checkbox
+    - name: actions
+
+  events:
+    # Logged in the playground Actions panel: onOpenChange, onConfirm, onCancel.
+    - name: onOpenChange
+      payload: { open: boolean }
+    - name: onConfirm
+      payload: none
+    - name: onCancel
+      payload: none
+
+  methods: []
+
+  dataAttributes:
+    - name: data-variant
+      values: [notification, warning]
+    - name: data-modal
+      description: Present while modal.
+
+  tokensUsed:
+    color:
+      - --gb-background-default
+      - --gb-background-backdrop
+      - --gb-border-subtle
+      - --gb-border-warning
+      - --gb-text-default
+      - --gb-text-error
+      - --gb-text-subtle
+    dimension:
+      - --gb-space-8
+      - --gb-space-16
+      - --gb-space-24
+      - --gb-radius-lg
+      - --gb-stroke-1
+    other:
+      - --gb-typography-lg
+      - --gb-typography-sm
+      - --gb-font-weight-semibold
+      - --gb-shadow-lg
+
+examples:
+  confirm:
+    code: |
+      <Dialog open={open} onOpenChange={setOpen} icon={<CircleAlert />}
+        title="Content Studio로 이동할까요?" description="이 페이지를 나가 Content Studio에서 게시물을 만듭니다."
+        confirmLabel="이동" cancelLabel="취소" onConfirm={go} />
+  warning:
+    code: |
+      <Dialog open={open} onOpenChange={setOpen} variant="warning" icon={<TriangleAlert />}
+        title="게시물을 삭제할까요?" description="삭제하면 되돌릴 수 없어요." confirmLabel="삭제" onConfirm={remove} />
+  do-not-ask:
+    code: |
+      <Dialog open={open} onOpenChange={setOpen} title="…" checkbox={<Checkbox variant="mute" checked={skip} onChange={(e) => setSkip(e.target.checked)}>Do not ask again.</Checkbox>} />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/dialog/review
+# ================================================================
+# 1. decided — name: Figma Popover → code Dialog (user, 2026-10-16).
+# 2. ⚠ needs design decision — backdrop not in Figma; code uses background/backdrop.
+# 3. ⚠ needs design decision — warning mixes border/warning and text/error; icon colours are unbound hex.
+# 4. ⚠ needs design decision — warning Confirm is the default button (no destructive Button style).
+# 5. ⚠ needs design decision — Checkbox only on notification in Figma (and hidden with Button); code allows both.
+# 6. Measured: 560 × 156, icon @24,26, title @56,24 418 × 28, description @24,60, buttons 251 × 36 @96 — matches Figma.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+# 2. No open / close animation (none in Figma).
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Dialog.tsx, Dialog.module.css) and Figma component set 7269:451.
+    Open design questions: Review Notes 2–5.

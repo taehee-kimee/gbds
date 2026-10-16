@@ -1,0 +1,358 @@
+/*
+ * Input — mirrors Figma `Part/Input` (520:3062, the box) and `Input` (5084:3716, the labelled field → Field).
+ * Part/Input Status=default | active | filled | error | disabled →
+ *   :focus-within (active) · the native placeholder (filled vs empty) · data-invalid · :disabled.
+ */
+
+.root {
+  --input-bg: var(--gb-background-default);
+  --input-border: var(--gb-border-default);
+  --input-ring: 0 0 0 0 transparent;
+  --input-fg: var(--gb-text-default);
+  --input-placeholder: var(--gb-text-subtle);
+  --input-icon: var(--gb-icon-subtle);
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--gb-space-8);
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--gb-space-36);
+  padding: 0 var(--gb-space-12);
+  border-radius: var(--gb-radius-md);
+  background: var(--input-bg);
+  /* Figma stroke is INSIDE; Status=active adds effect style Box Shadow/Focus ring. */
+  box-shadow: var(--input-ring), inset 0 0 0 var(--gb-stroke-1) var(--input-border);
+  cursor: text;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--input-fg);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+}
+
+.input::placeholder {
+  color: var(--input-placeholder);
+  opacity: 1;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--input-icon);
+}
+
+.icon > svg {
+  width: var(--gb-space-16);
+  height: var(--gb-space-16);
+}
+
+/* Built-in right-end buttons (clear, show password): 16px icon, 24px hit area without changing the layout. */
+.iconButton {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: var(--gb-space-24);
+  height: var(--gb-space-24);
+  margin: calc(-1 * var(--gb-space-4));
+  padding: 0;
+  border: 0;
+  border-radius: var(--gb-radius-sm);
+  background: transparent;
+  color: var(--input-icon);
+  cursor: pointer;
+}
+
+.iconButton > svg {
+  width: var(--gb-space-16);
+  height: var(--gb-space-16);
+}
+
+.iconButton:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-ring-focus);
+}
+
+.iconButton:disabled {
+  cursor: not-allowed;
+}
+
+/* ── type="file": the native control stays focusable but invisible; the text shows the file names ── */
+
+.root[data-file] {
+  cursor: pointer;
+}
+
+.root[data-file] .input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.fileText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--input-fg);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.fileText[data-placeholder] {
+  color: var(--input-placeholder);
+}
+
+/* ── Status=active: focus ──────────────────────────────────────────────── */
+
+.root:focus-within {
+  --input-border: var(--gb-border-static-gray);
+  --input-ring: var(--gb-ring-focus);
+}
+
+/* ── Status=error ──────────────────────────────────────────────────────── */
+
+.root[data-invalid] {
+  --input-border: var(--gb-border-warning);
+}
+
+/* ── Status=disabled ───────────────────────────────────────────────────── */
+
+.root:has(.input:disabled) {
+  --input-bg: var(--gb-background-disabled);
+  --input-border: var(--gb-border-overlay);
+  --input-fg: var(--gb-text-static-gray);
+  --input-placeholder: var(--gb-text-static-gray);
+  --input-icon: var(--gb-icon-static-gray);
+  cursor: not-allowed;
+}
+
+.root:has(.input:disabled) .input {
+  cursor: not-allowed;
+}
+
+/* ── Field (Figma Input): label, inputs, description / error — 12 apart ── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gb-space-12);
+}
+
+.label {
+  color: var(--gb-text-default);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-semibold);
+}
+
+.description {
+  margin: 0;
+  color: var(--gb-text-subtle);
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-medium);
+}
+
+.error {
+  margin: 0;
+  color: var(--gb-text-warning);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+}
+
+@media (forced-colors: active) {
+  .root {
+    border: var(--gb-stroke-1) solid CanvasText;
+  }
+}
+
+/* ── type="search" = Figma Input search: leading search icon (icon/default), gap 12, Box Shadow/shadow-xs ── */
+
+.search {
+  --input-shadow: var(--gb-shadow-xs);
+  gap: var(--gb-space-12);
+  box-shadow: var(--input-ring), inset 0 0 0 var(--gb-stroke-1) var(--input-border), var(--input-shadow);
+}
+
+.search .icon[data-leading] {
+  color: var(--gb-icon-default);
+}
+
+.search:has(.input:disabled) .icon[data-leading] {
+  color: var(--gb-icon-static-gray);
+}
+
+/* Figma has no clear (×) button; hide the browser's own for type="search". */
+.search .input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* Figma Input search Status=active: focus ring instead of shadow-xs. */
+.search:focus-within {
+  --input-shadow: 0 0 0 0 transparent;
+}
+
+/* ── Composites: type="time" (Figma Input time) and type="tel" (Figma Input phone) ── */
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--gb-space-8);
+  width: 100%;
+}
+
+.row > .root {
+  flex: 1;
+  min-width: 0;
+}
+
+/* AM / PM — Figma Toggle (2 options): padding 2, background/selected, border/default inside, radius lg. */
+.period {
+  display: flex;
+  align-self: stretch;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: var(--gb-space-2);
+  border-radius: var(--gb-radius-lg);
+  background: var(--gb-background-selected);
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-default);
+}
+
+.periodOption {
+  margin: 0;
+  padding: var(--gb-space-4) var(--gb-space-8);
+  border: 0;
+  border-radius: var(--gb-radius-md);
+  background: transparent;
+  color: var(--gb-text-default);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+  cursor: pointer;
+}
+
+/* The chosen period: background/mute, white text, shadow-sm. */
+.periodOption[aria-checked="true"] {
+  background: var(--gb-background-mute);
+  box-shadow: var(--gb-shadow-sm);
+  color: var(--gb-text-static-white);
+}
+
+.periodOption:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-ring-focus);
+}
+
+.period[data-disabled] {
+  background: var(--gb-background-disabled);
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-overlay);
+}
+
+.period[data-disabled] .periodOption {
+  background: transparent;
+  box-shadow: none;
+  color: var(--gb-text-static-gray);
+  cursor: not-allowed;
+}
+
+/* Input phone: select 88 wide, gap 10. */
+.phone {
+  gap: var(--gb-space-10);
+}
+
+/* Figma select box: padding 8 / 12, chevron-down 16, Text-sm/Medium. */
+.selectBox {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  box-sizing: border-box;
+  width: 88px;
+  height: var(--gb-space-36);
+  border-radius: var(--gb-radius-md);
+  background: var(--gb-background-default);
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-default);
+  color: var(--gb-icon-default);
+}
+
+.selectBox:focus-within {
+  box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--gb-border-static-gray);
+}
+
+/* The box shows only "+82"; the real <select> sits on top, its own text hidden, so it opens on click. */
+.selectValue {
+  position: absolute;
+  left: var(--gb-space-12);
+  color: var(--gb-text-default);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+  pointer-events: none;
+}
+
+.select {
+  appearance: none;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 var(--gb-space-36) 0 var(--gb-space-12);
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: transparent;
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+  cursor: pointer;
+}
+
+.selectBox > svg {
+  position: absolute;
+  right: var(--gb-space-12);
+  width: var(--gb-space-16);
+  height: var(--gb-space-16);
+  pointer-events: none;
+}
+
+.selectBox[data-disabled] {
+  background: var(--gb-background-disabled);
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-overlay);
+  color: var(--gb-icon-static-gray);
+}
+
+.select option {
+  color: var(--gb-text-default);
+  background: var(--gb-background-overlay);
+}
+
+.selectBox[data-disabled] .select {
+  cursor: not-allowed;
+}
+
+.selectBox[data-disabled] .selectValue {
+  color: var(--gb-text-static-gray);
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * State changes (hover, press, focus, selected) ease over --gb-duration-100. Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .root,
+  .iconButton,
+  .search,
+  .periodOption,
+  .selectBox {
+    transition-property: background-color, color, border-color, box-shadow, opacity;
+    transition-duration: var(--gb-duration-100);
+    transition-timing-function: var(--gb-easing-standard);
+  }
+}

@@ -4,7 +4,17 @@
       "choice": "static-white",
       "note": "Figma에서 라벨을 흰색으로 변경 (사용자, 2026-10-16). 처음 바인딩 text/invert는 다크에서 neutral-900 → text/static/white로 재바인딩 완료. Figma = 코드.",
       "reviewed": true
+    },
+    "2": {
+      "note": "Figma에서 ",
+      "choice": "figma"
+    },
+    "3": {
+      "choice": "keep"
+    },
+    "5": {
+      "choice": "keep"
     }
   },
-  "updatedAt": "2026-10-16T00:00:00.000Z"
+  "updatedAt": "2026-10-16T08:01:15.120Z"
 }

@@ -1,0 +1,411 @@
+# ================================================================
+# Chatbox Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-chatbox
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-chatbox
+  description: |
+    The message composer for a chat interface: a text area that grows with
+    its content, a file-attach (+) button and a send button. An optional
+    slot above the text holds whatever belongs to the next message
+    (attachment thumbnails, suggestion chips, an options row).
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Chatbox (7219:5411) · component set Chatbox (7219:5418)"
+    code: "react/src/components/Chatbox/Chatbox.tsx"
+
+usage:
+  when_to_use:
+    - At the bottom of a conversation, to write and send the next message
+    - For a prompt box that sends free text to an assistant
+
+  when_not_to_use:
+    - For a form field that is submitted with other fields → use Textarea
+    - For a one-line search → use Input
+
+  rules:
+    - id: label
+      rule: Give the text an accessible name
+      severity: error
+      message: "The placeholder is not a label. Pass aria-label (or aria-labelledby) — it goes to the textarea."
+
+    - id: enter-sends
+      rule: Do not change Enter to insert a line
+      severity: warning
+      message: "Enter sends, Shift+Enter adds a line — the convention users expect in chat. Enter during IME composition never sends."
+
+    - id: handle-attach
+      rule: Wire or remove the + button
+      severity: warning
+      message: "The default + does nothing without onAttach. Pass onAttach, replace it via start, or hide it with start={null}."
+
+    - id: submit-type
+      rule: Give your own send button type="submit"
+      severity: error
+      message: "In start/end/content, only type=\"submit\" buttons call onSubmit (Button defaults to type=\"button\")."
+
+  common_mistakes:
+    - mistake: Reading the text from onChange to send it
+      correct: Use onSubmit — it gets the trimmed text and clears an uncontrolled box.
+      example:
+        wrong: |
+          <Chatbox onChange={(e) => (draft = e.target.value)} onKeyDown={(e) => e.key === "Enter" && send(draft)} />
+        right: |
+          <Chatbox aria-label="메시지" onSubmit={send} />
+
+variant_guidelines:
+  default:
+    description: background/default, 1px inside border/default, radius 2xl, padding 16. Placeholder text/subtle. Figma Status=default.
+
+size_guidelines:
+  # Text is Text-base 16/24 in every size (user decision 2026-10-16; Figma text is Text-xs 12/16).
+  # 16px also avoids iOS Safari's zoom into inputs under 16px.
+  sm:
+    description: Height 240, padding 16, radius 2xl. Default.
+  md:
+    description: Height 280, padding 16, radius 2xl. Code only.
+  lg:
+    description: Height 320, padding 20, radius 3xl. Code only.
+  custom:
+    description: height (required) and width props — numbers are px, strings any CSS length ("40vh"). Padding and radius as sm. Code only.
+
+states_and_behaviors:
+  active:
+    description: |
+      The textarea has focus: border/static/gray plus ring/focus (Figma
+      effect style Box Shadow/Focus ring). Figma Status=active.
+  filled:
+    description: The text is text/default once there is a value (data-filled). Figma Status=filled.
+  disabled:
+    description: |
+      disabled prop: text and placeholder text/static/gray, both buttons
+      disabled. Figma Status=disabled.
+  height:
+    description: |
+      Fixed height per size — sm 240 · md 280 · lg 320, or size="custom"
+      with height / width (Figma 112, code only). The text fills the space
+      between the slot and the button row; text that does not fit scrolls
+      inside it, the buttons stay visible.
+  submit:
+    description: |
+      Send button or Enter (not Shift+Enter, not while an IME is composing).
+      Empty or whitespace-only text is not sent. An uncontrolled box clears
+      after sending.
+  click-to-focus:
+    description: A press on the box's empty space focuses the text.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: div
+    description: Figma variant frame (vertical, padding 16, gap 28).
+  slot:
+    type: slot
+    element: 'div[data-slot="content"]'
+    nullable: true
+    description: Figma "-> Slot" (visibility "Slot"). Filled by the content prop; flex row, wraps.
+  input:
+    type: control
+    element: textarea
+    description: Figma text "-> Text" (Figma Text-xs/Regular; code Text-base 16/24). Placeholder when empty.
+  start:
+    type: slot
+    description: Left of the button row. Default Button Type=icon (lucide/plus); replaced by the start prop.
+  end:
+    type: slot
+    nullable: true
+    description: Right of the button row. Default Button Type=icon (lucide/sparkles, type=submit, Figma visibility "Button"); replaced by the end prop.
+
+props:
+  text:
+    type: string
+    default: "Please share your ideas."
+    description: Figma "-> Text". Code — placeholder (default/active/disabled) or value (filled).
+  button:
+    type: boolean
+    default: true
+    description: Figma "Button". Code — showSend.
+  slot:
+    type: boolean + slot
+    default: false
+    description: Figma "Slot" + "-> Slot". Code — content (rendered in the slot).
+  status:
+    type: enum
+    default: default
+    enum: [default, active, disabled, filled]
+    description: Figma "Status". Code — focus, value, disabled.
+
+default:
+  name: Status=default
+  layout:
+    - root:
+        - slot
+        - input
+        - attach / send
+  styles:
+    root:
+      display: flex
+      flexDirection: column
+      gap: var(--gb-space-28)
+      padding: var(--gb-space-16)
+      borderRadius: var(--gb-radius-2xl)            # 18px
+      backgroundColor: var(--gb-background-default)
+      border: 1px inside var(--gb-border-default)
+      width: 100%                                   # Figma 700 fixed
+      height: var(--chatbox-height)                 # 240 (sm) — component-tier value, no global token
+    input:
+      textStyle: Text-base/Regular                  # var(--gb-typography-base) → 16px/24px in every size (Figma Text-xs 12/16)
+      minHeight: var(--gb-font-leading-6)
+      color: var(--gb-text-default)
+      placeholderColor: var(--gb-text-subtle)
+    actions:
+      justifyContent: space-between                 # + left, send right
+
+variants:
+  - name: active
+    configuration:
+      status: active
+    styles:
+      root:
+        border: 1px inside var(--gb-border-static-gray)
+        boxShadow: var(--gb-ring-focus)
+  - name: disabled
+    configuration:
+      status: disabled
+    styles:
+      input:
+        color: var(--gb-text-static-gray)
+        placeholderColor: var(--gb-text-static-gray)
+  - name: size-md
+    configuration:
+      size: md
+    styles:
+      root:
+        height: 280px
+  - name: size-lg
+    configuration:
+      size: lg
+    styles:
+      root:
+        padding: var(--gb-space-20)
+        borderRadius: var(--gb-radius-3xl)          # 22px
+        height: 320px
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      root:
+        border: 1px solid CanvasText
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Chatbox
+  import: 'import { Chatbox } from "@gb/react"'
+  element: HTMLTextAreaElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'lucide-react (peer dependency) — icons: plus, sparkles'
+
+  props:
+    - name: onSubmit
+      type: "(value: string) => void"
+      figma: none
+      description: Send button or Enter. Gets the trimmed text; not called when empty.
+    - name: onAttach
+      type: "() => void"
+      figma: none
+      description: Click on the default + button.
+    - name: showSend
+      type: boolean
+      default: true
+      figma: Button
+      description: Show the default send button. Ignored when end is passed.
+    - name: start
+      type: ReactNode
+      default: "the + button"
+      figma: "the + Button instance"
+      description: Left of the button row. Pass Buttons to replace the default, null for nothing. Buttons follow the box's disabled (ButtonGroupContext).
+    - name: end
+      type: ReactNode
+      default: "the sparkles send button"
+      figma: "the send Button instance (Button)"
+      description: Right of the button row. Pass Buttons; the one that sends needs type="submit". null for nothing.
+    - name: content
+      type: ReactNode
+      figma: "Slot + -> Slot"
+      description: |
+        Rendered in the slot above the text (chips, attachments,
+        checkboxes, buttons …). Omit it to hide the slot. Takes over the
+        HTML content attribute, which has no meaning on a textarea.
+    - name: size
+      type: '"sm" | "md" | "lg" | "custom"'
+      default: sm
+      figma: none
+      description: Box size — sm 240 · md 280 · lg 320 (padding 20) · custom (height / width props). Text is 16/24 in every size.
+    - name: height
+      type: "number | string"
+      required: "when size=\"custom\""
+      figma: none
+      description: Box height for size="custom" (number = px).
+    - name: width
+      type: "number | string"
+      figma: none
+      description: Box width for size="custom". Default fills the parent.
+    - name: className
+      type: string
+      figma: none
+      description: Applied to the outer box.
+    - name: style
+      type: CSSProperties
+      figma: none
+      description: Applied to the outer box (e.g. width).
+    - name: ref
+      type: Ref<HTMLTextAreaElement>
+      figma: none
+      description: Forwarded to the textarea.
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"textarea">'
+      figma: none
+      description: Other textarea attributes (aria-label, name, maxLength, autoFocus, onFocus …).
+
+  slots:
+    - name: content
+      description: The slot above the text, filled by the content prop
+    - name: start
+      description: Left of the button row
+    - name: end
+      description: Right of the button row
+
+  events:
+    # Logged in the playground Actions panel: onSubmit (with the text), onAttach, onFocus, onBlur.
+    - name: onSubmit
+      description: Enter, or a click on any type="submit" button inside the box (default send or yours). Never submits a surrounding <form>.
+      payload:
+        value: string (trimmed)
+    - name: onAttach
+      payload: none
+    - name: onChange / onFocus / onBlur / onKeyDown
+      description: Native textarea events, passed through. A handler that calls preventDefault on Enter keeps it from sending.
+
+  methods:
+    - name: focus
+      signature: "ref.current.focus(): void"
+
+  dataAttributes:
+    - name: data-size
+      values: [sm, md, lg, custom]
+    - name: data-filled
+      description: On the root while there is text.
+    - name: data-disabled
+      description: On the root when disabled.
+
+  tokensUsed:
+    color:
+      - --gb-background-default
+      - --gb-border-default
+      - --gb-border-static-gray
+      - --gb-text-default
+      - --gb-text-subtle
+      - --gb-text-static-gray
+    dimension:
+      - --gb-space-16
+      - --gb-space-20
+      - --gb-space-28
+      - --gb-radius-2xl
+      - --gb-radius-3xl
+      - --gb-stroke-1
+      - --gb-font-leading-6
+    other:
+      - --gb-typography-base
+      - --gb-ring-focus
+
+examples:
+  basic:
+    code: |
+      <Chatbox aria-label="메시지" onSubmit={(text) => send(text)} onAttach={openFilePicker} />
+  controlled:
+    code: |
+      const [text, setText] = useState("")
+      <Chatbox aria-label="메시지" value={text} onChange={(e) => setText(e.target.value)} onSubmit={(t) => { send(t); setText("") }} />
+  with-slot:
+    code: |
+      <Chatbox
+        aria-label="메시지"
+        content={
+          <>
+            <Chip>요약해줘</Chip>
+            <Chip>번역해줘</Chip>
+          </>
+        }
+        onSubmit={send}
+      />
+  custom-buttons:
+    description: Your own Buttons in the row
+    code: |
+      <Chatbox
+        aria-label="메시지"
+        onSubmit={send}
+        start={<Button icon={<Paperclip />} aria-label="파일 첨부" onClick={openFiles} />}
+        end={
+          <>
+            <Button variant="ghost" icon={<Mic />} aria-label="음성 입력" onClick={record} />
+            <Button type="submit" icon={<ArrowUp />} aria-label="보내기" />
+          </>
+        }
+      />
+  mobile:
+    description: Your own box size
+    code: |
+      <Chatbox aria-label="메시지" size="custom" height="40vh" width={480} onSubmit={send} />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/chatbox/review
+# ================================================================
+# 1. ⚠ needs design decision — send is enabled while empty; code ignores the press.
+# 2. ✅ decided 2026-10-16 (revised) — text 16/24 in every size; size = box only (sm · md · lg · custom height/width), code only.
+# 3. ✅ decided 2026-10-16 (revised) — fixed height per size (240 · 280 · 320) instead of maxRows; text scrolls inside.
+# 4. ✅ decided 2026-10-16 — start / end slots take Buttons directly (send = type="submit"); defaults stay + / sparkles.
+# 5. ✅ decided 2026-10-16 — start={null} hides +; start replaces it.
+# 6. Slot → content prop (user naming, 2026-10-16), rendered in an internal slot; playground shows example code (Chip, Avatar + Badge, Checkbox, Button).
+# 7. Status mapping, Enter / Shift+Enter / IME, click-to-focus; width fills the parent (Figma 700).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Chatbox.tsx, Chatbox.module.css) and Figma component set 7219:5418.
+    Layer 1 guidelines are a first draft and need design review.
+    Open design questions: Review Note 1.

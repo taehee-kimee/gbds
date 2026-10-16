@@ -1,0 +1,50 @@
+/*
+ * Progress — mirrors the Figma component sets `Progress` (3539:7160) and `Part/Progress` (3311:1341).
+ * Status=in progress | completed → data-status (from value).
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gb-space-8);
+}
+
+/* Text-xs/Semi Bold, text/subtle. */
+.label {
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-semibold);
+  color: var(--gb-text-subtle);
+}
+
+/* Part/Progress: 8 tall, radius full, background/subtler. */
+.track {
+  height: var(--gb-space-8);
+  border-radius: var(--gb-radius-full);
+  background: var(--gb-background-subtler);
+  overflow: hidden;
+}
+
+/* Indicator: background/bolder, width = value / max. */
+.indicator {
+  height: 100%;
+  border-radius: var(--gb-radius-full);
+  background: var(--gb-background-bolder);
+}
+
+@media (forced-colors: active) {
+  .track {
+    outline: 1px solid CanvasText;
+  }
+  .indicator {
+    background: Highlight;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * The fill grows to the new value over --gb-duration-300. Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .indicator {
+    transition: width var(--gb-duration-300) var(--gb-easing-standard);
+  }
+}

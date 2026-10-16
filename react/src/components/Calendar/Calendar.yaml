@@ -1,0 +1,478 @@
+# ================================================================
+# Calendar Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-calendar
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-calendar
+  description: |
+    The calendar surface: a month header, a weekday row and a grid of day
+    cells, with month and year pickers. Picks one day, or a start and end
+    across two months (range). Days can carry an event marker. Used as the
+    dropdown body of Date select / Range select, or embedded directly when a
+    calendar must always be visible.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Calendar (7219:10411) · component sets Part/Calendar modal (7219:10741), Part/Calendar (7219:10714)"
+    code: "react/src/components/Calendar/Calendar.tsx"
+
+usage:
+  when_to_use:
+    - When the date's position in the week or month matters (scheduling, publishing dates)
+    - To show which days already have events (markers)
+    - To pick a period with a start and an end (mode="range")
+
+  when_not_to_use:
+    - For a date the user already knows by heart, such as a birthday → a text field is faster
+    - For a date far in the past or future → typing beats paging through months
+    - For a time of day → not supported
+
+  rules:
+    - id: set-limits
+      rule: Set min and max when only some dates make sense
+      severity: warning
+      message: "Out-of-range days, months and years render disabled and cannot be picked; the user does not have to discover the limit by error."
+
+    - id: marker-meaning
+      rule: Explain what the markers mean nearby
+      severity: warning
+      message: "Dots differ by color and shape only. Show a legend; screen readers get markerLabels."
+
+    - id: today-pinned
+      rule: Do not pass today in production
+      severity: warning
+      message: "today exists to pin the date in tests and demos. Without it the component uses the real current day."
+
+  common_mistakes:
+    - mistake: Mutating the selected Date
+      correct: Treat the value as immutable — onChange gives a new Date at local midnight.
+      example:
+        wrong: |
+          onChange={(d) => { value.setDate(d.getDate()) }}
+        right: |
+          onChange={setValue}
+
+    - mistake: Expecting the range end on the first click
+      correct: Range onChange fires twice — { start } then { start, end }.
+      example:
+        wrong: |
+          <Calendar mode="range" onChange={({ start, end }) => save(start, end!)} />
+        right: |
+          <Calendar mode="range" onChange={(r) => r.end && save(r.start, r.end)} />
+
+variant_guidelines:
+  default:
+    description: |
+      One month. Header ‹ [Sep] [2026] ›, weekday row, day grid of always
+      6 weeks — 264 × 324 for every month.
+      Figma Type=default.
+  month:
+    description: |
+      12 months, 70 × 32 cells in a 3 × 4 grid spread over the day grid's
+      224 × 232 area (16 + 4 × 32 + 3 × 24 + 16), so the calendar keeps 264 × 324.
+      Opened with the month button (shown in Status=active) or
+      defaultView="month". Figma Type=month.
+  year:
+    description: |
+      12 years (the current year 8th, e.g. 2019–2030 for 2026), paged by
+      12. Opened with the year button or defaultView="year". Figma Type=year.
+  range:
+    description: |
+      Two months side by side, padding 12. Ends are Status=active, days
+      between are Status=auto-selected (square, background/selected).
+      488 × 308 in every view; the
+      month/year picker spans both months. Figma Type=range.
+
+states_and_behaviors:
+  day-default:
+    description: Text-sm/Regular, text/default, transparent. Figma Part/Calendar Type=day, Status=default.
+  hover:
+    description: |
+      background/subtlest on selectable, unselected days and month/year
+      cells (pointer devices). Figma Part/Calendar Status=hover (added
+      2026-10-16, Review Note 1).
+  today:
+    description: 1px inside border/static/gray ring; aria-current="date". Figma Type=today.
+  selected:
+    description: background/bold, text/invert, radius md; aria-selected on the gridcell. Figma Status=active.
+  in-range:
+    description: background/selected, text/bold, radius 0. Figma Status=auto-selected.
+  disabled:
+    description: |
+      text/static/gray. Days outside min/max or rejected by isDateDisabled
+      stay focusable (aria-disabled) but cannot be selected. Days of the
+      neighbouring months (leading days and the spare rows that keep six
+      weeks) use the same look and are not interactive.
+      Figma Status=disabled.
+  marker:
+    description: |
+      4px dot 4px above the bottom edge. published = icon/default dot,
+      reserved = icon/default ring, draft = icon/warning dot; on a selected
+      day icon/invert (draft stays warning). Figma Data=true + Data style.
+  range-preview:
+    description: |
+      mode="range" with only a start chosen: the days from the start to the
+      day under the pointer or keyboard focus show the auto-selected look
+      (background/selected, text/bold, square; the far end radius md).
+      Visual only — aria-selected changes on click. data-preview="middle" |
+      "end". Added 2026-10-16 (Review Note 6); reuses Figma Status=auto-selected.
+  focus:
+    description: Keyboard focus draws ring/focus on the day. No Figma variant.
+  keyboard:
+    description: |
+      Arrow keys move a day / a week, Home/End to the week's start/end,
+      PageUp/PageDown a month, Shift+PageUp/PageDown a year, Enter/Space
+      selects. Moving past the visible month(s) turns the page. One day is
+      in the Tab order. The month is announced through aria-live.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: div
+    description: Figma Part/Calendar modal frame (padding 20, gap 16, radius lg, background/overlay, border/default inside).
+  header:
+    type: container
+    description: "‹ (Button icon ghost), [month] [year] (Button outline, isSelected while their picker is open), › — space-between."
+  grid:
+    type: table
+    element: 'table[role=grid]'
+    description: One per visible month. th = weekday (Text-xs, text/subtle); td[role=gridcell] > button = day.
+  day:
+    type: control
+    element: button
+    instanceOf: Part/Calendar Type=day | today
+    description: 32 × 32 cell.
+  picker:
+    type: container
+    description: 3-column grid of month or year buttons (Part/Calendar Type=month & year, 70 × 32).
+  live-region:
+    type: text
+    description: Visually hidden aria-live text with the visible month(s).
+
+props:
+  type:
+    type: enum
+    default: default
+    enum: [default, month, year, range]
+    description: Figma modal "Type". Code — defaultView (month, year) and mode="range"; the header buttons switch views.
+  data:
+    type: enum
+    default: "False"
+    enum: ["False", "True"]
+    description: Figma modal "Data". Code — marker function.
+  cell-type:
+    type: enum
+    enum: [month & year, day, today]
+    description: Figma Part/Calendar "Type". Code — derived (picker cell, day, day equal to today).
+  cell-status:
+    type: enum
+    enum: [default, active, disabled, auto-selected, hover]
+    description: Figma Part/Calendar "Status". Code — derived from value, min, max, isDateDisabled; hover = :hover.
+  cell-data-style:
+    type: enum
+    enum: [N/A, published, reserved, draft]
+    description: Figma Part/Calendar "-> Data style". Code — marker(date) return value.
+
+default:
+  name: Part/Calendar modal Type=default, Data=False
+  layout:
+    - root:
+        - header
+        - grid
+  styles:
+    root:
+      display: inline-flex
+      flexDirection: column
+      gap: var(--gb-space-16)
+      padding: var(--gb-space-20)
+      borderRadius: var(--gb-radius-lg)
+      backgroundColor: var(--gb-background-overlay)
+      border: 1px inside var(--gb-border-default)
+    header:
+      justifyContent: space-between
+      gap: var(--gb-space-4)                     # Figma 8 is ignored by space-between; 4 fits the 210px picker
+    grid:
+      columns: 7 × var(--gb-space-32)            # 224
+      rows: 6 weeks                              # 16 + 6 × (4 + 32) = 232
+      rowGap: var(--gb-space-4)
+    weekday:
+      height: var(--gb-space-16)
+      textStyle: Text-xs/Regular                 # font: var(--gb-typography-xs)
+      color: var(--gb-text-subtle)
+    day:
+      size: var(--gb-space-32)
+      borderRadius: var(--gb-radius-md)
+      textStyle: Text-sm/Regular                 # font: var(--gb-typography-sm)
+      color: var(--gb-text-default)
+
+variants:
+  - name: hover
+    configuration:
+      state: hover
+    styles:
+      day:
+        backgroundColor: var(--gb-background-subtlest)
+  - name: today
+    styles:
+      day:
+        border: 1px inside var(--gb-border-static-gray)
+  - name: selected
+    styles:
+      day:
+        backgroundColor: var(--gb-background-bold)
+        color: var(--gb-text-invert)
+  - name: in-range
+    styles:
+      day:
+        backgroundColor: var(--gb-background-selected)
+        color: var(--gb-text-bold)
+        borderRadius: 0
+  - name: disabled
+    styles:
+      day:
+        color: var(--gb-text-static-gray)
+  - name: marker-published
+    styles:
+      marker: { size: var(--gb-space-4), bottom: var(--gb-space-4), background: var(--gb-icon-default) }
+  - name: marker-reserved
+    styles:
+      marker: { size: var(--gb-space-4), bottom: var(--gb-space-4), ring: 1px var(--gb-icon-default) }
+  - name: marker-draft
+    styles:
+      marker: { size: var(--gb-space-4), bottom: var(--gb-space-4), background: var(--gb-icon-warning) }
+  - name: marker-on-selected
+    styles:
+      marker: { color: var(--gb-icon-invert) }   # draft stays var(--gb-icon-warning)
+  - name: picker
+    configuration:
+      type: month | year
+    styles:
+      picker: { columns: 3 × 70px (space-between in 224), rows: 4 × var(--gb-space-32), rowGap: var(--gb-space-24), paddingBlock: var(--gb-space-16) }   # 16 + 128 + 72 + 16 = 232
+      pick: { height: var(--gb-space-32), borderRadius: var(--gb-radius-md) }
+      pick-selected: { backgroundColor: var(--gb-background-bold), color: var(--gb-text-invert) }
+  - name: range
+    configuration:
+      type: range
+    styles:
+      root: { padding: var(--gb-space-12) }
+      panels: { gap: var(--gb-space-16) }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Calendar
+  import: 'import { Calendar } from "@gb/react"'
+  element: HTMLDivElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'lucide-react (peer dependency) — icons: chevron-left, chevron-right'
+
+  props:
+    - name: mode
+      type: '"single" | "range"'
+      default: single
+      figma: "Type=range → range"
+    - name: value
+      type: "Date | null (single) · { start: Date; end?: Date } | null (range)"
+      figma: Part/Calendar Status=active / auto-selected
+      description: Controlled selection. null = nothing selected.
+    - name: defaultValue
+      type: same as value
+      figma: none
+      description: Initial selection when uncontrolled.
+    - name: onChange
+      type: "(date: Date) => void · (range: DateRange) => void"
+      figma: none
+      description: Fires on selection. Range fires with { start }, then { start, end }.
+    - name: defaultView
+      type: '"day" | "month" | "year"'
+      default: day
+      figma: "Type=month | year"
+    - name: defaultMonth
+      type: Date
+      default: "selected date's month, else today's"
+      figma: none
+    - name: min
+      type: Date
+      figma: Status=disabled
+    - name: max
+      type: Date
+      figma: Status=disabled
+    - name: isDateDisabled
+      type: "(date: Date) => boolean"
+      figma: Status=disabled
+    - name: marker
+      type: '(date: Date) => "published" | "reserved" | "draft" | undefined'
+      figma: "Data=True + -> Data style"
+    - name: markerLabels
+      type: 'Record<"published" | "reserved" | "draft", string>'
+      default: '{ published: "Published", reserved: "Reserved", draft: "Draft" }'
+      figma: none
+      description: Appended to each marked day's accessible name.
+    - name: locale
+      type: string
+      default: en-US
+      figma: none
+      description: Month and weekday names via Intl. English weekdays are trimmed to two letters (Su, Mo).
+    - name: weekStartsOn
+      type: number
+      default: 0
+      figma: none
+      description: 0 = Sunday (Figma), 1 = Monday.
+    - name: today
+      type: Date
+      default: the real current day
+      figma: Type=today
+      description: For tests and demos only.
+    - name: className
+      type: string
+      figma: none
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"div">'
+      figma: none
+      description: Other native attributes go to the root (id, style, aria-label, data-*).
+
+  slots: []
+
+  events:
+    # Calendar's only custom event is onChange (logged in the playground
+    # Actions panel, printed as YYYY-MM-DD).
+    - name: onChange
+      payload:
+        single: Date (local midnight)
+        range: "{ start: Date; end?: Date }"
+
+  methods: []
+
+  dataAttributes:
+    - name: data-mode
+      values: [single, range]
+    - name: data-view
+      values: [day, month, year]
+    - name: data-selected
+      values: [single, start, end, middle]
+      description: On each day button.
+    - name: data-today
+      description: On today's button.
+    - name: data-marker
+      values: [published, reserved, draft]
+    - name: data-outside
+      description: On neighbouring-month days (not interactive).
+    - name: data-preview
+      values: [middle, end]
+      description: Range preview while only the start is chosen.
+
+  tokensUsed:
+    color:
+      - --gb-background-overlay
+      - --gb-background-bold
+      - --gb-background-selected
+      - --gb-background-subtlest
+      - --gb-border-default
+      - --gb-border-static-gray
+      - --gb-text-default
+      - --gb-text-subtle
+      - --gb-text-invert
+      - --gb-text-bold
+      - --gb-text-static-gray
+      - --gb-icon-default
+      - --gb-icon-invert
+      - --gb-icon-warning
+    dimension:
+      - --gb-space-2
+      - --gb-space-4
+      - --gb-space-12
+      - --gb-space-16
+      - --gb-space-20
+      - --gb-space-24
+      - --gb-space-32
+      - --gb-radius-md
+      - --gb-radius-lg
+      - --gb-radius-full
+      - --gb-stroke-1
+    other:
+      - --gb-typography-sm
+      - --gb-typography-xs
+      - --gb-ring-focus
+
+examples:
+  basic:
+    code: |
+      const [date, setDate] = useState<Date | null>(null)
+      <Calendar value={date} onChange={setDate} />
+  range:
+    code: |
+      <Calendar mode="range" onChange={(r) => r.end && setPeriod(r)} />
+  limits:
+    code: |
+      <Calendar min={new Date()} isDateDisabled={(d) => d.getDay() === 0 || d.getDay() === 6} />
+  markers:
+    code: |
+      <Calendar marker={(d) => posts.get(key(d))?.status} markerLabels={{ published: "발행됨", reserved: "예약됨", draft: "임시저장" }} locale="ko-KR" />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/calendar/review
+# ================================================================
+# 1. ✅ decided 2026-10-16 — hover = background/subtlest (was subtle; changed by Note 10). Figma: Status=hover added.
+# 2. ✅ decided 2026-10-16 — keep neighbouring-month days grey and inert.
+# 3. ✅ decided 2026-10-16 — always 6 weeks (a month needs 4–6, never 7):
+#    264 × 324. Figma updated (default and range modals have 6 weeks).
+# 4. ✅ decided 2026-10-16 — constant size in every view (264 × 324;
+#    range 488 × 308). Figma month/year modals updated to 264 × 324
+#    (columns padded sp-16, gap sp-24).
+#    Header gap is 4 in code (Figma 8 is ignored by space-between).
+# 5. ⚠ needs design decision — range × month/year view not in Figma; code
+#    swaps to a single-panel picker.
+# 6. ✅ decided 2026-10-16 — range preview on hover / keyboard focus, using the auto-selected look.
+# 7. Markers: color/shape only, so names are added to the accessible label.
+# 8. Today + selected: selection fill with the today ring kept.
+# 9. Keyboard and screen reader follow the WAI-ARIA date grid pattern.
+# 10. ✅ decided 2026-10-16 — dark background/subtle equals the range band
+#    (both neutral-700). subtler was tried and rejected: light n100 = band,
+#    dark n800 = the calendar surface. Hover uses background/subtlest
+#    (light n50, dark n900).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+#
+# 2. Screen-reader strings
+#    - Description: header and navigation labels ("Previous month", "Choose month, …", "Months", "Years")
+#      are English only; only month/weekday names follow `locale`.
+#    - Priority: Medium before a Korean-only product uses it
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Calendar.tsx, dates.ts, Calendar.module.css) and Figma component sets 7219:10741 / 7219:10714.
+    Date select (7219:10905) and Range select (7219:10932) are separate components, not built yet.
+    Layer 1 guidelines are a first draft and need design review.
+    Open design questions: Review Note 5.

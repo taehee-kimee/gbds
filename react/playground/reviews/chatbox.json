@@ -1,0 +1,24 @@
+{
+  "items": {
+    "1": {
+      "choice": "keep"
+    },
+    "2": {
+      "choice": "presets",
+      "note": "size 프리셋(코드에만) → 글자는 16(Text-base)으로 통일, size는 박스 크기만 + custom(height/width) 추가 (사용자, 2026-10-16)"
+    },
+    "3": {
+      "choice": "fixed",
+      "note": "maxRows 대신 컨테이너 높이를 size별로 — 고정 높이 sm 240 · md 280 · lg 320, 넘치면 스크롤 (사용자, 2026-10-16)"
+    },
+    "4": {
+      "choice": "prop",
+      "note": "버튼을 직접 넣기 (슬롯) — start/end, 전송은 type=submit (사용자, 2026-10-16)"
+    },
+    "5": {
+      "choice": "other",
+      "note": "start 슬롯으로 해결 — null이면 + 숨김 (2026-10-16)"
+    }
+  },
+  "updatedAt": "2026-10-16T07:34:10.125Z"
+}

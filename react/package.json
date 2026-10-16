@@ -17,9 +17,11 @@
     "preview": "vite preview playground"
   },
   "dependencies": {
-    "@gb/tokens": "0.1.0"
+    "@gb/tokens": "0.1.0",
+    "libphonenumber-js": "^1.13.15"
   },
   "peerDependencies": {
+    "lucide-react": "^1.49.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

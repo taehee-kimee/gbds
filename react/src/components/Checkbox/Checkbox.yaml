@@ -172,13 +172,13 @@ anatomy:
     type: icon
     instanceOf: lucide/check
     nullable: true
-    description: 12px check, shown when checked and not indeterminate. Inline SVG, stroke 2 at 24px viewBox.
+    description: 12px check, shown when checked and not indeterminate. lucide-react Check, stroke 2 at 24px viewBox.
 
   dash:
     type: icon
     instanceOf: lucide/minus
     nullable: true
-    description: 12px dash, shown when indeterminate. Inline SVG.
+    description: 12px dash, shown when indeterminate. lucide-react Minus.
 
   label:
     type: text
@@ -329,6 +329,7 @@ api:
   element: HTMLInputElement
   requires:
     - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'lucide-react (peer dependency) — the check and dash icons'
 
   # figma: the Figma property this prop comes from, or "none" for code-only props.
   # Every prop below with a Figma source or a playground control is editable in the

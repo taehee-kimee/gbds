@@ -1,0 +1,328 @@
+# ================================================================
+# Chip Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-chip
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-chip
+  description: |
+    A clickable pill that the user switches on and off — for filters and
+    tag selection, any number at a time. With onRemove an X badge on the
+    corner removes the chip (hidden while disabled). Unlike Badge, which is
+    a passive label, a Chip is interactive.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Chip (3016:2861) · component set Chips (3021:1615)"
+    code: "react/src/components/Chip/Chip.tsx"
+
+usage:
+  when_to_use:
+    - Filters the user can combine (several on at once)
+    - Choosing tags or topics
+    - Removable tokens (selected filters, entered keywords) with onRemove
+
+  when_not_to_use:
+    - A passive label or status → Badge
+    - An action that runs once → Button
+    - Exactly one of several options → radio controls or Select
+
+  rules:
+    - id: remove-label
+      rule: Name the X after its chip
+      severity: warning
+      message: "Every X says \"Remove\" by default. Pass removeLabel, e.g. \"React 삭제\", so screen-reader users know which one goes."
+
+    - id: short-label
+      rule: Keep labels short
+      severity: warning
+      message: "Chips do not wrap (white-space: nowrap)."
+
+  common_mistakes:
+    - mistake: Using a Chip as a status label
+      correct: Use Badge for passive labels.
+      example:
+        wrong: |
+          <Chip disabled>Published</Chip>
+        right: |
+          <Badge variant="success">Published</Badge>
+
+variant_guidelines:
+  primary:
+    description: background/bold, text/invert. Figma Type=primary (default).
+  secondary:
+    description: background/surface-secondary, text/default. Figma Type=secondary.
+  outline:
+    description: background/default, 1px inside border/default, text/default. Figma Type=outline.
+  ghost:
+    description: No fill, text/default. Figma Type=ghost.
+
+states_and_behaviors:
+  selected:
+    description: |
+      Every Type turns background/mute with text/static/white (no border).
+      aria-pressed="true". Figma Status=active.
+  disabled:
+    description: |
+      opacity 70 and text/subtle; no X. Figma has this for primary only —
+      code applies it to every Type (Review Note 1).
+  focus:
+    description: ring/focus on the chip or the X. No Figma variant.
+  remove:
+    description: |
+      onRemove shows the X (Figma Delete icon). Pressing X, or Delete /
+      Backspace while the chip has focus, calls onRemove.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: span
+    description: Wrapper holding the chip and the X (two sibling buttons — buttons cannot nest).
+  chip:
+    type: control
+    element: button
+    description: Figma variant frame (height 28 fixed, padding 8/16, radius full). Label Text-sm/Medium.
+  remove:
+    type: control
+    element: button
+    nullable: true
+    description: |
+      Figma "Delete icon" — a 16 × 16 Button (Type=icon, Style=default)
+      overlapping the top-right corner at (width − 12, −5). lucide/x from
+      lucide-react, strokeWidth 1.5 (≈ the Figma 1px stroke at 16px).
+
+props:
+  label:
+    type: string
+    default: Chips
+    description: Figma "-> Label". Code — children.
+  deleteIcon:
+    type: boolean
+    default: false
+    description: Figma "Delete icon". Code — onRemove.
+  type:
+    type: enum
+    default: primary
+    enum: [primary, outline, secondary, ghost]
+    description: Figma "Type". Code — variant.
+  status:
+    type: enum
+    default: default
+    enum: [default, active, disabled]
+    description: Figma "Status". Code — isSelected / defaultSelected, disabled.
+
+default:
+  name: Type=primary, Status=default
+  layout:
+    - root:
+        - chip
+        - remove
+  styles:
+    chip:
+      height: var(--gb-space-28)
+      padding: 0 var(--gb-space-16)
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-bold)
+      color: var(--gb-text-invert)
+      textStyle: Text-sm/Medium                    # var(--gb-typography-sm) + var(--gb-font-weight-medium)
+    remove:
+      size: var(--gb-space-16)
+      position: "top −5px, right −4px"
+      borderRadius: var(--gb-radius-lg)
+      backgroundColor: var(--gb-background-default)
+      border: 1px inside var(--gb-border-default)
+      color: var(--gb-icon-default)
+
+variants:
+  - name: secondary
+    configuration: { type: secondary }
+    styles:
+      chip: { backgroundColor: var(--gb-background-surface-secondary), color: var(--gb-text-default) }
+  - name: outline
+    configuration: { type: outline }
+    styles:
+      chip: { backgroundColor: var(--gb-background-default), border: 1px inside var(--gb-border-default), color: var(--gb-text-default) }
+  - name: ghost
+    configuration: { type: ghost }
+    styles:
+      chip: { backgroundColor: transparent, color: var(--gb-text-default) }
+  - name: active
+    configuration: { status: active }
+    styles:
+      chip: { backgroundColor: var(--gb-background-mute), color: var(--gb-text-static-white), border: none }
+  - name: disabled
+    configuration: { status: disabled }
+    styles:
+      chip: { opacity: var(--gb-opacity-70), color: var(--gb-text-subtle) }
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      chip: { border: 1px solid ButtonText }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Chip
+  import: 'import { Chip } from "@gb/react"'
+  element: HTMLButtonElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'lucide-react (peer dependency) — icons: x (strokeWidth 1.5)'
+
+  props:
+    - name: children
+      type: ReactNode
+      required: true
+      figma: "-> Label"
+    - name: variant
+      type: '"primary" | "secondary" | "outline" | "ghost"'
+      default: primary
+      figma: Type
+    - name: isSelected
+      type: boolean
+      figma: Status=active
+      description: Controlled selection. Sets aria-pressed.
+    - name: defaultSelected
+      type: boolean
+      default: false
+      figma: none
+      description: Initial selection when uncontrolled.
+    - name: onSelectedChange
+      type: "(selected: boolean) => void"
+      figma: none
+    - name: disabled
+      type: boolean
+      figma: Status=disabled
+    - name: onRemove
+      type: "() => void"
+      figma: Delete icon
+      description: Shows the X; called on X or Delete / Backspace. Hidden while disabled.
+    - name: removeLabel
+      type: string
+      default: Remove
+      figma: none
+    - name: className
+      type: string
+      figma: none
+      description: Applied to the wrapper.
+    - name: style
+      type: CSSProperties
+      figma: none
+      description: Applied to the wrapper.
+    - name: ref
+      type: Ref<HTMLButtonElement>
+      figma: none
+      description: Forwarded to the chip button.
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"button">'
+      figma: none
+      description: Other button attributes go to the chip (name, value, aria-*, onFocus …).
+
+  slots:
+    - name: children
+      description: The label
+
+  events:
+    # Logged in the playground Actions panel: onSelectedChange, onRemove, onFocus, onBlur.
+    - name: onSelectedChange
+      payload: { selected: boolean }
+    - name: onRemove
+      payload: none
+    - name: onClick
+      description: Native click on the chip; call preventDefault to stop the toggle.
+
+  methods:
+    - name: focus
+      signature: "ref.current.focus(): void"
+
+  dataAttributes:
+    - name: data-variant
+      values: [primary, secondary, outline, ghost]
+    - name: data-selected
+      description: On the wrapper while selected.
+    - name: data-disabled
+      description: On the wrapper while disabled.
+
+  tokensUsed:
+    color:
+      - --gb-background-bold
+      - --gb-background-surface-secondary
+      - --gb-background-default
+      - --gb-background-mute
+      - --gb-border-default
+      - --gb-text-invert
+      - --gb-text-default
+      - --gb-text-static-white
+      - --gb-text-subtle
+      - --gb-icon-default
+    dimension:
+      - --gb-space-4
+      - --gb-space-16
+      - --gb-space-28
+      - --gb-radius-full
+      - --gb-radius-lg
+      - --gb-stroke-1
+    other:
+      - --gb-typography-sm
+      - --gb-font-weight-medium
+      - --gb-opacity-70
+      - --gb-ring-focus
+
+examples:
+  filter:
+    code: |
+      <Chip variant="outline" isSelected={on} onSelectedChange={setOn}>React</Chip>
+  removable:
+    code: |
+      <Chip variant="outline" onRemove={() => remove("React")} removeLabel="React 삭제">React</Chip>
+  in-chatbox:
+    description: Suggestions in the Chatbox content slot
+    code: |
+      <Chatbox content={<><Chip variant="outline">요약해줘</Chip><Chip variant="outline">번역해줘</Chip></>} />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/chip/review
+# ================================================================
+# 1. ⚠ needs design decision — disabled exists for primary only; code applies it to every Type.
+# 2. ⚠ needs design decision — no hover state (active means selected, so it cannot double as hover).
+# 3. ⚠ needs design decision — X overhangs the corner by 4 / 5px and is 16px (below WCAG 2.5.8's 24px).
+# 4. Toggle (aria-pressed), controlled or not; X / Delete / Backspace remove; X is a sibling button.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Chip.tsx, Chip.module.css) and Figma component set 3021:1615.
+    Layer 1 guidelines are a first draft and need design review.
+    Open design questions: Review Notes 1–3.

@@ -1,0 +1,235 @@
+# ================================================================
+# Progress Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-progress
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-progress
+  description: |
+    A labelled bar that fills as a task advances (upload, generation, steps
+    done). The label switches to a completed message when the value reaches max.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Progress (73:1983) · component sets Progress (3539:7160), Part/Progress (3311:1341)"
+    code: "react/src/components/Progress/Progress.tsx"
+
+usage:
+  when_to_use:
+    - A task whose progress you can measure (bytes, files, steps)
+  when_not_to_use:
+    - Unknown duration → Spinner
+    - Content whose layout is known while loading → Skeleton
+    - A value that is not progress (storage used, score) → a meter (not built)
+
+  rules:
+    - id: name-it
+      rule: Every bar needs a name
+      severity: error
+      message: "Pass label, or aria-label when the label is hidden (Figma Text=false)."
+    - id: announce-completion
+      rule: Announce completion yourself when it matters
+      severity: warning
+      message: "Value changes are not announced; use a live region / toast for 'done'."
+
+  common_mistakes:
+    - mistake: Faking indeterminate progress with a looping value
+      correct: Use Spinner when the amount is unknown.
+      example:
+        wrong: |
+          <Progress value={tick % 100} label="Loading…" />
+        right: |
+          <Spinner />
+
+variant_guidelines:
+  in-progress:
+    description: label (Figma -> Placeholder). Figma Status=in progress.
+  completed:
+    description: value ≥ max — label becomes completedLabel ("Completed"). Figma Status=completed.
+
+states_and_behaviors:
+  value:
+    description: Indicator width = value / max (clamped 0 … max). Figma Part/Progress only has 10% steps; code takes any value.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: div
+    description: Column, gap 8. Fills its parent (Figma 226).
+  label:
+    type: text
+    element: span
+    nullable: true
+    description: Figma "-> Placeholder". Text-xs/Semi Bold, text/subtle. Names the progress bar (aria-labelledby).
+  track:
+    type: indicator
+    element: div
+    description: role=progressbar, aria-valuemin 0 / max / now. Part/Progress — 8 tall, radius full, background/subtler.
+  indicator:
+    type: decoration
+    element: div
+    description: Part/Progress Indicator — background/bolder, radius full.
+
+props:
+  placeholder:
+    type: string
+    default: Loading image..
+    description: Figma "-> Placeholder". Code — label.
+  text:
+    type: boolean
+    default: true
+    description: Figma "Text". Code — label present (else aria-label).
+  status:
+    type: enum
+    default: in progress
+    enum: [in progress, completed]
+    description: Figma "Status". Code — derived from value ≥ max.
+  percentage:
+    type: enum
+    enum: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    description: Figma Part/Progress "Percentage(%)". Code — value / max.
+
+default:
+  name: Status=in progress
+  layout:
+    - root:
+        - label
+        - track:
+            - indicator
+  styles:
+    root:
+      gap: var(--gb-space-8)
+    label:
+      textStyle: Text-xs/Semi Bold                 # var(--gb-typography-xs) + var(--gb-font-weight-semibold)
+      color: var(--gb-text-subtle)
+    track:
+      height: var(--gb-space-8)
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-subtler)
+    indicator:
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-bolder)
+
+variants:
+  - name: completed
+    configuration: { status: completed }
+    styles:
+      indicator: { width: 100% }
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      track: { outline: 1px solid CanvasText }
+      indicator: { backgroundColor: Highlight }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Progress
+  import: 'import { Progress } from "@gb/react"'
+  element: HTMLDivElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  props:
+    - name: value
+      type: number
+      required: true
+      figma: "Part/Progress Percentage(%)"
+    - name: max
+      type: number
+      default: 100
+      figma: none
+    - name: label
+      type: ReactNode
+      figma: "-> Placeholder / Text"
+      description: Required unless aria-label or aria-labelledby is given.
+    - name: completedLabel
+      type: ReactNode
+      default: Completed
+      figma: "Status=completed label"
+    - name: aria-label
+      type: string
+      figma: none
+      description: Name when there is no label. Applied to the progressbar.
+    - name: aria-labelledby
+      type: string
+      figma: none
+      description: Applied to the progressbar.
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"div">'
+      figma: none
+      description: On the root (className, style, data-*).
+
+  slots: []
+  events: []
+  methods: []
+
+  dataAttributes:
+    - name: data-status
+      values: [in progress, completed]
+
+  tokensUsed:
+    color:
+      - --gb-text-subtle
+      - --gb-background-subtler
+      - --gb-background-bolder
+    dimension:
+      - --gb-space-8
+      - --gb-radius-full
+    other:
+      - --gb-typography-xs
+      - --gb-font-weight-semibold
+
+examples:
+  upload:
+    code: |
+      <Progress value={done} max={files.length} label={`Uploading ${done} / ${files.length}`} completedLabel="Upload complete" />
+  bar-only:
+    code: |
+      <Progress value={40} aria-label="Generating image" />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/progress/review
+# ================================================================
+# 1. ⚠ needs design decision — completed label is fixed "Completed" in Figma, not tied to -> Placeholder / Text.
+# 2. ⚠ needs design decision — progress / completion is not announced (no live region).
+# 3. ⚠ needs design decision — no fill animation (no motion tokens exist).
+# 4. Measured: 226 × 32, label 16 tall, bar @24 8 tall — matches Figma.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Progress.tsx, Progress.module.css) and Figma component sets 3539:7160, 3311:1341.
+    Open design questions: Review Notes 1–3.

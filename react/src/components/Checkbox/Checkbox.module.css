@@ -115,3 +115,15 @@
     stroke: CanvasText;
   }
 }
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * State changes (hover, press, focus, selected) ease over --gb-duration-100. Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .input,
+  .label {
+    transition-property: background-color, color, border-color, box-shadow, opacity;
+    transition-duration: var(--gb-duration-100);
+    transition-timing-function: var(--gb-easing-standard);
+  }
+}

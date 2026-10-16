@@ -1,4 +1,4 @@
-import { isValidElement, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactElement, type ReactNode } from "react"
+import { Fragment, isValidElement, useId, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactElement, type ReactNode } from "react"
 
 import { useThemes } from "../shell/theme"
 import "./controls.css"
@@ -13,13 +13,17 @@ type ControlBase = {
   /** Property type shown in the Type column, e.g. "boolean", '"button" | "submit"'. Derived from the kind when omitted. */
   type?: string
   description?: string
+  /** Figma property type shown under the name when it differs from the control kind (e.g. "SLOT"). */
+  figmaKind?: string
+  /** Show the row only when this returns true (e.g. height only for size="custom"). */
+  visibleWhen?: (values: FigmaValues) => boolean
 }
 
 export type FigmaControl = ControlBase &
   (
     | { kind: "VARIANT"; options: readonly string[]; default: string }
     | { kind: "BOOLEAN"; default: boolean }
-    | { kind: "TEXT"; default: string }
+    | { kind: "TEXT"; default: string; /** A number field instead of text; the value stays a string. */ inputType?: "number"; unit?: string; min?: number }
     | { kind: "INSTANCE_SWAP"; options: Record<string, ReactElement>; default: string }
   )
 
@@ -57,10 +61,19 @@ type Action = { id: number; time: string; event: string; detail: string }
 /** A short, readable summary of an event argument for the Actions log. */
 function describe(arg: unknown): string {
   const e = arg as { type?: string; key?: string; target?: { type?: string; checked?: boolean; indeterminate?: boolean } }
+  // Chatbox onSubmit hands over the text itself.
+  if (typeof arg === "string") return JSON.stringify(arg.length > 40 ? arg.slice(0, 40) + "…" : arg)
+  // Chip onSelectedChange hands over the new state.
+  if (typeof arg === "boolean") return `selected: ${arg}`
   if (!e || typeof e !== "object") return ""
   // Calendar onChange: a Date, or a { start, end? } range.
   const day = (d: unknown) => (d instanceof Date ? d.toLocaleDateString("en-CA") : "…")
   if (arg instanceof Date) return day(arg)
+  // Input type="tel" onPhoneChange: { country, e164, valid }.
+  if ("callingCode" in e) {
+    const ph = e as unknown as { country: string; e164?: string; valid: boolean }
+    return `${ph.country} ${ph.e164 ?? "—"} valid: ${ph.valid}`
+  }
   if ("start" in e) return `${day((e as { start: unknown }).start)} → ${day((e as { end?: unknown }).end)}`
   if (e.type === "change" && e.target?.type === "checkbox") return `checked: ${e.target.checked}`
   if (e.key) return `key: "${e.key}"`
@@ -95,8 +108,9 @@ export function PropsPanel({ story }: { story: Story }) {
   const code = toJsx(element, "", new Set(story.events.slice(1)))
   const note = story.note?.(values)
   const changed = story.controls.some((c) => values[c.name] !== c.default)
-  const figmaControls = story.controls.filter((c) => c.source !== "code")
-  const codeControls = story.controls.filter((c) => c.source === "code")
+  const shown = story.controls.filter((c) => c.visibleWhen?.(values) ?? true)
+  const figmaControls = shown.filter((c) => c.source !== "code")
+  const codeControls = shown.filter((c) => c.source === "code")
 
   const copy = () =>
     navigator.clipboard.writeText(code).then(() => {
@@ -265,6 +279,73 @@ function typeOf(control: FigmaControl) {
   }
 }
 
+/**
+ * Figma's instance-swap picker: a button showing the current icon; clicking it opens a searchable grid.
+ * The grid is a native popover (top layer), so the controls table never clips it; Esc and outside clicks close it.
+ */
+function SwapPicker({ labelledBy, options, value, onChange }: { labelledBy: string; options: Record<string, ReactElement>; value: string; onChange: (v: string) => void }) {
+  const popoverId = useId()
+  const trigger = useRef<HTMLButtonElement>(null)
+  const panel = useRef<HTMLDivElement>(null)
+  const [q, setQ] = useState("")
+  const names = Object.keys(options)
+  const shown = q ? names.filter((n) => n.toLowerCase().includes(q.trim().toLowerCase())) : names
+
+  // Place the panel under the trigger, or above it when there is no room below.
+  const place = () => {
+    const r = trigger.current?.getBoundingClientRect()
+    const el = panel.current
+    if (!r || !el) return
+    const below = window.innerHeight - r.bottom > el.offsetHeight + 8
+    el.style.left = `${Math.min(r.left, window.innerWidth - el.offsetWidth - 8)}px`
+    el.style.top = `${below ? r.bottom + 4 : Math.max(8, r.top - el.offsetHeight - 4)}px`
+  }
+  const pick = (name: string) => {
+    onChange(name)
+    panel.current?.hidePopover()
+    trigger.current?.focus()
+  }
+
+  return (
+    <>
+      <button ref={trigger} type="button" className="pp-swap" popoverTarget={popoverId} aria-labelledby={labelledBy} aria-describedby={`${popoverId}-value`}>
+        <span className="pp-swap-icon">{options[value]}</span>
+        <span id={`${popoverId}-value`}>{value.replace(/^lucide\//, "")}</span>
+      </button>
+      <div
+        ref={panel}
+        id={popoverId}
+        popover="auto"
+        className="pp-swap-panel"
+        onToggle={(e) => {
+          if (e.newState === "open") {
+            place()
+            panel.current?.querySelector("input")?.focus()
+          } else setQ("")
+        }}
+      >
+        <input type="search" placeholder={`아이콘 검색 (${names.length})`} aria-label="아이콘 검색" value={q} onChange={(e) => setQ(e.target.value)} />
+        <div className="pp-swap-grid" role="listbox" aria-label="아이콘">
+          {shown.map((name) => (
+            <button
+              key={name}
+              type="button"
+              role="option"
+              aria-selected={name === value}
+              title={name}
+              aria-label={name.replace(/^lucide\//, "")}
+              onClick={() => pick(name)}
+            >
+              {options[name]}
+            </button>
+          ))}
+          {shown.length === 0 && <p>결과 없음</p>}
+        </div>
+      </div>
+    </>
+  )
+}
+
 function ControlRow({ control, value, onChange }: { control: FigmaControl; value: string | boolean; onChange: (v: string | boolean) => void }) {
   const id = `pp-${control.name.replace(/\W+/g, "-")}`
   let input: ReactNode
@@ -289,10 +370,28 @@ function ControlRow({ control, value, onChange }: { control: FigmaControl; value
       )
       break
     case "TEXT":
-      input = <input type="text" aria-labelledby={id} value={String(value)} onChange={(e) => onChange(e.target.value)} />
+      input =
+        control.inputType === "number" ? (
+          <label className="pp-number">
+            <input
+              type="number"
+              inputMode="numeric"
+              min={control.min}
+              aria-labelledby={id}
+              value={String(value)}
+              onChange={(e) => onChange(e.target.value)}
+            />
+            {control.unit && <span>{control.unit}</span>}
+          </label>
+        ) : (
+          <input type="text" aria-labelledby={id} value={String(value)} onChange={(e) => onChange(e.target.value)} />
+        )
       break
     case "INSTANCE_SWAP":
-      input = (
+      // Icon swaps get the visual picker; other swaps (example content, button combos) keep a plain list.
+      input = Object.keys(control.options).every((o) => o.startsWith("lucide/")) ? (
+        <SwapPicker labelledBy={id} options={control.options} value={String(value)} onChange={onChange} />
+      ) : (
         <select aria-labelledby={id} value={String(value)} onChange={(e) => onChange(e.target.value)}>
           {Object.keys(control.options).map((o) => <option key={o}>{o}</option>)}
         </select>
@@ -304,7 +403,7 @@ function ControlRow({ control, value, onChange }: { control: FigmaControl; value
     <tr>
       <td>
         <span id={id} className="pp-name">{control.name}</span>
-        <small className="pp-kind">{control.source === "code" ? "React prop" : `Figma ${control.kind}`}</small>
+        <small className="pp-kind">{control.source === "code" ? "React prop" : `Figma ${control.figmaKind ?? control.kind}`}</small>
       </td>
       <td><code className="pp-type">{typeOf(control)}</code></td>
       <td className="pp-desc">{control.description}</td>
@@ -318,8 +417,30 @@ function ControlRow({ control, value, onChange }: { control: FigmaControl; value
 
 type AnyType = string | { displayName?: string; name?: string }
 
+/** new Date(2026, 8, 11) — local calendar date, the way Calendar stories build them. */
+function printDate(d: Date) {
+  return `new Date(${d.getFullYear()}, ${d.getMonth()}, ${d.getDate()})`
+}
+
+/** { icon: <X />, label: "지우기", onClick: handleClick } — elements as JSX, functions as handler names. */
+function printObject(o: Record<string, unknown>, owner: string): string {
+  const parts = Object.entries(o)
+    .filter(([, v]) => v !== undefined)
+    .map(([k, v]) => {
+      if (isValidElement(v)) return `${k}: ${toJsx(v)}`
+      if (v instanceof Date) return `${k}: ${printDate(v)}`
+      if (typeof v === "function") {
+        const key = k.replace(/^on/, "")
+        return `${k}: handle${owner[0]!.toUpperCase()}${owner.slice(1)}${key[0]!.toUpperCase()}${key.slice(1)}`
+      }
+      return `${k}: ${JSON.stringify(v)}`
+    })
+  return `{ ${parts.join(", ")} }`
+}
+
 function elementName(type: unknown) {
   const t = type as AnyType
+  if (type === Fragment) return "" // prints <>…</>
   return typeof t === "string" ? t : (t.displayName ?? t.name ?? "Component")
 }
 
@@ -336,12 +457,16 @@ function toJsx(node: ReactNode, indent = "", hidden: Set<string> = new Set()): s
   const name = elementName(node.type)
   const { children, style: _style, ...props } = node.props as Record<string, unknown> & { children?: ReactNode }
   const attrs = Object.entries(props)
-    .filter(([k, v]) => v !== undefined && v !== false && !(typeof v === "function" && hidden.has(k)))
+    // false is printed (clearable={false}, showSend={false}); stories pass undefined for "not set".
+    .filter(([k, v]) => v !== undefined && !(typeof v === "function" && hidden.has(k)))
     .map(([k, v]) => {
       if (v === true) return k
+      if (v === false) return `${k}={false}`
       if (typeof v === "string") return `${k}=${JSON.stringify(v)}`
       if (isValidElement(v)) return `${k}={${toJsx(v)}}`
       if (typeof v === "function") return `${k}={${k.replace(/^on/, "handle")}}`
+      if (v instanceof Date) return `${k}={${printDate(v)}}`
+      if (v && typeof v === "object" && !Array.isArray(v)) return `${k}={${printObject(v as Record<string, unknown>, k)}}`
       return `${k}={${JSON.stringify(v)}}`
     })
   const open = [name, ...attrs].join(" ")

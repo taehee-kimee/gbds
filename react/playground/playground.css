@@ -16,7 +16,7 @@ body {
   color: var(--gb-text-default);
 }
 
-.panel h2 {
+.panel > h2 {
   margin: 0 0 var(--gb-space-24);
   font: var(--gb-typography-sm);
   font-weight: var(--gb-font-weight-semibold);
@@ -38,7 +38,7 @@ body {
   color: var(--gb-text-subtle);
 }
 
-.panel h2.sub {
+.panel > h2.sub {
   margin-top: var(--gb-space-40);
 }
 

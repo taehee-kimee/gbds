@@ -1,0 +1,132 @@
+/*
+ * Chip — mirrors the Figma component set `Chips` (3021:1615).
+ * Figma Type → data-variant; Status=active → data-selected (aria-pressed); Status=disabled → disabled.
+ * Delete icon → the X button, a sibling of the chip (two buttons cannot nest), on the top-right corner.
+ */
+
+.root {
+  --chip-bg: var(--gb-background-bold);
+  --chip-fg: var(--gb-text-invert);
+  --chip-border: transparent;
+  --chip-opacity: 1;
+
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--gb-space-28);
+  margin: 0;
+  padding: 0 var(--gb-space-16);
+  border: 0;
+  border-radius: var(--gb-radius-full);
+  background: var(--chip-bg);
+  /* Figma stroke is INSIDE. */
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--chip-border);
+  color: var(--chip-fg);
+  opacity: var(--chip-opacity);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chip:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--chip-border);
+}
+
+/* ── Type ──────────────────────────────────────────────────────────────── */
+
+.root[data-variant="secondary"] {
+  --chip-bg: var(--gb-background-surface-secondary);
+  --chip-fg: var(--gb-text-default);
+}
+
+.root[data-variant="outline"] {
+  --chip-bg: var(--gb-background-default);
+  --chip-fg: var(--gb-text-default);
+  --chip-border: var(--gb-border-default);
+}
+
+.root[data-variant="ghost"] {
+  --chip-bg: transparent;
+  --chip-fg: var(--gb-text-default);
+}
+
+/* ── Status=active: switched on ────────────────────────────────────────── */
+
+.root[data-selected] {
+  --chip-bg: var(--gb-background-mute);
+  --chip-fg: var(--gb-text-static-white);
+  --chip-border: transparent;
+}
+
+/* ── Status=disabled (Figma: primary only — applied to every Type) ──────── */
+
+.root[data-disabled] {
+  --chip-fg: var(--gb-text-subtle);
+  --chip-opacity: var(--gb-opacity-70);
+}
+
+.root[data-disabled] .chip {
+  cursor: not-allowed;
+}
+
+/* ── Delete icon: 16px X badge, Figma at (width − 12, −5) ──────────────── */
+
+.remove {
+  position: absolute;
+  top: calc(-1 * var(--gb-space-4) - 1px);
+  right: calc(-1 * var(--gb-space-4));
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--gb-space-16);
+  height: var(--gb-space-16);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gb-radius-lg);
+  background: var(--gb-background-default);
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-default);
+  color: var(--gb-icon-default);
+  cursor: pointer;
+}
+
+.remove svg {
+  width: var(--gb-space-16);
+  height: var(--gb-space-16);
+}
+
+.remove:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--gb-border-default);
+}
+
+@media (forced-colors: active) {
+  .chip {
+    border: var(--gb-stroke-1) solid ButtonText;
+  }
+  .root[data-selected] .chip {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * State changes (hover, press, focus, selected) ease over --gb-duration-100. Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .chip,
+  .remove {
+    transition-property: background-color, color, border-color, box-shadow, opacity;
+    transition-duration: var(--gb-duration-100);
+    transition-timing-function: var(--gb-easing-standard);
+  }
+}

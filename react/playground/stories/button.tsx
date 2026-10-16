@@ -1,8 +1,8 @@
-import { ArrowRight, CircleDashed, Plus, Search, X } from "lucide-react"
 import type { CSSProperties } from "react"
 
 import { Button } from "../../src"
 import type { Story } from "../controls/PropsPanel"
+import { gbIconOptions } from "../icons/gb-icons"
 import { vars } from "../review/Review"
 
 type Type = "default" | "icon" | "google"
@@ -25,26 +25,21 @@ function activeStyle(type: Type, style: Style): CSSProperties {
   return vars(base)
 }
 
-/** Figma component set Button (73:3681) — properties in Figma's own order. */
+/** Figma component set Button (73:3681) — properties in Figma's own order, except -> Icon sits under Show icon (user request). */
 export const buttonStory: Story = {
   figma: "Figma · Button (73:3681)",
   events: ["onClick", "onFocus", "onBlur", "onKeyDown"],
   controls: [
     { kind: "TEXT", name: "-> Label", default: "Button", description: "버튼 텍스트 → children. Type=icon에서는 aria-label로 들어감" },
+    { kind: "BOOLEAN", name: "Show icon", default: false, description: "라벨 뒤 아이콘 → icon (Type=default, Style≠ghost)" },
     {
       kind: "INSTANCE_SWAP",
       name: "-> Icon",
-      description: "아이콘 교체 → icon",
+      description: "아이콘 교체 → icon. 클릭해서 GB 아이콘 세트에서 선택",
       default: "lucide/circle-dashed",
-      options: {
-        "lucide/circle-dashed": <CircleDashed />,
-        "lucide/arrow-right": <ArrowRight />,
-        "lucide/plus": <Plus />,
-        "lucide/search": <Search />,
-        "lucide/x": <X />,
-      },
+      // The whole GB icon set (Figma 📐 Lucide Icons, lucide-backed) — click the icon control to pick one.
+      options: gbIconOptions,
     },
-    { kind: "BOOLEAN", name: "Show icon", default: false, description: "라벨 뒤 아이콘 → icon (Type=default, Style≠ghost)" },
     { kind: "VARIANT", name: "Type", options: ["default", "icon", "google"], default: "default", description: "default → children · icon → children 없이 icon + aria-label · google → variant=\"google\"" },
     { kind: "VARIANT", name: "Style", options: ["default", "mute", "outline", "link", "ghost", "ghost-rounded"], default: "default", description: "→ variant. Type마다 있는 Style이 다름" },
     { kind: "VARIANT", name: "Status", options: ["default", "active", "disabled"], default: "default", description: "disabled → disabled prop · active → :hover / :active" },

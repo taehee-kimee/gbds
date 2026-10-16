@@ -1,0 +1,157 @@
+/*
+ * Dialog — mirrors the Figma component set `Popover` (7269:451), a centred modal that waits for an answer.
+ * Type=notification | warning → data-variant.
+ */
+
+.root {
+  /* Component tier: Figma width 560, never wider than the viewport minus a 16px gutter each side. */
+  --dialog-width: 560px;
+
+  box-sizing: border-box;
+  width: min(var(--dialog-width), 100% - 2 * var(--gb-space-16));
+  max-width: none;
+  max-height: calc(100% - 2 * var(--gb-space-16));
+  margin: auto;
+  /* Figma strokes inside: the 1px border takes from the 24px padding, so the box stays 560 × 156. */
+  padding: calc(var(--gb-space-24) - var(--gb-stroke-1));
+  border: var(--gb-stroke-1) solid var(--gb-border-subtle);
+  border-radius: var(--gb-radius-lg);
+  background: var(--gb-background-default);
+  box-shadow: var(--gb-shadow-lg);
+  color: var(--gb-text-default);
+  overflow: auto;
+}
+
+.root[open] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gb-space-16);
+}
+
+.root::backdrop {
+  background: var(--gb-background-backdrop);
+}
+
+.root:focus-visible {
+  outline: none;
+}
+
+.root[data-variant="warning"] {
+  border-color: var(--gb-border-warning);
+  color: var(--gb-text-error);
+}
+
+/* Title row + description. */
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gb-space-8);
+}
+
+/* Figma centres the 24px icon on the 28px title line; top-aligned so a wrapped title keeps it on line 1. */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gb-space-8);
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  margin-top: calc((var(--gb-font-leading-7) - var(--gb-space-24)) / 2);
+}
+
+.icon > svg {
+  width: var(--gb-space-24);
+  height: var(--gb-space-24);
+}
+
+/* Text-lg/Semi Bold — inherits text/default, text/error on warning. Two classes so page-wide h2 rules do not win. */
+.root .title {
+  margin: 0;
+  font: var(--gb-typography-lg);
+  font-weight: var(--gb-font-weight-semibold);
+  color: inherit;
+}
+
+/* Text-sm/Regular, text/subtle. */
+.root .description {
+  margin: 0;
+  font: var(--gb-typography-sm);
+  color: var(--gb-text-subtle);
+}
+
+/* Checkbox above the buttons. */
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gb-space-8);
+}
+
+@media (forced-colors: active) {
+  .root {
+    border-color: CanvasText;
+  }
+}
+
+/* modal={false} — in the page flow instead of the UA's absolute centring. */
+.root:not([data-modal]) {
+  position: static;
+  width: min(var(--dialog-width), 100%);
+  margin: 0;
+  max-height: none;
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * Modal: fades in and grows from 96% over --gb-duration-200 (enter), leaves over --gb-duration-150 (exit).
+ * The backdrop fades with it. display / overlay are carried discretely so the exit can play.
+ * Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .root[data-modal] {
+    transition:
+      opacity var(--gb-duration-150) var(--gb-easing-exit),
+      transform var(--gb-duration-150) var(--gb-easing-exit),
+      overlay var(--gb-duration-150) allow-discrete,
+      display var(--gb-duration-150) allow-discrete;
+  }
+
+  .root[data-modal]:not([open]) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  .root[data-modal][open] {
+    transition-duration: var(--gb-duration-200);
+    transition-timing-function: var(--gb-easing-enter);
+  }
+
+  @starting-style {
+    .root[data-modal][open] {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  .root[data-modal]::backdrop {
+    transition:
+      background-color var(--gb-duration-150) var(--gb-easing-exit),
+      overlay var(--gb-duration-150) allow-discrete,
+      display var(--gb-duration-150) allow-discrete;
+  }
+
+  .root[data-modal]:not([open])::backdrop {
+    background-color: transparent;
+  }
+
+  .root[data-modal][open]::backdrop {
+    transition-duration: var(--gb-duration-200);
+    transition-timing-function: var(--gb-easing-enter);
+  }
+
+  @starting-style {
+    .root[data-modal][open]::backdrop {
+      background-color: transparent;
+    }
+  }
+}

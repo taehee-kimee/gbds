@@ -47,7 +47,7 @@ export const items: ReviewItem[] = [
     title: "menu가 링크가 아니라 버튼",
     status: "open",
     figma: "menu 항목은 Button 인스턴스.",
-    code: "<nav> 안의 <button>. 페이지 이동은 onClick으로 처리해야 해서 새 탭 열기 · 주소 복사 · 가운데 클릭이 안 됨. Button에 링크(<a href>) 렌더링이 아직 없음.",
+    code: "적용됨 (2026-10-16): Button에 href를 주면 <a href>로 렌더링 — 새 탭 열기 · 주소 복사 · 가운데 클릭 가능. 모양은 같음. disabled면 href를 빼고 aria-disabled.",
     columns: [],
     options: [
       { id: "href", label: "Button에 href 지원 추가 (href가 있으면 <a>로 렌더링)", recommended: true },

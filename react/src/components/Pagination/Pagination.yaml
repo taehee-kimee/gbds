@@ -1,0 +1,316 @@
+# ================================================================
+# Pagination Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-pagination
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-pagination
+  description: |
+    Moves between pages of a list or between slides. Type=number shows
+    previous / next and page numbers, collapsing far pages into an ellipsis;
+    Type=dot shows one dot per page (carousels, onboarding steps).
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Pagination (73:1981) · component sets Pagination (3331:2811), Part/pagination (3641:9731)"
+    code: "react/src/components/Pagination/Pagination.tsx"
+
+usage:
+  when_to_use:
+    - A long list or table split into pages (number)
+    - A carousel or a short sequence of steps (dot, about 2–7 pages)
+
+  when_not_to_use:
+    - Continuous feeds → load more / infinite scroll
+    - Steps the user must complete in order → a stepper
+    - Many pages with dot — every page gets a dot; use number
+
+  rules:
+    - id: label-nav
+      rule: Name each pagination when a page has more than one
+      severity: warning
+      message: "Every <nav> is called \"Pagination\" by default. Pass aria-label (e.g. \"결과 페이지\") when there are several."
+    - id: localize-labels
+      rule: Localize the button names
+      severity: info
+      message: "previousLabel, nextLabel and pageLabel default to English (\"Previous page\", \"Next page\", \"Page n\")."
+
+  common_mistakes:
+    - mistake: Using dot for a long list
+      correct: Use variant="number" — it collapses to maxItems slots.
+      example:
+        wrong: |
+          <Pagination variant="dot" totalPages={40} />
+        right: |
+          <Pagination totalPages={40} />
+
+variant_guidelines:
+  number:
+    description: Previous / next chevrons and page buttons. With more than maxItems (default 7) pages it always shows maxItems slots (first, last, a window around the current page, ellipses). Figma Type=number.
+  dot:
+    description: One 6 × 6 dot per page, no previous / next. Figma Type=dot.
+
+states_and_behaviors:
+  current:
+    description: |
+      aria-current="page". number — background/default with 1px inside
+      border/default. dot — icon/pressed fill with an icon/faint ring
+      (Figma Status=active; looks fainter than the others — Review Note 1).
+  disabled:
+    description: Previous on page 1 and next on the last page are disabled, icon/static/gray. Not in Figma (Review Note 3).
+  hover:
+    description: None — Figma has no hover (Review Note 2).
+  focus:
+    description: ring/focus. No Figma variant.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: nav
+    description: Auto layout, gap 4, row (Horizontal) or column (Vertical).
+  previous:
+    type: control
+    element: button
+    description: Part/pagination Type=chevron — lucide chevron-left (chevron-up when vertical), 16px.
+  page:
+    type: control
+    element: button
+    description: Part/pagination Type=number — 36 × 36, radius md, Text-sm/Medium text/default.
+  ellipsis:
+    type: decoration
+    element: span
+    nullable: true
+    description: Part/pagination Type=ellipsis — lucide ellipsis (ellipsis-vertical when vertical), aria-hidden.
+  next:
+    type: control
+    element: button
+    description: lucide chevron-right (chevron-down when vertical).
+  dot:
+    type: control
+    element: button
+    description: Part/pagination Type=dot — 6 × 6 circle; ::before widens the hit area to 14 × 14.
+
+props:
+  type:
+    type: enum
+    default: number
+    enum: [number, dot]
+    description: Figma "Type". Code — variant.
+  direction:
+    type: enum
+    default: Horizontal
+    enum: [Horizontal, Vertical]
+    description: Figma "Direction". Code — orientation.
+
+default:
+  name: Type=number, Direction=Horizontal
+  layout:
+    - root:
+        - previous
+        - page
+        - ellipsis
+        - next
+  styles:
+    root:
+      gap: var(--gb-space-4)
+    page:
+      size: var(--gb-space-36)
+      borderRadius: var(--gb-radius-md)
+      color: var(--gb-text-default)
+      textStyle: Text-sm/Medium                    # var(--gb-typography-sm) + var(--gb-font-weight-medium)
+    previous:
+      size: var(--gb-space-36)
+      iconSize: var(--gb-space-16)
+      iconColor: var(--gb-icon-default)
+
+variants:
+  - name: current
+    configuration: { status: active }
+    styles:
+      page: { backgroundColor: var(--gb-background-default), border: 1px inside var(--gb-border-default) }
+  - name: vertical
+    configuration: { direction: Vertical }
+    styles:
+      root: { flexDirection: column }
+  - name: dot
+    configuration: { type: dot }
+    styles:
+      dot: { size: 6px, borderRadius: var(--gb-radius-full), backgroundColor: var(--gb-icon-default) }
+  - name: dot-current
+    configuration: { type: dot, status: active }
+    styles:
+      dot: { backgroundColor: var(--gb-icon-pressed), border: 1px inside var(--gb-icon-faint) }
+  - name: disabled
+    configuration: { edge: first-or-last }
+    styles:
+      previous: { iconColor: var(--gb-icon-static-gray), cursor: not-allowed }
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      page: { outline: 2px solid Highlight (current) }
+      dot: { backgroundColor: CanvasText }
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Pagination
+  import: 'import { Pagination } from "@gb/react"'
+  element: HTMLElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+    - 'lucide-react (peer dependency) — icons: chevron-left, chevron-right, chevron-up, chevron-down, ellipsis, ellipsis-vertical'
+
+  props:
+    - name: totalPages
+      type: number
+      required: true
+      figma: none
+    - name: page
+      type: number
+      figma: Status=active
+      description: Current page (1-based), controlled. Clamped to 1 … totalPages.
+    - name: defaultPage
+      type: number
+      default: 1
+      figma: none
+    - name: onPageChange
+      type: "(page: number) => void"
+      figma: none
+    - name: variant
+      type: '"number" | "dot"'
+      default: number
+      figma: Type
+    - name: orientation
+      type: '"horizontal" | "vertical"'
+      default: horizontal
+      figma: Direction
+    - name: maxItems
+      type: number
+      default: 7
+      figma: none
+      description: |
+        Type=number — items between previous and next, ellipses included (minimum 5).
+        With more pages, first and last stay and a window around the current page fills the rest;
+        the count never changes while paging (like Atlassian max / Carbon itemsShown).
+    - name: previousLabel
+      type: string
+      default: Previous page
+      figma: none
+    - name: nextLabel
+      type: string
+      default: Next page
+      figma: none
+    - name: pageLabel
+      type: "(page: number) => string"
+      default: "(n) => `Page ${n}`"
+      figma: none
+    - name: aria-label
+      type: string
+      default: Pagination
+      figma: none
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"nav">'
+      figma: none
+
+  slots: []
+
+  events:
+    # Logged in the playground Actions panel: onPageChange.
+    - name: onPageChange
+      payload: { page: number }
+      description: Not called when the clicked page is already current.
+
+  methods: []
+
+  dataAttributes:
+    - name: data-variant
+      values: [number, dot]
+    - name: data-orientation
+      values: [horizontal, vertical]
+    - name: data-ellipsis
+      description: On ellipsis items.
+
+  tokensUsed:
+    color:
+      - --gb-text-default
+      - --gb-icon-default
+      - --gb-icon-pressed
+      - --gb-icon-faint
+      - --gb-icon-static-gray
+      - --gb-background-default
+      - --gb-border-default
+    dimension:
+      - --gb-space-4
+      - --gb-space-16
+      - --gb-space-36
+      - --gb-radius-md
+      - --gb-radius-full
+      - --gb-stroke-1
+    other:
+      - --gb-typography-sm
+      - --gb-font-weight-medium
+      - --gb-ring-focus
+
+examples:
+  list:
+    code: |
+      <Pagination totalPages={Math.ceil(items.length / 5)} page={page} onPageChange={setPage} />
+  carousel:
+    code: |
+      <Pagination variant="dot" totalPages={slides.length} page={slide} onPageChange={setSlide} aria-label="슬라이드" />
+  korean:
+    code: |
+      <Pagination totalPages={10} maxItems={5} previousLabel="이전 페이지" nextLabel="다음 페이지" pageLabel={(n) => `${n}페이지`} />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/pagination/review
+# ================================================================
+# 1. ⚠ needs design decision — dot current (icon/pressed + icon/faint) is fainter than the other dots.
+# 2. ⚠ needs design decision — no hover state.
+# 3. ⚠ needs design decision — previous / next at the ends: disabled (code) — no Figma variant.
+# 4. ⚠ needs design decision — Figma example omits the last page; code always shows first and last.
+# 5. ellipsis / chevron Status=active variants unused (ellipsis is not a control).
+# 6. nav + buttons, aria-current="page"; no link (href) mode yet.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+# 2. Link mode
+#    - Description: pages are buttons; server-rendered lists may need <a href> per page (renderItem / getHref).
+#    - Priority: Medium, when a routed list needs it
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    2026-10-16: siblingCount/boundaryCount replaced by maxItems (user choice — one total-slot count).
+    Drafted from code (Pagination.tsx, Pagination.module.css, range.ts) and Figma component sets 3331:2811, 3641:9731.
+    Measured in the playground: items 36 × 36, gap 4, dot row 46 × 6 — matches Figma.
+    Open design questions: Review Notes 1–4.

@@ -57,7 +57,7 @@
   box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--button-border);
 }
 
-.root:disabled {
+.root:is(:disabled, [aria-disabled="true"]) {
   cursor: not-allowed;
 }
 
@@ -123,70 +123,70 @@
 /* ── Status=active: :hover, :active and isSelected share one look ──────── */
 
 @media (hover: hover) {
-  .root:not(:disabled):hover {
+  .root:not(:disabled, [aria-disabled="true"]):hover {
     --button-bg: var(--gb-background-mute);
     --button-fg: var(--gb-text-static-white);
     --button-border: transparent;
   }
-  .root[data-type="icon"]:not(:disabled):hover {
+  .root[data-type="icon"]:not(:disabled, [aria-disabled="true"]):hover {
     --button-fg: var(--gb-icon-static-white);
   }
-  .root[data-type="icon"][data-variant="ghost"]:not(:disabled):hover {
+  .root[data-type="icon"][data-variant="ghost"]:not(:disabled, [aria-disabled="true"]):hover {
     --button-radius: var(--gb-radius-lg);
   }
-  .root[data-variant="link"]:not(:disabled):hover {
+  .root[data-variant="link"]:not(:disabled, [aria-disabled="true"]):hover {
     --button-bg: transparent;
     --button-fg: var(--gb-text-subtle);
     --button-underline: var(--gb-border-mute-subtle);
   }
-  .root[data-type="default"]:is([data-variant="default"], [data-variant="mute"]):not(:disabled):hover {
+  .root[data-type="default"]:is([data-variant="default"], [data-variant="mute"]):not(:disabled, [aria-disabled="true"]):hover {
     --button-opacity: var(--gb-opacity-90);
   }
 }
 
-.root:not(:disabled):is(:active, [data-selected]) {
+.root:not(:disabled, [aria-disabled="true"]):is(:active, [data-selected]) {
   --button-bg: var(--gb-background-mute);
   --button-fg: var(--gb-text-static-white);
   --button-border: transparent;
 }
-.root[data-type="icon"]:not(:disabled):is(:active, [data-selected]) {
+.root[data-type="icon"]:not(:disabled, [aria-disabled="true"]):is(:active, [data-selected]) {
   --button-fg: var(--gb-icon-static-white);
 }
-.root[data-type="icon"][data-variant="ghost"]:not(:disabled):is(:active, [data-selected]) {
+.root[data-type="icon"][data-variant="ghost"]:not(:disabled, [aria-disabled="true"]):is(:active, [data-selected]) {
   --button-radius: var(--gb-radius-lg);
 }
-.root[data-variant="link"]:not(:disabled):is(:active, [data-selected]) {
+.root[data-variant="link"]:not(:disabled, [aria-disabled="true"]):is(:active, [data-selected]) {
   --button-bg: transparent;
   --button-fg: var(--gb-text-subtle);
   --button-underline: var(--gb-border-mute-subtle);
 }
-.root[data-type="default"]:is([data-variant="default"], [data-variant="mute"]):not(:disabled):is(:active, [data-selected]) {
+.root[data-type="default"]:is([data-variant="default"], [data-variant="mute"]):not(:disabled, [aria-disabled="true"]):is(:active, [data-selected]) {
   --button-opacity: var(--gb-opacity-90);
 }
 
 /* ── Status=disabled ───────────────────────────────────────────────────── */
 
-.root:disabled {
+.root:is(:disabled, [aria-disabled="true"]) {
   --button-bg: var(--gb-background-disabled);
   --button-fg: var(--gb-text-static-gray);
   --button-border: var(--gb-border-overlay);
 }
 
-.root[data-type="icon"]:disabled {
+.root[data-type="icon"]:is(:disabled, [aria-disabled="true"]) {
   --button-fg: var(--gb-icon-static-gray);
 }
 
 /* Ghost styles stay unfilled when disabled. */
-.root:is([data-variant="ghost"], [data-variant="ghost-rounded"]):disabled {
+.root:is([data-variant="ghost"], [data-variant="ghost-rounded"]):is(:disabled, [aria-disabled="true"]) {
   --button-bg: transparent;
   --button-border: transparent;
 }
 
-.root[data-type="default"][data-variant="ghost"]:disabled {
+.root[data-type="default"][data-variant="ghost"]:is(:disabled, [aria-disabled="true"]) {
   --button-fg: var(--gb-text-static-gray);
 }
 
-.root[data-variant="link"]:disabled {
+.root[data-variant="link"]:is(:disabled, [aria-disabled="true"]) {
   --button-bg: transparent;
   --button-border: transparent;
   --button-underline: var(--gb-border-static-gray);
@@ -199,5 +199,16 @@
   }
   .root[data-variant="link"] {
     border-color: transparent;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+ * State changes (hover, press, focus, selected) ease over --gb-duration-100. Off under reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .root {
+    transition-property: background-color, color, border-color, box-shadow, opacity;
+    transition-duration: var(--gb-duration-100);
+    transition-timing-function: var(--gb-easing-standard);
   }
 }

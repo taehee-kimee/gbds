@@ -3,7 +3,10 @@
 .sb {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
+  /* One row the height of the viewport: the sidebar stays put and only the canvas scrolls. */
+  grid-template-rows: minmax(0, 1fr);
   height: 100vh;
+  height: 100dvh;
   background: var(--gb-background-default);
   color: var(--gb-text-default);
 }
@@ -213,6 +216,8 @@
 }
 
 .sb-canvas {
+  /* Containing block for absolutely positioned content, so it scrolls with the canvas instead of stretching the page. */
+  position: relative;
   overflow: auto;
 }
 

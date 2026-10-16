@@ -1,0 +1,30 @@
+{
+  "items": {
+    "1": {
+      "choice": "add"
+    },
+    "2": {
+      "choice": "replace"
+    },
+    "3": {
+      "choice": "showcase"
+    },
+    "4": {
+      "choice": "none"
+    },
+    "8": {
+      "note": "시간제 — hourCycle 12 | 24, 기본 12 (사용자, 2026-10-16). 에러 판단 방식은 아직 결정 필요."
+    },
+    "9": {
+      "choice": "library",
+      "note": "국가번호 목록 — 라이브러리 사용 (사용자, 2026-10-16) → libphonenumber-js"
+    },
+    "10": {
+      "note": "search · text: 입력된 항목이 있을 때만 오른쪽 delete 아이콘 (사용자, 2026-10-16)"
+    },
+    "11": {
+      "note": "비밀번호 보기는 password 타입 input에 내장 (사용자, 2026-10-16)"
+    }
+  },
+  "updatedAt": "2026-10-16T09:05:32.026Z"
+}

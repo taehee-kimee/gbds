@@ -3,7 +3,7 @@ import { useContext, type ComponentPropsWithRef, type ReactNode } from "react"
 import { ButtonGroupContext } from "../ButtonGroup/context"
 import styles from "./Button.module.css"
 
-type NativeButtonProps = Omit<ComponentPropsWithRef<"button">, "children"> & {
+type SelectableProps = {
   /**
    * Selected state, e.g. the current item of a button group. Default false.
    * true shows the Figma Status=active look. Passing the prop (true or false) also marks the button
@@ -12,6 +12,16 @@ type NativeButtonProps = Omit<ComponentPropsWithRef<"button">, "children"> & {
    */
   isSelected?: boolean
 }
+
+/**
+ * Without href: a <button>. With href: an <a> — the same look, but real navigation (new tab, copy link,
+ * middle click). A disabled link drops its href and gets aria-disabled, since <a> has no disabled.
+ */
+type NativeButtonProps = SelectableProps &
+  (
+    | (Omit<ComponentPropsWithRef<"button">, "children"> & { href?: undefined })
+    | (Omit<ComponentPropsWithRef<"a">, "children"> & { href: string; disabled?: boolean })
+  )
 
 /**
  * Required when nothing visible names the control: `aria-label`, or `aria-labelledby` pointing at
@@ -47,30 +57,52 @@ export type IconButtonProps = NativeButtonProps &
 export type ButtonProps = TextButtonProps | PlainButtonProps | IconButtonProps
 
 export function Button(props: ButtonProps) {
-  const { variant = "default", className, type = "button", children, icon, isSelected = false, ...rest } = props
+  const { variant = "default", className, children, icon, isSelected = false, ...rest } = props
+  const link = props.href !== undefined
   // Only buttons that take part in selection get aria-pressed — a plain button never announces "not pressed".
   // (Checks the raw prop, not the defaulted one: spreading `{ isSelected: undefined }` must stay a plain button.)
-  const pressed = props.isSelected !== undefined && !rest["aria-current"] ? isSelected : undefined
+  // Links never get it: aria-pressed is a button state; a link marks the current page with aria-current.
+  const pressed = props.isSelected !== undefined && !rest["aria-current"] && !link ? isSelected : undefined
   // Figma Type: google is its own Type; a button with no children is Type=icon.
   // Inside a disabled ButtonGroup (Figma Status=disabled) unless this button says otherwise.
   const group = useContext(ButtonGroupContext)
   const disabled = rest.disabled ?? group.disabled
   const figmaType = variant === "google" ? "google" : children == null ? "icon" : "default"
 
-  return (
-    <button
-      {...rest}
-      type={type}
-      disabled={disabled}
-      aria-pressed={rest["aria-pressed"] ?? pressed}
-      data-type={figmaType}
-      data-variant={variant}
-      data-selected={isSelected || undefined}
-      className={className ? `${styles.root} ${className}` : styles.root}
-    >
+  const shared = {
+    "data-type": figmaType,
+    "data-variant": variant,
+    "data-selected": isSelected || undefined,
+    className: className ? `${styles.root} ${className}` : styles.root,
+  }
+  const content = (
+    <>
       {figmaType === "google" && <GoogleLogo />}
       {figmaType === "icon" ? icon : children}
       {figmaType === "default" && icon}
+    </>
+  )
+
+  if (link) {
+    const { href, disabled: _, ...anchor } = rest as ComponentPropsWithRef<"a"> & { disabled?: boolean }
+    return (
+      <a
+        {...anchor}
+        {...shared}
+        // No href = not focusable and not followable; role keeps it announced as a (disabled) link.
+        href={disabled ? undefined : href}
+        role={disabled ? "link" : anchor.role}
+        aria-disabled={disabled || undefined}
+      >
+        {content}
+      </a>
+    )
+  }
+
+  const { type = "button", ...button } = rest as ComponentPropsWithRef<"button">
+  return (
+    <button {...button} {...shared} type={type} disabled={disabled} aria-pressed={button["aria-pressed"] ?? pressed}>
+      {content}
     </button>
   )
 }

@@ -1,3 +1,4 @@
+import { Check, Minus } from "lucide-react"
 import { useCallback, useEffect, useRef, type ComponentPropsWithRef, type ReactNode, type Ref } from "react"
 
 import type { AccessibleName } from "../Button/Button"
@@ -56,13 +57,9 @@ export function Checkbox(props: CheckboxProps) {
           type="checkbox"
           className={styles.input}
         />
-        {/* lucide/check and lucide/minus (ISC), inlined so the package needs no icon dependency. */}
-        <svg className={styles.check} viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M20 6 9 17l-5-5" />
-        </svg>
-        <svg className={styles.dash} viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M5 12h14" />
-        </svg>
+        {/* Figma lucide/check and lucide/minus. Size, color and stroke come from the CSS. */}
+        <Check className={styles.check} aria-hidden="true" />
+        <Minus className={styles.dash} aria-hidden="true" />
       </span>
       {children != null && <span className={styles.label}>{children}</span>}
     </label>

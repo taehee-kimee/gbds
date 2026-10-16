@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useEffect, useRef, useState, type ComponentPropsWithRef, type KeyboardEvent } from "react"
 
 import { Button } from "../Button"
@@ -103,6 +104,10 @@ export function Calendar(props: CalendarProps) {
   const [view, setView] = useState<View>(defaultView)
   const [yearStart, setYearStart] = useState(() => yearPageStart(month.getFullYear()))
   const [focused, setFocused] = useState(() => single ?? range?.start ?? (isSameMonth(today, month) ? today : month))
+  // Range preview (review 6): the day under the pointer or keyboard focus while only the start is chosen.
+  const [hovered, setHovered] = useState<Date | null>(null)
+  const preview = range && !range.end && hovered && !isSameDay(hovered, range.start) ? hovered : null
+  const [previewLo, previewHi] = preview && range ? (compareDays(preview, range.start) < 0 ? [preview, range.start] : [range.start, preview]) : [null, null]
   const moveFocus = useRef(false)
   const gridRef = useRef<HTMLDivElement>(null)
 
@@ -194,13 +199,19 @@ export function Calendar(props: CalendarProps) {
       {month.getFullYear()}
     </Button>
   )
-  const prevButton = <Button variant="ghost" icon={<Chevron dir="left" />} aria-label={prevLabel} onClick={goPrev} />
-  const nextButton = <Button variant="ghost" icon={<Chevron dir="right" />} aria-label={nextLabel} onClick={goNext} />
+  const prevButton = <Button variant="ghost" icon={<ChevronLeft />} aria-label={prevLabel} onClick={goPrev} />
+  const nextButton = <Button variant="ghost" icon={<ChevronRight />} aria-label={nextLabel} onClick={goNext} />
 
   const dayGrid = (m: Date) => {
     const weeks = monthWeeks(m, weekStartsOn)
     return (
-      <table role="grid" className={styles.grid} aria-label={monthLong.format(m)} onKeyDown={onGridKeyDown}>
+      <table
+        role="grid"
+        className={styles.grid}
+        aria-label={monthLong.format(m)}
+        onKeyDown={onGridKeyDown}
+        onMouseLeave={() => setHovered(null)}
+      >
         <thead>
           <tr>
             {weeks[0]!.map((d) => (
@@ -230,6 +241,10 @@ export function Calendar(props: CalendarProps) {
                     : isSameDay(d, range?.start) && (rangeEnd && !isSameDay(range!.start, rangeEnd) ? "start" : "single")
                       || (isSameDay(d, rangeEnd) && "end")
                       || (range && rangeEnd && compareDays(d, range.start) > 0 && compareDays(d, rangeEnd) < 0 && "middle")
+                const previewing =
+                  previewLo && previewHi && compareDays(d, previewLo) >= 0 && compareDays(d, previewHi) <= 0 && !isSameDay(d, range!.start)
+                    ? isSameDay(d, preview) ? "end" : "middle"
+                    : undefined
                 const mark = marker?.(d)
                 const label = [fullDate.format(d), mark && markerLabels[mark]].filter(Boolean).join(", ")
                 return (
@@ -242,11 +257,17 @@ export function Calendar(props: CalendarProps) {
                       data-selected={selected || undefined}
                       data-today={isSameDay(d, today) || undefined}
                       data-marker={mark}
+                      data-preview={previewing}
                       aria-label={label}
                       aria-current={isSameDay(d, today) ? "date" : undefined}
                       aria-disabled={disabled || undefined}
                       onClick={() => select(d)}
-                      onFocus={() => setFocused(d)}
+                      onFocus={() => {
+                        setFocused(d)
+                        setHovered(d)
+                      }}
+                      onBlur={() => setHovered(null)}
+                      onMouseEnter={() => setHovered(d)}
                     >
                       {d.getDate()}
                     </button>
@@ -333,7 +354,8 @@ export function Calendar(props: CalendarProps) {
           </div>
         </div>
       ) : (
-        <>
+        // Same footprint in every view (user decision, review 4): in range mode the picker spans both months.
+        <div className={styles.body} data-span={mode === "range" ? "two" : undefined}>
           <div className={styles.header}>
             {prevButton}
             <div className={styles.titleGroup}>
@@ -343,17 +365,8 @@ export function Calendar(props: CalendarProps) {
             {nextButton}
           </div>
           <div ref={gridRef}>{view === "day" ? dayGrid(month) : pickerGrid(view)}</div>
-        </>
+        </div>
       )}
     </div>
-  )
-}
-
-/** lucide/chevron-left and lucide/chevron-right (ISC), inlined so the package needs no icon dependency. */
-function Chevron({ dir }: { dir: "left" | "right" }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={dir === "left" ? "m15 18-6-6 6-6" : "m9 18 6-6-6-6"} />
-    </svg>
   )
 }

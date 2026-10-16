@@ -270,10 +270,10 @@ examples:
     description: Top-level navigation with the current page marked
     code: |
       <ButtonGroup variant="menu" aria-label="주 메뉴">
-        <Button variant="ghost-rounded" icon={<House />} aria-label="Home" />
-        <Button variant="ghost">Assets</Button>
-        <Button variant="ghost" isSelected aria-current="page">Compass</Button>
-        <Button variant="ghost">Content Studio</Button>
+        <Button variant="ghost-rounded" icon={<House />} aria-label="Home" href="/" />
+        <Button variant="ghost" href="/assets">Assets</Button>
+        <Button variant="ghost" href="/compass" isSelected aria-current="page">Compass</Button>
+        <Button variant="ghost" href="/content-studio">Content Studio</Button>
       </ButtonGroup>
 
 # ================================================================
@@ -282,8 +282,9 @@ examples:
 # ================================================================
 # 1. ⚠ needs design decision — menu has no current-page state in Figma.
 #    Code uses Button Status=active via isSelected + aria-current="page".
-# 2. ⚠ needs design decision — menu items are <button>, not links; Button
-#    has no href yet, so navigation is onClick-only.
+# 2. Decided 2026-10-16 — menu items are links: Button takes href and
+#    renders <a href> (new tab, copy link, middle click work). A disabled
+#    menu drops each href and sets aria-disabled.
 # 3. ⚠ needs design decision — menu height is fixed at 53 in Figma (items
 #    at y=8.5); code is 52 from the padding tokens. x positions match.
 # 4. ⚠ needs design decision — the five pair Types differ only in labels;
