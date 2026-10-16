@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  font-family: var(--gs-font-family-sans);
+  font-family: var(--gb-font-family-sans);
 }
 
 .page {
@@ -11,44 +11,44 @@ body {
 
 .panel {
   flex: 1 1 420px;
-  padding: var(--gs-space-32);
-  background: var(--gs-background-default);
-  color: var(--gs-text-default);
+  padding: var(--gb-space-32);
+  background: var(--gb-background-default);
+  color: var(--gb-text-default);
 }
 
 .panel h2 {
-  margin: 0 0 var(--gs-space-24);
-  font: var(--gs-typography-sm);
-  font-weight: var(--gs-font-weight-semibold);
-  color: var(--gs-text-subtle);
+  margin: 0 0 var(--gb-space-24);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-semibold);
+  color: var(--gb-text-subtle);
   text-transform: uppercase;
 }
 
 .grid {
   display: grid;
   grid-template-columns: 96px repeat(var(--cols, 3), max-content);
-  gap: var(--gs-space-24) var(--gs-space-40);
+  gap: var(--gb-space-24) var(--gb-space-40);
   align-items: center;
   justify-items: start;
 }
 
 .head,
 .label {
-  font: var(--gs-typography-xs);
-  color: var(--gs-text-subtle);
+  font: var(--gb-typography-xs);
+  color: var(--gb-text-subtle);
 }
 
 .panel h2.sub {
-  margin-top: var(--gs-space-40);
+  margin-top: var(--gb-space-40);
 }
 
 .stack {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--gs-space-12);
+  gap: var(--gb-space-12);
 }
 
 .stack.indent {
-  padding-left: var(--gs-space-24);
+  padding-left: var(--gb-space-24);
 }

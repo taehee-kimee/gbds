@@ -5,25 +5,25 @@ const label = "Accept terms and conditions"
 
 /* The convention most libraries use, frozen inline: empty box when unchecked, filled box when checked. */
 const conventionalUnchecked = vars({
-  "checkbox-bg": "var(--gs-background-default)",
-  "checkbox-border": "var(--gs-border-muted)",
+  "checkbox-bg": "var(--gb-background-default)",
+  "checkbox-border": "var(--gb-border-muted)",
 })
 const conventionalChecked = vars({
-  "checkbox-bg": "var(--gs-background-bolder)",
-  "checkbox-border": "var(--gs-background-bolder)",
-  "checkbox-fg": "var(--gs-icon-invert)",
+  "checkbox-bg": "var(--gb-background-bolder)",
+  "checkbox-border": "var(--gb-background-bolder)",
+  "checkbox-fg": "var(--gb-icon-invert)",
 })
-/* Freezes :focus-visible: the box draws --gs-shadow-xs, so point it at the focus ring. */
-const focusRing = vars({ "gs-shadow-xs": "var(--gs-ring-focus)" })
+/* Freezes :focus-visible: the box draws --gb-shadow-xs, so point it at the focus ring. */
+const focusRing = vars({ "gb-shadow-xs": "var(--gb-ring-focus)" })
 
 export const items: ReviewItem[] = [
   {
     id: "1",
     title: "체크 안 된 상태가 꽉 찬 박스, 체크된 상태가 빈 박스",
-    status: "open",
+    status: "decided",
     figma:
-      "Type=default 박스 = background/bolder (라이트: 검정, 다크: 흰색). Type=Checked/Part 박스 = background/default + border/subtler + 아이콘.",
-    code: "Figma 그대로. 대부분의 라이브러리는 반대(빈 박스 → 체크 시 채움)라서 사용자가 상태를 거꾸로 읽을 위험이 있음.",
+      "Status=default 박스 = background/bolder (라이트: 검정, 다크: 흰색). Status=checked/part 박스 = background/default + border/subtler + 아이콘.",
+    code: "디자인 의도로 확정 (2026-10-16) — Figma 그대로 유지. 참고: 대부분의 라이브러리는 반대(빈 박스 → 체크 시 채움)라서 사용자가 상태를 거꾸로 읽을 위험이 있음.",
     columns: [
       {
         label: "Figma (현재 코드)",
@@ -46,81 +46,89 @@ export const items: ReviewItem[] = [
         ),
       },
     ],
-    options: [
-      { id: "keep", label: "Figma 유지 (의도된 디자인)" },
-      { id: "swap", label: "관례대로 반전: unchecked 빈 박스, checked 채운 박스", recommended: true },
-      { id: "other", label: "기타 (메모에 기록)" },
-    ],
   },
   {
     id: "2",
-    title: "muted 라벨이 disabled 라벨보다 더 흐림",
-    status: "open",
-    figma: "Style=muted 라벨 = text/subtler (neutral-450). Type=Disabled 라벨 = text/subtle (라이트 neutral-500, 다크 neutral-400).",
-    code: "Figma 그대로. 결과적으로 활성 상태인 muted가 비활성보다 더 비활성처럼 보임.",
+    title: "mute 라벨이 disabled 라벨보다 더 흐림",
+    status: "decided",
+    figma:
+      "Figma 업데이트로 해결 (2026-10-16 확인): Type=mute 라벨 = text/subtle, Status=disabled 라벨 = text/static/gray.",
+    code: "Figma 그대로 반영.",
     columns: [
       {
         label: "나란히 비교",
         render: () => (
           <>
-            <Spec label="muted (활성)"><Checkbox variant="muted">{label}</Checkbox></Spec>
+            <Spec label="mute (활성)"><Checkbox variant="mute">{label}</Checkbox></Spec>
             <Spec label="disabled"><Checkbox disabled>{label}</Checkbox></Spec>
           </>
         ),
       },
     ],
-    options: [
-      { id: "keep", label: "Figma 유지" },
-      { id: "muted-subtle", label: "muted 라벨을 text/subtle로, disabled를 더 흐린 토큰으로" },
-      { id: "other", label: "기타 (메모에 기록)" },
-    ],
   },
   {
     id: "3",
-    title: "muted × checked / part 조합이 Figma에 없음",
+    title: "mute × disabled 조합이 Figma에 없음",
     status: "open",
-    figma: "Style=muted는 Type=default에만 존재. 체크된 muted 변형 없음.",
-    code: "체크되면 checked 스타일이 우선 — 박스와 라벨 모두 default와 같아짐 (muted 흔적 없음).",
+    figma:
+      "Type=mute에는 Status=default / checked / part만 있음 (checked·part는 2026-10-16 확인 시 추가돼 있음). disabled 계열은 Type=default에만 존재.",
+    code: "mute + disabled면 default의 disabled 모양을 그대로 씀 (박스 background/disabled-bold, 라벨 text/static/gray).",
     columns: [
       {
-        label: "코드 — muted를 클릭해 보세요",
+        label: "코드",
         render: () => (
           <>
-            <Spec label="muted"><Checkbox variant="muted">{label}</Checkbox></Spec>
-            <Spec label="muted checked"><Checkbox variant="muted" defaultChecked>{label}</Checkbox></Spec>
-            <Spec label="muted part"><Checkbox variant="muted" indeterminate>{label}</Checkbox></Spec>
+            <Spec label="mute"><Checkbox variant="mute">{label}</Checkbox></Spec>
+            <Spec label="mute checked"><Checkbox variant="mute" defaultChecked>{label}</Checkbox></Spec>
+            <Spec label="mute disabled"><Checkbox variant="mute" disabled>{label}</Checkbox></Spec>
+            <Spec label="mute disabled-checked"><Checkbox variant="mute" disabled defaultChecked>{label}</Checkbox></Spec>
           </>
         ),
       },
     ],
     options: [
-      { id: "same", label: "체크되면 default와 같음 (현재 코드 유지)" },
-      { id: "add", label: "Figma에 muted × Checked / Part 변형 추가", recommended: true },
+      { id: "same", label: "default의 disabled 모양 사용 (현재 코드 유지)", recommended: true },
+      { id: "add", label: "Figma에 mute × disabled 변형 추가" },
       { id: "other", label: "기타 (메모에 기록)" },
     ],
   },
   {
     id: "4",
-    title: "disabled × checked / part 조합이 Figma에 없음",
-    status: "open",
-    figma: "Type=Disabled 하나뿐. 체크된 채로 비활성인 상태(예: 필수 동의 항목)를 표현할 수 없음.",
-    code: "disabled 박스(background/disabled-bold) 위에 체크/대시 아이콘을 그대로 표시.",
+    title: "disabled × checked / part 조합",
+    status: "decided",
+    figma: "Figma에 Status=disabled-checked / disabled-part 추가됨. 아이콘 색은 리뷰 8번 참고.",
+    code: "Figma 그대로 반영.",
     columns: [
       {
         label: "코드",
         render: () => (
           <>
             <Spec label="disabled"><Checkbox disabled>{label}</Checkbox></Spec>
-            <Spec label="disabled checked"><Checkbox disabled defaultChecked>{label}</Checkbox></Spec>
-            <Spec label="disabled part"><Checkbox disabled indeterminate>{label}</Checkbox></Spec>
+            <Spec label="disabled-checked"><Checkbox disabled defaultChecked>{label}</Checkbox></Spec>
+            <Spec label="disabled-part"><Checkbox disabled indeterminate>{label}</Checkbox></Spec>
           </>
         ),
       },
     ],
-    options: [
-      { id: "same", label: "현재 코드 유지" },
-      { id: "add", label: "Figma에 Disabled × Checked / Part 변형 추가", recommended: true },
-      { id: "other", label: "기타 (메모에 기록)" },
+  },
+  {
+    id: "8",
+    title: "라이트 모드 disabled-checked / part에서 체크가 안 보임",
+    status: "decided",
+    figma:
+      "Figma 반영 (2026-10-16): disabled-checked / disabled-part 아이콘 icon/static/gray → icon/subtlest (라이트 neutral-400, 다크 neutral-500).",
+    code: "Figma 그대로 반영.",
+    columns: [
+      {
+        label: "코드",
+        render: () => (
+          <>
+            <Spec label="disabled"><Checkbox disabled>{label}</Checkbox></Spec>
+            <Spec label="disabled-checked"><Checkbox disabled defaultChecked>{label}</Checkbox></Spec>
+            <Spec label="disabled-part"><Checkbox disabled indeterminate>{label}</Checkbox></Spec>
+          </>
+        ),
+      },
     ],
   },
   {
@@ -128,7 +136,7 @@ export const items: ReviewItem[] = [
     title: "키보드 포커스 · hover 상태가 Figma에 없음",
     status: "open",
     figma: "focus, hover 변형 없음.",
-    code: ":focus-visible일 때 박스에 --gs-ring-focus (Button과 동일). hover 스타일은 없음.",
+    code: ":focus-visible일 때 박스에 --gb-ring-focus (Button과 동일). hover 스타일은 없음.",
     columns: [
       {
         label: "코드 — Tab 키로 이동해 보세요",

@@ -1,5 +1,5 @@
 {
-  "name": "@gs/tokens",
+  "name": "@gb/tokens",
   "version": "0.1.0",
   "private": true,
   "description": "Gabrielle design system foundation tokens — generated from Figma variables.",

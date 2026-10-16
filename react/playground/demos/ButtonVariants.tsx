@@ -5,8 +5,8 @@ import type { CSSProperties } from "react"
 import { Button } from "../../src"
 import { Row, Themes } from "../shell/theme"
 
-const textVariants = ["primary", "mute", "outline", "link"] as const
-const iconVariants = ["icon", "ghost", "icon-rounded"] as const
+const textStyles = ["default", "mute", "outline", "link"] as const
+const iconStyles = ["default", "ghost", "ghost-rounded"] as const
 
 function Matrix({ theme }: { theme: "light" | "dark" }) {
   return (
@@ -14,24 +14,36 @@ function Matrix({ theme }: { theme: "light" | "dark" }) {
       <span />
       <span className="head">default</span>
       <span className="head">disabled</span>
-      <span className="head">isSelected</span>
-      <span className="head">trailing icon</span>
-      {textVariants.map((v) => (
-        <Row key={v} label={v}>
-          <Button variant={v} data-testid={`${theme}-${v}`}>Button</Button>
-          <Button variant={v} disabled>Button</Button>
-          <Button variant={v} isSelected>Button</Button>
-          {v === "link" ? <span /> : <Button variant={v} trailingIcon={<CircleDashed />}>Button</Button>}
+      <span className="head">isSelected (= active)</span>
+      <span className="head">Show icon</span>
+      {textStyles.map((s) => (
+        <Row key={s} label={`default / ${s}`}>
+          <Button variant={s} data-testid={`${theme}-default-${s}`}>Button</Button>
+          <Button variant={s} disabled data-testid={`${theme}-default-${s}-disabled`}>Button</Button>
+          <Button variant={s} isSelected data-testid={`${theme}-default-${s}-active`}>Button</Button>
+          <Button variant={s} icon={<CircleDashed />} data-testid={`${theme}-default-${s}-icon`}>Button</Button>
         </Row>
       ))}
-      {iconVariants.map((v) => (
-        <Row key={v} label={v}>
-          <Button variant={v} aria-label="Placeholder" data-testid={`${theme}-${v}`}><CircleDashed /></Button>
-          <Button variant={v} aria-label="Placeholder" disabled><CircleDashed /></Button>
-          <Button variant={v} aria-label="Placeholder" isSelected><CircleDashed /></Button>
+      <Row label="default / ghost">
+        <Button variant="ghost" data-testid={`${theme}-default-ghost`}>Button</Button>
+        <Button variant="ghost" disabled data-testid={`${theme}-default-ghost-disabled`}>Button</Button>
+        <Button variant="ghost" isSelected data-testid={`${theme}-default-ghost-active`}>Button</Button>
+        <span />
+      </Row>
+      {iconStyles.map((s) => (
+        <Row key={s} label={`icon / ${s}`}>
+          <Button variant={s} icon={<CircleDashed />} aria-label="Placeholder" data-testid={`${theme}-icon-${s}`} />
+          <Button variant={s} icon={<CircleDashed />} aria-label="Placeholder" disabled data-testid={`${theme}-icon-${s}-disabled`} />
+          <Button variant={s} icon={<CircleDashed />} aria-label="Placeholder" isSelected data-testid={`${theme}-icon-${s}-active`} />
           <span />
         </Row>
       ))}
+      <Row label="google">
+        <Button variant="google" data-testid={`${theme}-google`}>Continue with Google</Button>
+        <Button variant="google" disabled data-testid={`${theme}-google-disabled`}>Continue with Google</Button>
+        <Button variant="google" isSelected data-testid={`${theme}-google-active`}>Continue with Google</Button>
+        <span />
+      </Row>
     </div>
   )
 }

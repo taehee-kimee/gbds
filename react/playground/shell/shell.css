@@ -4,8 +4,8 @@
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   height: 100vh;
-  background: var(--gs-background-default);
-  color: var(--gs-text-default);
+  background: var(--gb-background-default);
+  color: var(--gb-text-default);
 }
 
 @media (max-width: 760px) {
@@ -16,7 +16,7 @@
   .sb-side {
     max-height: 40vh;
     border-right: 0;
-    border-bottom: var(--gs-stroke-1) solid var(--gs-border-default);
+    border-bottom: var(--gb-stroke-1) solid var(--gb-border-default);
   }
 }
 
@@ -24,39 +24,39 @@
 
 .sb-side {
   overflow-y: auto;
-  padding: var(--gs-space-16) var(--gs-space-12);
-  border-right: var(--gs-stroke-1) solid var(--gs-border-default);
-  background: var(--gs-background-subtlest);
-  font: var(--gs-typography-sm);
+  padding: var(--gb-space-16) var(--gb-space-12);
+  border-right: var(--gb-stroke-1) solid var(--gb-border-default);
+  background: var(--gb-background-subtlest);
+  font: var(--gb-typography-sm);
 }
 
 .sb-brand {
-  padding: 0 var(--gs-space-8) var(--gs-space-12);
-  font-weight: var(--gs-font-weight-bold);
+  padding: 0 var(--gb-space-8) var(--gb-space-12);
+  font-weight: var(--gb-font-weight-bold);
 }
 
 .sb-brand span {
-  color: var(--gs-text-subtle);
-  font-weight: var(--gs-font-weight-normal);
+  color: var(--gb-text-subtle);
+  font-weight: var(--gb-font-weight-normal);
 }
 
 .sb-search {
   box-sizing: border-box;
   width: 100%;
   height: 32px;
-  padding: 0 var(--gs-space-12);
-  border: var(--gs-stroke-1) solid var(--gs-border-default);
-  border-radius: var(--gs-radius-full);
-  background: var(--gs-background-default);
+  padding: 0 var(--gb-space-12);
+  border: var(--gb-stroke-1) solid var(--gb-border-default);
+  border-radius: var(--gb-radius-full);
+  background: var(--gb-background-default);
   color: inherit;
   font: inherit;
 }
 
 .sb-group {
-  margin: var(--gs-space-20) var(--gs-space-8) var(--gs-space-6);
-  color: var(--gs-text-subtle);
-  font: var(--gs-typography-xs);
-  font-weight: var(--gs-font-weight-semibold);
+  margin: var(--gb-space-20) var(--gb-space-8) var(--gb-space-6);
+  color: var(--gb-text-subtle);
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -72,15 +72,15 @@
 .sb-leaf {
   display: flex;
   align-items: center;
-  gap: var(--gs-space-6);
+  gap: var(--gb-space-6);
   box-sizing: border-box;
   width: 100%;
   min-height: 30px;
-  padding: 0 var(--gs-space-8);
+  padding: 0 var(--gb-space-8);
   border: 0;
-  border-radius: var(--gs-radius-md);
+  border-radius: var(--gb-radius-md);
   background: none;
-  color: var(--gs-text-default);
+  color: var(--gb-text-default);
   font: inherit;
   text-align: left;
   text-decoration: none;
@@ -88,28 +88,28 @@
 }
 
 .sb-node {
-  font-weight: var(--gs-font-weight-medium);
+  font-weight: var(--gb-font-weight-medium);
 }
 
 .sb-node:hover,
 .sb-leaf:hover {
-  background: var(--gs-background-subtler);
+  background: var(--gb-background-subtler);
 }
 
 .sb-leaf {
   padding-left: 30px;
-  color: var(--gs-text-subtle);
+  color: var(--gb-text-subtle);
 }
 
 .sb-leaf.sb-top {
-  padding-left: var(--gs-space-8);
-  color: var(--gs-text-default);
-  font-weight: var(--gs-font-weight-medium);
+  padding-left: var(--gb-space-8);
+  color: var(--gb-text-default);
+  font-weight: var(--gb-font-weight-medium);
 }
 
 .sb-leaf[aria-current="page"] {
-  background: var(--gs-background-bold);
-  color: var(--gs-text-invert);
+  background: var(--gb-background-bold);
+  color: var(--gb-text-invert);
 }
 
 .sb-caret {
@@ -129,16 +129,16 @@
 .sb-badge,
 .sb-counts {
   margin-left: auto;
-  font: var(--gs-typography-xs);
+  font: var(--gb-typography-xs);
 }
 
 .sb-badge {
   min-width: 18px;
-  padding: 0 var(--gs-space-4);
-  border-radius: var(--gs-radius-full);
-  background: var(--gs-background-warning-default);
-  color: var(--gs-text-static-white);
-  font-weight: var(--gs-font-weight-semibold);
+  padding: 0 var(--gb-space-4);
+  border-radius: var(--gb-radius-full);
+  background: var(--gb-background-warning-default);
+  color: var(--gb-text-static-white);
+  font-weight: var(--gb-font-weight-semibold);
   text-align: center;
 }
 
@@ -149,7 +149,7 @@
 .sb-counts {
   display: inline-flex;
   align-items: center;
-  gap: var(--gs-space-6);
+  gap: var(--gb-space-6);
 }
 
 .sb-counts .sb-badge {
@@ -157,8 +157,8 @@
 }
 
 .sb-none {
-  padding: var(--gs-space-8);
-  color: var(--gs-text-subtle);
+  padding: var(--gb-space-8);
+  color: var(--gb-text-subtle);
 }
 
 /* ── Main ──────────────────────────────────────────────────────────────── */
@@ -172,44 +172,44 @@
 .sb-toolbar {
   display: flex;
   align-items: center;
-  gap: var(--gs-space-16);
+  gap: var(--gb-space-16);
   min-height: 44px;
-  padding: 0 var(--gs-space-16);
-  border-bottom: var(--gs-stroke-1) solid var(--gs-border-default);
-  font: var(--gs-typography-sm);
+  padding: 0 var(--gb-space-16);
+  border-bottom: var(--gb-stroke-1) solid var(--gb-border-default);
+  font: var(--gb-typography-sm);
 }
 
 .sb-crumb {
-  color: var(--gs-text-subtle);
+  color: var(--gb-text-subtle);
 }
 
 .sb-crumb strong {
-  color: var(--gs-text-default);
-  font-weight: var(--gs-font-weight-semibold);
+  color: var(--gb-text-default);
+  font-weight: var(--gb-font-weight-semibold);
 }
 
 .sb-themes {
   display: flex;
   margin-left: auto;
   padding: 2px;
-  border-radius: var(--gs-radius-md);
-  background: var(--gs-background-subtler);
+  border-radius: var(--gb-radius-md);
+  background: var(--gb-background-subtler);
 }
 
 .sb-themes button {
-  padding: 4px var(--gs-space-10);
+  padding: 4px var(--gb-space-10);
   border: 0;
-  border-radius: var(--gs-radius-sm);
+  border-radius: var(--gb-radius-sm);
   background: none;
-  color: var(--gs-text-subtle);
-  font: var(--gs-typography-xs);
+  color: var(--gb-text-subtle);
+  font: var(--gb-typography-xs);
   cursor: pointer;
 }
 
 .sb-themes button[aria-checked="true"] {
-  background: var(--gs-background-default);
-  color: var(--gs-text-default);
-  box-shadow: var(--gs-shadow-xs);
+  background: var(--gb-background-default);
+  color: var(--gb-text-default);
+  box-shadow: var(--gb-shadow-xs);
 }
 
 .sb-canvas {
@@ -221,5 +221,5 @@
 }
 
 .sb-canvas[data-page="review"] {
-  padding: 0 var(--gs-space-24);
+  padding: 0 var(--gb-space-24);
 }

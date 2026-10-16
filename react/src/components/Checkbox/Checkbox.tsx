@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, type ComponentPropsWithRef, type ReactNode, type Ref } from "react"
 
+import type { AccessibleName } from "../Button/Button"
 import styles from "./Checkbox.module.css"
 
 type NativeInputProps = Omit<ComponentPropsWithRef<"input">, "type" | "children">
 
 type CommonProps = NativeInputProps & {
-  /** Figma `Style`. `muted` only changes the unchecked look and the label color. */
-  variant?: "default" | "muted"
-  /** Figma `Type=Part` — the "some selected" dash. Sets the DOM `indeterminate` property; overrides `checked` visually. */
+  /** Figma `Type`. `mute` keeps the light box and dimmer label in every Status. */
+  variant?: "default" | "mute"
+  /** Figma `Status=part` — the "some selected" dash. Sets the DOM `indeterminate` property; overrides `checked` visually. */
   indeterminate?: boolean
 }
 
@@ -17,11 +18,10 @@ export type LabelledCheckboxProps = CommonProps & {
 }
 
 /** Figma `Label=false` — a bare box. */
-export type BareCheckboxProps = CommonProps & {
-  children?: undefined
-  /** Required: with no visible label, screen readers have nothing to announce. */
-  "aria-label": string
-}
+export type BareCheckboxProps = CommonProps &
+  AccessibleName & {
+    children?: undefined
+  }
 
 export type CheckboxProps = LabelledCheckboxProps | BareCheckboxProps
 

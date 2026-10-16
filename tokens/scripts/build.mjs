@@ -7,8 +7,8 @@
 //   src/semantic.light.json  tier 2, Light mode
 //   src/semantic.dark.json   tier 2, Dark mode — must have exactly the same keys
 //
-// CSS name = "--gs-" + token path joined with "-": background.surface-secondary → --gs-background-surface-secondary.
-// References ({color.neutral.50}) are emitted as var(--gs-…) so the alias chain survives in the browser.
+// CSS name = "--gb-" + token path joined with "-": background.surface-secondary → --gb-background-surface-secondary.
+// References ({color.neutral.50}) are emitted as var(--gb-…) so the alias chain survives in the browser.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 
@@ -42,7 +42,7 @@ const dark = flatten(read("semantic.dark.json"))
 // --- validation --------------------------------------------------------------
 
 const errors = []
-const PREFIX = "gs"
+const PREFIX = "gb"
 const cssName = (path) => `--${PREFIX}-${path.join("-")}`
 
 const known = new Set([...constant, ...light].map((t) => t.path.join(".")))

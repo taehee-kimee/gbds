@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import { defineConfig } from "vite"
 
-import { gsScopedName } from "../css-modules.mjs"
+import { gbScopedName } from "../css-modules.mjs"
 
 const reviewsDir = join(dirname(fileURLToPath(import.meta.url)), "reviews")
 
@@ -17,7 +17,7 @@ const reviewsDir = join(dirname(fileURLToPath(import.meta.url)), "reviews")
 /** @returns {import("vite").Plugin} */
 function reviewStore() {
   return {
-    name: "gs-review-store",
+    name: "gb-review-store",
     configureServer(server) {
       server.middlewares.use("/__review/", async (req, res) => {
         const name = (req.url ?? "").replace(/^\//, "").split("?")[0]
@@ -58,6 +58,6 @@ export default defineConfig({
   build: { outDir: "dist", emptyOutDir: true },
   plugins: [reviewStore()],
   css: {
-    modules: { generateScopedName: gsScopedName },
+    modules: { generateScopedName: gbScopedName },
   },
 })

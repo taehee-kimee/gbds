@@ -10,32 +10,37 @@ function Matrix({ theme }: { theme: "light" | "dark" }) {
     <div className="grid">
       <span />
       <span className="head">default</span>
-      <span className="head">muted</span>
+      <span className="head">mute</span>
       <span className="head">no label</span>
       <Row label="unchecked">
         <Checkbox data-testid={`${theme}-default`}>{label}</Checkbox>
-        <Checkbox variant="muted" data-testid={`${theme}-muted`}>{label}</Checkbox>
+        <Checkbox variant="mute" data-testid={`${theme}-mute`}>{label}</Checkbox>
         <Checkbox aria-label={label} />
       </Row>
       <Row label="checked">
         <Checkbox defaultChecked data-testid={`${theme}-checked`}>{label}</Checkbox>
-        <Checkbox variant="muted" defaultChecked>{label}</Checkbox>
+        <Checkbox variant="mute" defaultChecked>{label}</Checkbox>
         <Checkbox aria-label={label} defaultChecked />
       </Row>
       <Row label="part">
         <Checkbox indeterminate data-testid={`${theme}-part`}>{label}</Checkbox>
-        <Checkbox variant="muted" indeterminate>{label}</Checkbox>
+        <Checkbox variant="mute" indeterminate>{label}</Checkbox>
         <Checkbox aria-label={label} indeterminate />
       </Row>
       <Row label="disabled">
         <Checkbox disabled data-testid={`${theme}-disabled`}>{label}</Checkbox>
-        <Checkbox variant="muted" disabled>{label}</Checkbox>
+        <Checkbox variant="mute" disabled>{label}</Checkbox>
         <Checkbox aria-label={label} disabled />
       </Row>
       <Row label="disabled checked">
         <Checkbox disabled defaultChecked>{label}</Checkbox>
-        <Checkbox variant="muted" disabled defaultChecked>{label}</Checkbox>
+        <Checkbox variant="mute" disabled defaultChecked>{label}</Checkbox>
         <Checkbox aria-label={label} disabled defaultChecked />
+      </Row>
+      <Row label="disabled part">
+        <Checkbox disabled indeterminate>{label}</Checkbox>
+        <Checkbox variant="mute" disabled indeterminate>{label}</Checkbox>
+        <Checkbox aria-label={label} disabled indeterminate />
       </Row>
     </div>
   )

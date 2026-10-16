@@ -1,0 +1,389 @@
+# ================================================================
+# Avatar Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-avatar
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-avatar
+  description: |
+    A fixed-size (32px) picture of a user or entity. Shows a photo when one
+    is available, otherwise the first letter of the name, otherwise a
+    generic person icon.
+    Presentational by default. With onClick it becomes a button (e.g. open
+    the person's profile); Figma has no interactive states for it.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Avatar (72:2717) · component set Avatar (3073:4051)"
+    code: "react/src/components/Avatar/Avatar.tsx"
+
+usage:
+  when_to_use:
+    - Next to a person's name in lists, comments, chat messages and headers
+    - To identify the owner or author of an item at a glance
+
+  when_not_to_use:
+    - For navigation to a URL — wrap it in a link instead (onClick renders a <button>)
+    - For logos or product images that are not a user or entity
+
+  rules:
+    - id: accessible-name
+      rule: Every avatar has an alt
+      severity: error
+      message: "alt is required by the TypeScript type. Pass the person's name — it is also where the initial comes from. alt=\"\" only when there is no name (shows the icon)."
+
+    - id: name-not-label
+      rule: alt is the name, not a description
+      severity: warning
+      message: "The initial is the first letter of alt. alt=\"프로필 사진\" would show \"프\"; alt=\"Sam Lee\" shows \"S\"."
+
+    - id: clickable-name
+      rule: A clickable avatar has a name
+      severity: error
+      message: "With onClick, alt is the button's name. alt=\"\" leaves the button unnamed — pass aria-label."
+
+  common_mistakes:
+    - mistake: Hiding a named avatar with alt=""
+      correct: Keep the name in alt and pass aria-hidden — alt="" also removes the initial.
+      example:
+        wrong: |
+          <Avatar src={user.photo} alt="" /> <span>{user.name}</span>
+        right: |
+          <Avatar src={user.photo} alt={user.name} aria-hidden /> <span>{user.name}</span>
+
+    - mistake: Choosing the Type by hand
+      correct: Pass whatever data you have; the component picks Image, Initial or Icon.
+      example:
+        wrong: |
+          {user.photo ? <Avatar src={user.photo} alt={user.name} /> : <IconAvatar />}
+        right: |
+          <Avatar src={user.photo} alt={user.name} />
+
+variant_guidelines:
+  image:
+    description: |
+      The photo, cropped to cover the 32px box and clipped to the shape. No
+      background or border. Figma Type=Image (default).
+
+  initial:
+    description: |
+      The first letter of alt, uppercased (any script; spaces, digits and
+      symbols are skipped), in Inter Black 20px, icon/default, on
+      background/default with a 1px border/subtler inside stroke. Always one
+      character. Figma Type=Initial.
+
+  icon:
+    description: |
+      lucide/user-filled (18px) on the same frame as Initial. The final
+      fallback when there is no image and alt has no letter (alt=""). Figma Type=Icon.
+
+shape_guidelines:
+  rounded:
+    description: radius md (8px). Figma Style=rounded (default).
+  rectangle:
+    description: radius none. Figma Style=rectangle.
+  circle:
+    description: radius full. Figma Style=circle.
+
+states_and_behaviors:
+  loading:
+    description: |
+      While src loads, the fallback (initial, else icon) is shown and the
+      image is mounted hidden. When it loads the avatar switches to Image.
+
+  error:
+    description: |
+      If src fails to load, the image is removed and the fallback stays.
+      A new src starts over.
+
+  clickable:
+    description: |
+      onClick renders the root as <button type="button"> named by alt.
+      Focus shows --gb-ring-focus; disabled shows a not-allowed cursor.
+      No hover/pressed look (not in Figma — Review Note 8).
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: span | button
+    description: |
+      The 32px frame. role="img" with aria-label=alt (aria-hidden when alt
+      is ""). With onClick: <button type="button"> with aria-label=alt. Figma: the variant frame (auto layout, centered, INSIDE stroke).
+
+  image:
+    type: media
+    element: img
+    nullable: true
+    description: The photo, object-fit cover, alt="" (the root carries the name). Figma "avatar-image" rectangle (IMAGE fill, CROP).
+
+  initial:
+    type: text
+    element: span
+    nullable: true
+    description: First letter of alt. Figma "S" vector (outlined text, no text property — Review Note 1).
+
+  icon:
+    type: icon
+    instanceOf: lucide/user-filled
+    nullable: true
+    description: 18px filled person icon, inline SVG, currentColor.
+
+props:
+  type:
+    type: enum
+    default: Image
+    enum:
+      - Initial
+      - Icon
+      - Image
+    description: Content (Figma "Type"). Code — derived from src, alt and the image load.
+
+  style:
+    type: enum
+    default: rounded
+    enum:
+      - rectangle
+      - circle
+      - rounded
+    description: Frame shape (Figma "Style"). Code — shape prop.
+
+default:
+  name: Type=Image, Style=rounded
+  layout:
+    - root:
+        - image
+  styles:
+    root:
+      width: var(--gb-space-32)                  # 32px
+      height: var(--gb-space-32)
+      borderRadius: var(--gb-radius-md)          # 8px
+      overflow: hidden
+
+    image:
+      width: 100%
+      height: 100%
+      objectFit: cover
+
+variants:
+  - name: initial
+    configuration:
+      type: Initial
+    styles:
+      root:
+        backgroundColor: var(--gb-background-default)
+        border: 1px inside var(--gb-border-subtler)
+      initial:
+        font: var(--gb-typography-xl)            # 20px
+        fontWeight: var(--gb-font-weight-black)  # 900
+        lineHeight: 1
+        color: var(--gb-icon-default)
+
+  - name: icon
+    configuration:
+      type: Icon
+    styles:
+      root:
+        backgroundColor: var(--gb-background-default)
+        border: 1px inside var(--gb-border-subtler)
+      icon:
+        width: 18px
+        height: 18px
+        fill: var(--gb-icon-default)
+
+  - name: rectangle
+    configuration:
+      style: rectangle
+    styles:
+      root:
+        borderRadius: var(--gb-radius-none)
+
+  - name: circle
+    configuration:
+      style: circle
+    styles:
+      root:
+        borderRadius: var(--gb-radius-full)
+
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      root:
+        border: 1px solid CanvasText             # Initial and Icon only
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Avatar
+  import: 'import { Avatar } from "@gb/react"'
+  element: HTMLSpanElement (HTMLButtonElement with onClick)
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  # figma: the Figma property this prop comes from, or "none" for code-only props.
+  props:
+    - name: alt
+      type: string
+      required: true
+      figma: Type=Initial (text)
+      description: |
+        The name. Accessible name in every Type, and its first letter
+        (uppercased) is the Initial. "" = no name: icon, hidden from
+        assistive technology.
+
+    - name: src
+      type: string
+      default: undefined
+      figma: Type=Image
+      description: Image URL. Shown once it has loaded; the fallback shows while loading and on error.
+
+    - name: shape
+      type: '"rounded" | "rectangle" | "circle"'
+      default: rounded
+      figma: Style
+      description: Frame shape.
+
+    - name: onClick
+      type: MouseEventHandler<HTMLButtonElement>
+      default: undefined
+      figma: none
+      description: |
+        Makes the avatar a <button type="button"> named by alt. Native button
+        props (disabled, onFocus …) then apply. alt="" needs aria-label.
+
+    - name: className
+      type: string
+      figma: none
+      description: Appended to the root. Use for layout (margin), not for colors.
+
+    - name: ref
+      type: Ref<HTMLSpanElement>
+      figma: none
+      description: Forwarded to the root <span>, or <button> with onClick (React 19 ref-as-prop).
+
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"span">'
+      figma: none
+      description: Other native span (or button, with onClick) attributes go to the root (id, title, style, data-*, aria-hidden). children is not accepted.
+
+  slots: []
+
+  events:
+    - name: onClick
+      payload: MouseEvent<HTMLButtonElement>
+      description: Click, Enter or Space. Passing it switches the root to a <button>.
+
+  methods: []
+
+  dataAttributes:
+    - name: data-type
+      values: [image, initial, icon]
+      description: What the avatar is showing now (Figma Type). Set by the component, not a prop.
+
+    - name: data-shape
+      values: [rounded, rectangle, circle]
+      description: Figma Style.
+
+  tokensUsed:
+    color:
+      - --gb-background-default
+      - --gb-border-subtler
+      - --gb-icon-default
+    dimension:
+      - --gb-space-32
+      - --gb-radius-md
+      - --gb-radius-none
+      - --gb-radius-full
+      - --gb-stroke-1
+    other:
+      - --gb-typography-xl
+      - --gb-font-weight-black
+
+examples:
+  basic:
+    description: Photo; "S" shows while it loads or if it fails
+    code: |
+      <Avatar src={user.photoUrl} alt="Sam Lee" />
+
+  initial:
+    description: No photo
+    code: |
+      <Avatar alt="Sam Lee" shape="circle" />   {/* shows "S" */}
+
+  icon:
+    description: Unknown user
+    code: |
+      <Avatar alt="" />
+
+  clickable:
+    description: Opens the profile
+    code: |
+      <Avatar src={user.photoUrl} alt="Sam Lee" onClick={() => openProfile(user.id)} />
+
+  decorative:
+    description: Name printed next to it
+    code: |
+      <Avatar src={user.photoUrl} alt="Sam Lee" aria-hidden />
+      <span>Sam Lee</span>
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/avatar/review
+# ================================================================
+# 1. ⚠ needs design decision — Type=Initial's "S" is an outlined VECTOR,
+#    not text, so instances cannot change the letter. Measured as Inter
+#    Black 20px (12.19 × 14.91 ink, exact match). Code renders real text.
+# 2. ⚠ needs design decision — the initial is alt's first letter (user
+#    decision 2026-10-16), always one character. Korean names show the
+#    first syllable in the system font (Inter has no Hangul); the
+#    alternative is Latin-only with the icon otherwise.
+# 3. ⚠ needs design decision — the Figma vector sits at y=9; code centers
+#    the line box and the glyph top lands at y=8.26 (0.74px higher).
+#    x and size match.
+# 4. ⚠ needs design decision — Type=Image has no border or background,
+#    unlike Initial/Icon. Photos close to the page color lose their edge.
+# 5. ⚠ needs design decision — one size (32px), no Size property.
+# 6. Code picks Type from the data (src → first letter of alt → icon) instead of a
+#    type prop, so missing or broken photos fall back automatically.
+# 7. alt is required; the root carries the name so it survives the fallback.
+#    Hide a named avatar with aria-hidden, not alt="" (that drops the initial).
+# 8. ⚠ needs design decision — onClick (code-only) makes the avatar a button.
+#    Figma has no hover/pressed/focus state for Avatar; code uses only the
+#    shared focus ring.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Avatar.tsx, Avatar.module.css) and Figma component set 3073:4051.
+    Layer 1 guidelines are a first draft and need design review.
+    Open design questions: Review Notes 1–5.

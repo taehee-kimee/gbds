@@ -1,4 +1,4 @@
-# Builds the GS playground and publishes it to GitHub Pages on every push to main.
+# Builds the GB playground and publishes it to GitHub Pages on every push to main.
 name: Playground → GitHub Pages
 
 on:

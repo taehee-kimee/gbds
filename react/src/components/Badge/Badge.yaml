@@ -1,0 +1,453 @@
+# ================================================================
+# Badge Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-badge
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-badge
+  description: |
+    A small inline pill that labels a count, a status or a short change
+    ("New", "3", "+12%"). Style sets the color role; Size (20 / 28) scales
+    the label and the optional leading icon together. Purely passive — for a
+    pill the user clicks, selects or removes, use Chip.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Badge (72:2718) · component set Badge (665:2024)"
+    code: "react/src/components/Badge/Badge.tsx"
+
+usage:
+  when_to_use:
+    - To show a count next to a label (unread messages, items in a tab)
+    - To mark the status of a row or card (Active, Failed, Draft)
+    - To tag an item with a short attribute (New, Beta)
+
+  when_not_to_use:
+    - For anything clickable, selectable or removable → use Chip
+    - For long text or sentences → use plain text or an inline message
+    - For a primary action → use Button
+
+  rules:
+    - id: short-label
+      rule: Keep the label to one or two words
+      severity: warning
+      message: "The badge never wraps (white-space: nowrap). Long labels push the layout instead of breaking."
+
+    - id: not-interactive
+      rule: Do not attach click handlers
+      severity: error
+      message: "Badge is a <span> with no focus or keyboard support. Wrap it in a Button or use Chip."
+
+    - id: icon-only-name
+      rule: An icon-only badge needs aria-label
+      severity: error
+      message: "Enforced by the TypeScript type. The badge gets role=\"img\" so the name is announced."
+
+    - id: color-not-only
+      rule: Do not rely on color alone for meaning
+      severity: warning
+      message: "alarm, success and destructive differ only by color — the label must say the status too."
+
+  common_mistakes:
+    - mistake: Making a badge clickable
+      correct: Use Chip for an interactive pill.
+      example:
+        wrong: |
+          <Badge onClick={removeFilter}>React</Badge>
+        right: |
+          <Chip onRemove={removeFilter}>React</Chip>
+
+    - mistake: Icon-only badge without a name
+      correct: Pass aria-label.
+      example:
+        wrong: |
+          <!-- TypeScript error: Property 'aria-label' is missing -->
+          <Badge icon={<Bell />} />
+        right: |
+          <Badge icon={<Bell />} aria-label="새 알림" />
+
+variant_guidelines:
+  default:
+    description: Filled with background/bold, text/invert label. Figma Style=default.
+    best_practices:
+      - The neutral choice for counts and tags
+
+  reverse:
+    description: background/default fill, border/bolder stroke, text/default label. Figma Style=reverse.
+    best_practices:
+      - Use when a filled default badge is too heavy next to other content
+
+  outline:
+    description: No fill, border/muted stroke, text/subtle label. Figma Style=outline.
+    best_practices:
+      - Lowest emphasis — secondary tags and metadata
+
+  alarm:
+    description: No fill, border/warning stroke and text/warning label (red-400). Figma Style=alarm.
+    best_practices:
+      - Attention needed but not a failure (Review Note 3 — light-mode contrast)
+
+  success:
+    description: No fill, border/success stroke and text/success label. Figma Style=success.
+    best_practices:
+      - Completed or healthy status
+
+  destructive:
+    description: Filled with background/error/default (red-600), text/static/white label in Semi Bold. Figma Style=destructive.
+    best_practices:
+      - Errors and failures only (Review Note 5)
+
+size_guidelines:
+  "20":
+    description: Height 20, padding 6, label Text-xs/Medium (12/16), icon 10px. Figma Size=20 (default).
+  "28":
+    description: Height 28, padding 12, label Text-sm/Medium (14/20), icon 14px. Figma Size=28.
+
+shape_guidelines:
+  with_label:
+    description: Optional leading icon, then the label. Figma Label=true (default).
+  icon_only:
+    description: The icon alone. Figma Label=false. requires aria-label (enforced by type).
+
+states_and_behaviors:
+  static:
+    description: Badge has no interactive states. It does not take focus.
+
+other_options:
+  leading_icon:
+    description: |
+      Any SVG passed as icon, sized 10 / 14px and colored like the label
+      (currentColor). Figma Leading Icon + "-> Leading Icon" swap (default
+      lucide/circle-dashed).
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: span
+    description: |
+      The pill. Figma: the variant frame (auto layout HORIZONTAL, gap sp-4,
+      radius full, 1px INSIDE stroke on outlined styles).
+
+  icon:
+    type: icon
+    element: span > svg
+    nullable: true
+    description: Leading icon wrapper, aria-hidden. Figma "-> Leading Icon" instance, visibility "Leading Icon".
+
+  label:
+    type: text
+    nullable: true
+    description: Label text, passed as children. Figma "-> Label" text property, visibility "Label".
+
+props:
+  label:
+    type: string
+    default: Badge
+    description: Label text (Figma "-> Label")
+
+  showLabel:
+    type: boolean
+    default: true
+    description: Show the label (Figma "Label"). Code — omit children and pass icon + aria-label.
+
+  leadingIcon:
+    type: boolean
+    default: false
+    description: Show the icon (Figma "Leading Icon"). Code — icon prop.
+
+  leadingIconSwap:
+    type: instance
+    default: lucide/circle-dashed
+    description: The icon (Figma "-> Leading Icon"). Code — icon prop.
+
+  style:
+    type: enum
+    default: default
+    enum: [default, reverse, alarm, success, destructive, outline]
+    description: Color role (Figma "Style"). Code — variant prop.
+
+  size:
+    type: enum
+    default: "20"
+    enum: ["20", "28"]
+    description: Height (Figma "Size"). Code — size prop (number).
+
+default:
+  name: Style=default, Size=20
+  layout:
+    - root:
+        - icon
+        - label
+  styles:
+    root:
+      display: inline-flex
+      alignItems: center
+      gap: var(--gb-space-4)                     # 4px
+      height: var(--gb-space-20)                 # 20px
+      padding: 0 var(--gb-space-6)               # 6px
+      borderRadius: var(--gb-radius-full)
+      backgroundColor: var(--gb-background-bold)
+      whiteSpace: nowrap
+
+    icon:
+      width: 10px
+      height: 10px
+      color: currentColor
+
+    label:
+      textStyle: Text-xs/Medium                  # font: var(--gb-typography-xs); font-weight: var(--gb-font-weight-medium) → 12px/16px Inter 500
+      color: var(--gb-text-invert)
+
+variants:
+  - name: size-28
+    configuration:
+      size: "28"
+    styles:
+      root:
+        height: var(--gb-space-28)
+        padding: 0 var(--gb-space-12)
+      icon:
+        width: 14px
+        height: 14px
+      label:
+        textStyle: Text-sm/Medium                # 14px/20px
+
+  - name: reverse
+    configuration:
+      style: reverse
+    styles:
+      root:
+        backgroundColor: var(--gb-background-default)
+        border: 1px inside var(--gb-border-bolder)
+      label:
+        color: var(--gb-text-default)
+
+  - name: alarm
+    configuration:
+      style: alarm
+    styles:
+      root:
+        backgroundColor: transparent
+        border: 1px inside var(--gb-border-warning)
+      label:
+        color: var(--gb-text-warning)
+
+  - name: success
+    configuration:
+      style: success
+    styles:
+      root:
+        backgroundColor: transparent
+        border: 1px inside var(--gb-border-success)
+      label:
+        color: var(--gb-text-success)
+
+  - name: destructive
+    configuration:
+      style: destructive
+    styles:
+      root:
+        backgroundColor: var(--gb-background-error-default)
+      label:
+        color: var(--gb-text-static-white)       # white in both themes (Review Note 1)
+        fontWeight: var(--gb-font-weight-semibold)
+
+  - name: outline
+    configuration:
+      style: outline
+    styles:
+      root:
+        backgroundColor: transparent
+        border: 1px inside var(--gb-border-muted)
+      label:
+        color: var(--gb-text-subtle)
+
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      root:
+        border: 1px solid CanvasText
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Badge
+  import: 'import { Badge } from "@gb/react"'
+  element: HTMLSpanElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  # figma: the Figma property this prop comes from, or "none" for code-only props.
+  props:
+    - name: children
+      type: ReactNode
+      default: undefined
+      figma: "-> Label, shown when Label=true"
+      description: Label text. Omit for an icon-only badge (then icon and aria-label are required).
+
+    - name: aria-label
+      type: string
+      required: "when children is omitted"
+      figma: "-> Label, when Label=false"
+      description: Accessible name for an icon-only badge. Required at type level; the root gets role="img".
+
+    - name: icon
+      type: ReactNode
+      default: undefined
+      figma: "Leading Icon + -> Leading Icon"
+      description: Leading icon. Any SVG; sized 10 / 14px, colored like the label. Required when children is omitted.
+
+    - name: variant
+      type: '"default" | "reverse" | "alarm" | "success" | "destructive" | "outline"'
+      default: default
+      figma: Style
+
+    - name: size
+      type: "20 | 28"
+      default: 20
+      figma: Size
+
+    - name: className
+      type: string
+      figma: none
+      description: Appended to the root. Use for layout (margin), not for colors.
+
+    - name: ref
+      type: Ref<HTMLSpanElement>
+      figma: none
+      description: Forwarded to the root <span> (React 19 ref-as-prop).
+
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"span">'
+      figma: none
+      description: Other native span attributes go to the root (id, title, style, aria-*, data-*).
+
+  slots:
+    - name: children
+      description: Label content after the icon
+
+  events:
+    # Badge defines no events. Native span events pass through but a badge
+    # must not be the click target (rule not-interactive). Nothing is logged
+    # in the playground.
+    []
+
+  methods: []
+
+  dataAttributes:
+    - name: data-variant
+      values: [default, reverse, alarm, success, destructive, outline]
+      description: Figma Style.
+
+    - name: data-size
+      values: ["20", "28"]
+      description: Figma Size.
+
+  tokensUsed:
+    color:
+      - --gb-background-bold
+      - --gb-background-default
+      - --gb-background-error-default
+      - --gb-border-bolder
+      - --gb-border-warning
+      - --gb-border-success
+      - --gb-border-muted
+      - --gb-text-invert
+      - --gb-text-default
+      - --gb-text-warning
+      - --gb-text-success
+      - --gb-text-subtle
+      - --gb-text-static-white
+    dimension:
+      - --gb-space-4
+      - --gb-space-6
+      - --gb-space-12
+      - --gb-space-20
+      - --gb-space-28
+      - --gb-radius-full
+      - --gb-stroke-1
+    other:
+      - --gb-typography-xs
+      - --gb-typography-sm
+      - --gb-font-weight-medium
+      - --gb-font-weight-semibold
+
+examples:
+  basic:
+    description: Status tag
+    code: |
+      <Badge variant="success">Active</Badge>
+
+  count:
+    description: Count next to a label
+    code: |
+      <span>받은 메일 <Badge aria-hidden>3</Badge></span>
+
+  with-icon:
+    description: Leading icon, larger size
+    code: |
+      <Badge size={28} icon={<TriangleAlert />} variant="alarm">확인 필요</Badge>
+
+  icon-only:
+    description: No visible label (aria-label required)
+    code: |
+      <Badge icon={<Bell />} aria-label="새 알림" />
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/badge/review
+# ================================================================
+# 1. Decided 2026-10-16 — destructive label is white in both themes
+#    (was text/default: black on red in light mode, 4.1:1). Code uses
+#    text/static/white. Figma first moved to text/invert (neutral-900 in
+#    dark mode), then was rebound to text/static/white — Figma = code.
+# 2. ⚠ needs design decision — the leading icon's stroke is bound to
+#    border/invert-strong in the icon component, so it ignores the badge
+#    Style; in dark mode it is near-white on the light default badge.
+#    Code colors the icon like the label (currentColor).
+# 3. ⚠ needs design decision — light-mode contrast: alarm (red-400) 2.8:1,
+#    success (green-600) 3.3:1 on white; 12px text needs 4.5:1.
+# 4. ⚠ needs design decision — Figma Size=20 hugs its height, so an
+#    icon-only badge is 22 × 14 (Size=28 is fixed: 38 × 28); with Label and
+#    icon both off it stays a 49 × 20 empty pill. Code keeps the Size height
+#    and requires an icon when there is no label.
+# 5. ⚠ needs design decision — only destructive uses Semi Bold.
+# 6. Display only: <span>, no events; icon-only gets role="img".
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Badge.tsx, Badge.module.css) and Figma component set 665:2024.
+    Layer 1 guidelines are a first draft and need design review.
+    Open design questions: Review Notes 2–5.

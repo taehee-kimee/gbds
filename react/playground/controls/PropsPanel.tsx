@@ -58,6 +58,10 @@ type Action = { id: number; time: string; event: string; detail: string }
 function describe(arg: unknown): string {
   const e = arg as { type?: string; key?: string; target?: { type?: string; checked?: boolean; indeterminate?: boolean } }
   if (!e || typeof e !== "object") return ""
+  // Calendar onChange: a Date, or a { start, end? } range.
+  const day = (d: unknown) => (d instanceof Date ? d.toLocaleDateString("en-CA") : "…")
+  if (arg instanceof Date) return day(arg)
+  if ("start" in e) return `${day((e as { start: unknown }).start)} → ${day((e as { end?: unknown }).end)}`
   if (e.type === "change" && e.target?.type === "checkbox") return `checked: ${e.target.checked}`
   if (e.key) return `key: "${e.key}"`
   return e.type ?? ""
@@ -161,7 +165,9 @@ export function PropsPanel({ story }: { story: Story }) {
               지우기
             </button>
           </div>
-          {actions.length === 0 ? (
+          {story.events.length === 0 ? (
+            <p className="pp-empty">이 컴포넌트는 이벤트가 없습니다 (표시 전용).</p>
+          ) : actions.length === 0 ? (
             <p className="pp-empty">
               컴포넌트를 클릭하거나 Tab · Space로 조작하면 이벤트가 기록됩니다.
               <br />
@@ -186,7 +192,7 @@ export function PropsPanel({ story }: { story: Story }) {
 
 /* ── Resizable split between the component area and the controls ───────── */
 
-const SPLIT_KEY = "gs-playground-split"
+const SPLIT_KEY = "gb-playground-split"
 const DEFAULT_SPLIT = 0.55
 const clamp = (n: number) => Math.min(0.85, Math.max(0.15, n))
 

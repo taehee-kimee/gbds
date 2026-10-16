@@ -1,5 +1,5 @@
-import "@gs/tokens/fonts.css"
-import "@gs/tokens/tokens.css"
+import "@gb/tokens/fonts.css"
+import "@gb/tokens/tokens.css"
 import "./playground.css"
 
 import { StrictMode } from "react"

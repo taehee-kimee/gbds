@@ -1,0 +1,92 @@
+/*
+ * Badge — mirrors the Figma component set `Badge` (665:2024).
+ * Figma Style → data-variant, Size=20 | 28 → data-size on the root.
+ *
+ * Styles and sizes only reassign the --badge-* properties below.
+ */
+
+.root {
+  --badge-bg: var(--gb-background-bold);
+  --badge-fg: var(--gb-text-invert);
+  --badge-border: transparent;
+  --badge-height: var(--gb-space-20);
+  --badge-padding: var(--gb-space-6);
+  --badge-icon-size: 10px;
+  --badge-font: var(--gb-typography-xs);
+  --badge-weight: var(--gb-font-weight-medium);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gb-space-4);
+  box-sizing: border-box;
+  height: var(--badge-height);
+  padding: 0 var(--badge-padding);
+  border-radius: var(--gb-radius-full);
+  background: var(--badge-bg);
+  /* Figma stroke is INSIDE — an inset shadow keeps the hug width. */
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--badge-border);
+  color: var(--badge-fg);
+  font: var(--badge-font);
+  font-weight: var(--badge-weight);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.icon > svg {
+  width: var(--badge-icon-size);
+  height: var(--badge-icon-size);
+}
+
+/* ── Size=28 ───────────────────────────────────────────────────────────── */
+
+.root[data-size="28"] {
+  --badge-height: var(--gb-space-28);
+  --badge-padding: var(--gb-space-12);
+  --badge-icon-size: 14px;
+  --badge-font: var(--gb-typography-sm);
+}
+
+/* ── Style ─────────────────────────────────────────────────────────────── */
+
+.root[data-variant="reverse"] {
+  --badge-bg: var(--gb-background-default);
+  --badge-fg: var(--gb-text-default);
+  --badge-border: var(--gb-border-bolder);
+}
+
+.root[data-variant="alarm"] {
+  --badge-bg: transparent;
+  --badge-fg: var(--gb-text-warning);
+  --badge-border: var(--gb-border-warning);
+}
+
+.root[data-variant="success"] {
+  --badge-bg: transparent;
+  --badge-fg: var(--gb-text-success);
+  --badge-border: var(--gb-border-success);
+}
+
+.root[data-variant="destructive"] {
+  --badge-bg: var(--gb-background-error-default);
+  /* White in both themes — review 1, decided 2026-10-16. */
+  --badge-fg: var(--gb-text-static-white);
+  --badge-weight: var(--gb-font-weight-semibold);
+}
+
+.root[data-variant="outline"] {
+  --badge-bg: transparent;
+  --badge-fg: var(--gb-text-subtle);
+  --badge-border: var(--gb-border-muted);
+}
+
+/* Windows High Contrast drops box-shadow and background; keep the pill outline. */
+@media (forced-colors: active) {
+  .root {
+    border: var(--gb-stroke-1) solid CanvasText;
+  }
+}

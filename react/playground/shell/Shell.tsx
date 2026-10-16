@@ -99,7 +99,7 @@ function Sidebar({ current, page }: { current: ComponentEntry | null; page: Page
   return (
     <nav className="sb-side" aria-label="컴포넌트">
       <div className="sb-brand">
-        GS <span>Design System</span>
+        GB <span>Design System</span>
       </div>
       <input
         className="sb-search"

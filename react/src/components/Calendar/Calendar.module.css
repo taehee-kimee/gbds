@@ -1,0 +1,219 @@
+/*
+ * Calendar — mirrors the Figma component sets `Part/Calendar modal` (7219:10741, the surface) and
+ * `Part/Calendar` (7219:10714, one day / month / year cell).
+ * Modal Type=default | month | year → data-view on the root; Type=range → data-mode="range".
+ * Cell Status=active | auto-selected | disabled, Type=today and Data style → data-* on each day button.
+ */
+
+.root {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--gb-space-16);
+  box-sizing: border-box;
+  padding: var(--gb-space-20);
+  border-radius: var(--gb-radius-lg);
+  background: var(--gb-background-overlay);
+  /* Figma stroke is INSIDE. */
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-default);
+  color: var(--gb-text-default);
+  font: var(--gb-typography-sm);
+}
+
+/* Type=range: two months side by side, tighter padding. */
+.root[data-mode="range"][data-view="day"] {
+  padding: var(--gb-space-12);
+}
+
+.panels {
+  display: flex;
+  gap: var(--gb-space-16);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gb-space-16);
+}
+
+/* ── Header: ‹ [Sep] [2026] › ──────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Figma sets gap 8 with space-between, which ignores the gap; 4 lets the header fit the 210px picker. */
+  gap: var(--gb-space-4);
+}
+
+.header[data-align="end"] {
+  justify-content: flex-end;
+}
+
+.titleGroup {
+  display: flex;
+  gap: var(--gb-space-4);
+}
+
+/* ── Day grid: 7 × 32px columns, 4px between rows ──────────────────────── */
+
+.grid {
+  border-collapse: separate;
+  border-spacing: 0 var(--gb-space-4);
+  /* border-spacing also pads the outside — pull it back so the grid is 224 × (16 + rows × 36 − 4 + 4). */
+  margin-block: calc(-1 * var(--gb-space-4));
+  table-layout: fixed;
+}
+
+.weekday {
+  width: var(--gb-space-32);
+  height: var(--gb-space-16);
+  padding: 0;
+  font: var(--gb-typography-xs);
+  color: var(--gb-text-subtle);
+  text-align: center;
+}
+
+.cell {
+  width: var(--gb-space-32);
+  height: var(--gb-space-32);
+  padding: 0;
+}
+
+/* Figma Part/Calendar Type=day: 32 × 32, Text-sm/Regular, radius md. */
+.day {
+  --day-bg: transparent;
+  --day-fg: var(--gb-text-default);
+  --day-border: transparent;
+  --day-radius: var(--gb-radius-md);
+  --day-marker: var(--gb-icon-default);
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--gb-space-32);
+  height: var(--gb-space-32);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--day-radius);
+  background: var(--day-bg);
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--day-border);
+  color: var(--day-fg);
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.day:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--day-border);
+}
+
+/* Type=today */
+.day[data-today] {
+  --day-border: var(--gb-border-static-gray);
+}
+
+/* Status=disabled — unavailable days and the neighbouring months' days. */
+.day[aria-disabled="true"],
+.day[data-outside] {
+  --day-fg: var(--gb-text-static-gray);
+  cursor: not-allowed;
+}
+
+.day[data-outside] {
+  cursor: default;
+}
+
+/* Status=active — the selected day, and both ends of a range. */
+.day:is([data-selected="single"], [data-selected="start"], [data-selected="end"]) {
+  --day-bg: var(--gb-background-bold);
+  --day-fg: var(--gb-text-invert);
+  --day-marker: var(--gb-icon-invert);
+}
+
+/* Status=auto-selected — days inside a range: square, so the band reads as one strip. */
+.day[data-selected="middle"] {
+  --day-bg: var(--gb-background-selected);
+  --day-fg: var(--gb-text-bold);
+  --day-radius: 0;
+}
+
+/* Data=true: a 4px dot 4px above the bottom edge (Figma Ellipse at y 24). */
+.day[data-marker]::after {
+  content: "";
+  position: absolute;
+  bottom: var(--gb-space-4);
+  left: 50%;
+  width: var(--gb-space-4);
+  height: var(--gb-space-4);
+  margin-left: calc(-1 * var(--gb-space-2));
+  border-radius: var(--gb-radius-full);
+  background: var(--day-marker);
+}
+
+/* Data style=reserved: a ring instead of a dot. */
+.day[data-marker="reserved"]::after {
+  background: transparent;
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--day-marker);
+}
+
+/* Data style=draft: warning color, also on a selected day. */
+.day[data-marker="draft"]::after {
+  background: var(--gb-icon-warning);
+}
+
+/* ── Month / year picker: 3 × 70px columns (Figma Type=month & year cell) ─ */
+
+.picker {
+  display: grid;
+  grid-template-columns: repeat(3, 70px);
+  row-gap: var(--gb-space-4);
+}
+
+.pick {
+  height: var(--gb-space-32);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gb-radius-md);
+  background: transparent;
+  color: var(--gb-text-default);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pick[data-selected] {
+  background: var(--gb-background-bold);
+  color: var(--gb-text-invert);
+}
+
+.pick:disabled {
+  color: var(--gb-text-static-gray);
+  cursor: not-allowed;
+}
+
+.pick:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-ring-focus);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .root {
+    border: var(--gb-stroke-1) solid CanvasText;
+  }
+  .day:is([data-selected="single"], [data-selected="start"], [data-selected="end"]),
+  .pick[data-selected] {
+    outline: 2px solid Highlight;
+  }
+}

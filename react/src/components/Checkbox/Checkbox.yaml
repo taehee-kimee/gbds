@@ -1,17 +1,17 @@
 # ================================================================
 # Checkbox Component Specification
 # ================================================================
-# Last Updated: 2026-10-02
+# Last Updated: 2026-10-16
 # Updated By: taehee0150@gmail.com
 
-title: gs-checkbox
+title: gb-checkbox
 
 # ================================================================
 # Layer 1: UX Guidelines
 # ================================================================
 
 meta:
-  component: gs-checkbox
+  component: gb-checkbox
   description: |
     A single boolean choice with an optional text label next to a 16px box.
     Use for a standalone yes/no option (e.g. agreeing to terms) or for
@@ -37,7 +37,7 @@ usage:
     - id: label-required
       rule: Every checkbox must have an accessible name
       severity: error
-      message: "Pass a label as children. Without children, aria-label is required — enforced by the TypeScript type."
+      message: "Pass a label as children. Without children, aria-label (or aria-labelledby) is required — enforced by the TypeScript type."
 
     - id: indeterminate-only-for-groups
       rule: Use indeterminate only for a parent whose children are partly selected
@@ -84,16 +84,17 @@ usage:
 variant_guidelines:
   default:
     description: |
-      The standard checkbox. Figma Style=default. Unchecked box is filled
-      with background/bolder; label is text/default.
+      The standard checkbox. Figma Type=default. Unchecked box is filled
+      with background/bolder; checked/part box is background/default with a
+      border/subtler stroke. Label is text/default.
     best_practices:
       - Use everywhere unless the option needs to recede
 
-  muted:
+  mute:
     description: |
-      A lower-emphasis unchecked look: background/default box with a
-      border/mute stroke and a text/subtler label. Figma Style=muted. Once
-      checked or part, it looks the same as default.
+      A lower-emphasis checkbox: background/default box with a
+      border/mute-subtle stroke and a text/subtle label, in every Status
+      (only the check or dash changes). Figma Type=mute.
     best_practices:
       - Use for optional, secondary choices next to more important ones
       - Do not use it to mean "disabled" — the control is still interactive
@@ -113,14 +114,14 @@ shape_guidelines:
 
 states_and_behaviors:
   unchecked:
-    description: Figma Type=default. Native checked=false.
+    description: Figma Status=default. Native checked=false.
 
   checked:
-    description: Figma Type=Checked. Native checked=true. Shows a 12px check (lucide/check).
+    description: Figma Status=checked. Native checked=true. Shows a 12px check (lucide/check).
 
   part:
     description: |
-      Figma Type=Part. indeterminate prop → the DOM indeterminate property.
+      Figma Status=part. indeterminate prop → the DOM indeterminate property.
       Shows a 12px dash (lucide/minus) and takes precedence over checked
       visually. Screen readers announce "mixed". A click clears it natively
       and toggles checked; the component re-applies the prop on the next
@@ -133,9 +134,11 @@ states_and_behaviors:
 
   disabled:
     description: |
-      Native disabled attribute. Figma Type=Disabled. Box becomes
-      background/disabled-bold with border/default; label text/subtle. If
-      also checked or part, the mark stays visible on the disabled box.
+      Native disabled attribute. Figma Status=disabled, disabled-checked,
+      disabled-part. Box becomes background/disabled-bold with
+      border/default; the check or dash turns icon/subtlest and the
+      label text/static/gray. Figma has these for Type=default only; mute
+      uses the same look (Review Note 3).
     caution: Use sparingly. A disabled checkbox does not explain why it is unavailable.
 
 other_options:
@@ -198,21 +201,23 @@ props:
     default: default
     enum:
       - default
-      - Checked
-      - Part
-      - Disabled
-    description: Check state (Figma "Type"). Code — checked, indeterminate and disabled on the input.
+      - mute
+    description: Visual emphasis (Figma "Type"). Code — variant prop.
 
-  style:
+  status:
     type: enum
     default: default
     enum:
       - default
-      - muted
-    description: Visual emphasis (Figma "Style"). Code — variant prop.
+      - part
+      - checked
+      - disabled
+      - disabled-checked
+      - disabled-part
+    description: Check state (Figma "Status"). Code — checked, indeterminate and disabled on the input.
 
 default:
-  name: Type=default, Style=default
+  name: Type=default, Status=default
   layout:
     - root:
         - box
@@ -221,96 +226,89 @@ default:
     root:
       display: inline-flex
       alignItems: center
-      gap: var(--gs-space-8)                     # 8px
+      gap: var(--gb-space-8)                     # 8px
       cursor: pointer
 
     box:
-      width: var(--gs-space-16)                  # 16px
-      height: var(--gs-space-16)
-      borderRadius: var(--gs-radius-sm)          # 6px
-      backgroundColor: var(--gs-background-bolder)
-      border: 1px inside var(--gs-border-muted)
-      boxShadow: var(--gs-shadow-xs)             # 0 1px 2px rgb(0 0 0 / 10%)
+      width: var(--gb-space-16)                  # 16px
+      height: var(--gb-space-16)
+      borderRadius: var(--gb-radius-sm)          # 6px
+      backgroundColor: var(--gb-background-bolder)
+      border: 1px inside var(--gb-border-muted)
+      boxShadow: var(--gb-shadow-xs)             # 0 1px 2px rgb(0 0 0 / 10%)
 
     check:
       width: 12px
       height: 12px
-      stroke: var(--gs-icon-default)
-      strokeWidth: var(--gs-stroke-2)            # at 24px viewBox → 1px rendered
+      stroke: var(--gb-icon-default)
+      strokeWidth: var(--gb-stroke-2)            # at 24px viewBox → 1px rendered
 
     label:
-      textStyle: Text-sm/Medium               # font: var(--gs-typography-sm); font-weight: var(--gs-font-weight-medium) → 14px/20px Inter 500
-      color: var(--gs-text-default)
+      textStyle: Text-sm/Medium               # font: var(--gb-typography-sm); font-weight: var(--gb-font-weight-medium) → 14px/20px Inter 500
+      color: var(--gb-text-default)
 
 variants:
   - name: default-unchecked
     configuration:
       type: default
-      style: default
+      status: default
     styles:
       box:
-        backgroundColor: var(--gs-background-bolder)
-        border: 1px inside var(--gs-border-muted)
+        backgroundColor: var(--gb-background-bolder)
+        border: 1px inside var(--gb-border-muted)
       label:
-        color: var(--gs-text-default)
+        color: var(--gb-text-default)
 
-  - name: muted-unchecked
+  - name: default-checked
     configuration:
       type: default
-      style: muted
+      status: checked | part
     styles:
       box:
-        backgroundColor: var(--gs-background-default)
-        border: 1px inside var(--gs-border-mute)
-      label:
-        color: var(--gs-text-subtler)
-
-  - name: checked
-    configuration:
-      type: Checked
-      style: default | muted
-    styles:
-      box:
-        backgroundColor: var(--gs-background-default)
-        border: 1px inside var(--gs-border-subtler)
+        backgroundColor: var(--gb-background-default)
+        border: 1px inside var(--gb-border-subtler)
       check:
-        visible: true
-        stroke: var(--gs-icon-default)
+        visible: true                            # dash instead for part
+        stroke: var(--gb-icon-default)
       label:
-        color: var(--gs-text-default)
+        color: var(--gb-text-default)
 
-  - name: part
+  - name: mute
     configuration:
-      type: Part
-      style: default | muted
+      type: mute
+      status: default | checked | part
     styles:
       box:
-        backgroundColor: var(--gs-background-default)
-        border: 1px inside var(--gs-border-subtler)
-      dash:
-        visible: true
-        stroke: var(--gs-icon-default)
+        backgroundColor: var(--gb-background-default)
+        border: 1px inside var(--gb-border-mute-subtle)
+      check:
+        visible: checked                         # dash for part
+        stroke: var(--gb-icon-default)
       label:
-        color: var(--gs-text-default)
+        color: var(--gb-text-subtle)
 
   - name: disabled
     configuration:
-      type: Disabled
+      type: default                              # mute uses the same in code (Review Note 3)
+      status: disabled | disabled-checked | disabled-part
     styles:
       root:
         cursor: not-allowed
       box:
-        backgroundColor: var(--gs-background-disabled-bold)
-        border: 1px inside var(--gs-border-default)
+        backgroundColor: var(--gb-background-disabled-bold)
+        border: 1px inside var(--gb-border-default)
+      check:
+        visible: disabled-checked                # dash for disabled-part
+        stroke: var(--gb-icon-subtlest)
       label:
-        color: var(--gs-text-subtle)
+        color: var(--gb-text-static-gray)
 
   - name: focus-visible
     configuration:
       state: focus
     styles:
       box:
-        boxShadow: var(--gs-ring-focus)          # plus the inset border and shadow-xs
+        boxShadow: var(--gb-ring-focus)          # plus the inset border and shadow-xs
 
   - name: forced-colors
     configuration:
@@ -327,10 +325,10 @@ variants:
 
 api:
   component: Checkbox
-  import: 'import { Checkbox } from "@gs/react"'
+  import: 'import { Checkbox } from "@gb/react"'
   element: HTMLInputElement
   requires:
-    - '@gs/tokens/fonts.css and @gs/tokens/tokens.css loaded once at the app root'
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
 
   # figma: the Figma property this prop comes from, or "none" for code-only props.
   # Every prop below with a Figma source or a playground control is editable in the
@@ -349,14 +347,14 @@ api:
       description: Accessible name for a box-only checkbox. Required at type level.
 
     - name: variant
-      type: '"default" | "muted"'
+      type: '"default" | "mute"'
       default: default
-      figma: Style
-      description: Figma "Style". Only affects the unchecked look and label color.
+      figma: Type
+      description: Figma "Type". mute keeps the light box and text/subtle label in every state.
 
     - name: checked
       type: boolean
-      figma: Type=Checked
+      figma: Status=checked
       description: Controlled checked state. Use with onChange.
 
     - name: defaultChecked
@@ -367,13 +365,13 @@ api:
     - name: indeterminate
       type: boolean
       default: false
-      figma: Type=Part
+      figma: Status=part
       description: Sets the DOM indeterminate property; shows the dash and overrides the check visually.
 
     - name: disabled
       type: boolean
       default: false
-      figma: Type=Disabled
+      figma: Status=disabled, disabled-checked, disabled-part
       description: Native disabled. Blocks click and focus.
 
     - name: name
@@ -445,33 +443,34 @@ api:
 
   dataAttributes:
     - name: data-variant
-      values: [default, muted]
-      description: Set on the root <label>. Drives the muted styles.
+      values: [default, mute]
+      description: Set on the root <label>. Drives the mute styles.
 
   tokensUsed:
     color:
-      - --gs-background-bolder
-      - --gs-background-default
-      - --gs-background-disabled-bold
-      - --gs-border-muted
-      - --gs-border-mute
-      - --gs-border-subtler
-      - --gs-border-default
-      - --gs-icon-default
-      - --gs-text-default
-      - --gs-text-subtler
-      - --gs-text-subtle
+      - --gb-background-bolder
+      - --gb-background-default
+      - --gb-background-disabled-bold
+      - --gb-border-muted
+      - --gb-border-mute-subtle
+      - --gb-border-subtler
+      - --gb-border-default
+      - --gb-icon-default
+      - --gb-icon-subtlest
+      - --gb-text-default
+      - --gb-text-subtle
+      - --gb-text-static-gray
     dimension:
-      - --gs-space-8
-      - --gs-space-16
-      - --gs-radius-sm
-      - --gs-stroke-1
-      - --gs-stroke-2
+      - --gb-space-8
+      - --gb-space-16
+      - --gb-radius-sm
+      - --gb-stroke-1
+      - --gb-stroke-2
     other:
-      - --gs-typography-sm
-      - --gs-font-weight-medium
-      - --gs-shadow-xs
-      - --gs-ring-focus
+      - --gb-typography-sm
+      - --gb-font-weight-medium
+      - --gb-shadow-xs
+      - --gb-ring-focus
 
 examples:
   basic:
@@ -499,10 +498,10 @@ examples:
     code: |
       <Checkbox aria-label="이 행 선택" />
 
-  muted:
+  mute:
     description: Lower-emphasis option
     code: |
-      <Checkbox variant="muted">다시 보지 않기</Checkbox>
+      <Checkbox variant="mute">다시 보지 않기</Checkbox>
 
 # ================================================================
 # Review Notes (Figma vs Code)
@@ -510,27 +509,32 @@ examples:
 #
 # FIGMA VS CODE DISCREPANCIES:
 #
-# 1. **Unchecked is filled, checked is empty**  ⚠ needs design decision
-#    - Figma: Type=default box = background/bolder (black in light, white in dark);
-#             Checked/Part box = background/default + border/subtler + icon
+# 1. **Unchecked is filled, checked is empty** — decided 2026-10-16: intended design, keep
+#    - Figma: Status=default box = background/bolder (black in light, white in dark);
+#             checked/part box = background/default + border/subtler + icon
 #    - Code: follows Figma. Most libraries do the opposite, so users may read the state backwards
 #
-# 2. **Muted label is fainter than disabled label**  ⚠ needs design decision
-#    - Figma: muted label text/subtler (neutral-450); disabled label text/subtle
-#             (light neutral-500, dark neutral-400)
+# 2. **Mute label fainter than disabled label** — resolved in Figma (checked 2026-10-16)
+#    - Figma: mute label text/subtle; disabled label text/static/gray
 #    - Code: follows Figma
 #
-# 3. **No muted × Checked / Part variant**  ⚠ needs design decision
-#    - Figma: Style=muted exists only with Type=default
-#    - Code: checked / part styles win; a checked muted checkbox looks like default
+# 3. **No mute × disabled variant**  ⚠ needs design decision
+#    - Figma: Type=mute has Status=default / checked / part only
+#    - Code: disabled wins; a disabled mute checkbox looks like a disabled default one
 #
-# 4. **No Disabled × Checked / Part variant**  ⚠ needs design decision
-#    - Figma: a single Type=Disabled (unchecked)
-#    - Code: disabled box with the check or dash still visible
+# 4. **Disabled × checked / part** — resolved in Figma (checked 2026-10-16)
+#    - Figma: Status=disabled-checked / disabled-part
+#    - Code: follows Figma
+#
+# 4b. **Disabled mark invisible in light mode** — fixed in Figma 2026-10-16 (review item 8)
+#    - Was: mark icon/static/gray = neutral-500 on background/disabled-bold neutral-500 (light)
+#    - Figma now: disabled-checked and disabled-part marks icon/subtlest
+#      (light neutral-400, dark neutral-500)
+#    - Code: follows Figma
 #
 # 5. **Focus and hover**  ⚠ needs design decision
 #    - Figma: no focus or hover variant
-#    - Code: :focus-visible → var(--gs-ring-focus) around the box; no hover style
+#    - Code: :focus-visible → var(--gb-ring-focus) around the box; no hover style
 #
 # 6. **Label visibility**
 #    - Figma: "Label" boolean property
@@ -554,8 +558,8 @@ examples:
 #
 # 1. Library Build
 #    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
-#      That build must set css.modules.generateScopedName to gsScopedName (react/css-modules.mjs) so
-#      class names stay gs-{component} (root) and gs-{component}-{local} — a consumer compiling src/ with its own config gets other names
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local} — a consumer compiling src/ with its own config gets other names
 #    - Priority: High before the first external consumer
 #
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -565,7 +569,7 @@ examples:
 # ================================================================
 
 metadata:
-  lastUpdated: "2026-10-02"
+  lastUpdated: "2026-10-16"
   status: draft
   notes: |
     Drafted from code (Checkbox.tsx, Checkbox.module.css) and Figma component set 76:8617.

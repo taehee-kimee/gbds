@@ -1,0 +1,1041 @@
+# ================================================================
+# Button Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-button
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-button
+  description: |
+    A clickable button used to trigger an action such as submit, navigate,
+    or confirm. Figma Type sets the content — default renders a label
+    (optionally followed by an icon), icon renders a single icon with no
+    label, google renders the branded sign-in button — and Style sets the
+    color role. Not for representing a persistent on/off state — use Toggle
+    or Switch instead.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Button (72:2719) · component set Button (73:3681), Type × Style × Status = 27 variants"
+    code: "react/src/components/Button/Button.tsx"
+
+usage:
+  when_to_use:
+    - To trigger the most important action in a section (use default)
+    - To offer a supporting action next to a default one (use mute or outline)
+    - To place a low-emphasis text action inline with other content (use link)
+    - For items in a pill-shaped menu or segment row (use the text ghost)
+    - To trigger a well-known action where space is tight, such as close, search or more (use an icon-only button)
+    - To start "Sign in with Google" (use google)
+    - When you need a clear call to action in forms, dialogs, or workflows
+
+  when_not_to_use:
+    - For moving to another page or URL → use an anchor (<a>) / router Link. The link style is still a <button> and cannot be opened in a new tab
+    - For toggling an on/off state → use Toggle or Switch instead
+    - For choosing between options → use Tabs, Select, Checkbox or radio controls instead
+    - When the content is purely informational → use text instead
+
+  rules:
+    - id: one-default-per-section
+      rule: Limit default (filled) buttons to one per section
+      severity: warning
+      message: "Several default buttons compete for attention. Use mute or outline for the other actions."
+
+    - id: icon-only-accessible-name
+      rule: Icon-only buttons must have an aria-label
+      severity: error
+      message: "Type=icon has no visible text. Pass aria-label (or aria-labelledby pointing at visible text) so screen readers can announce the action. Enforced by the TypeScript type — omitting both is a compile error."
+
+    - id: avoid-disabled-state
+      rule: Avoid disabled state when possible
+      severity: warning
+      message: "A disabled button does not say why it is unavailable, and it cannot receive focus. Prefer an enabled button plus inline feedback."
+
+    - id: clear-action-labels
+      rule: Button labels should be clear and action-oriented
+      severity: warning
+      message: "Use a concise verb ('저장', '삭제', '다음') instead of generic text ('확인', '여기를 클릭')."
+
+    - id: link-variant-not-for-navigation
+      rule: Do not use the link style for page navigation
+      severity: warning
+      message: "The link style only looks like a link. Navigation needs a real <a> so users can open it in a new tab or copy the address."
+
+  common_mistakes:
+    - mistake: Using too many default buttons in one section
+      correct: Keep one default for the main action; use mute or outline for the rest.
+      example:
+        wrong: |
+          <Button>제출</Button>
+          <Button>임시 저장</Button>
+          <Button>취소</Button>
+        right: |
+          <Button>제출</Button>
+          <Button variant="outline">임시 저장</Button>
+          <Button variant="mute">취소</Button>
+
+    - mistake: Icon-only button without an accessible name
+      correct: Always pass aria-label.
+      example:
+        wrong: |
+          <!-- TypeScript error: Property 'aria-label' is missing -->
+          <Button variant="ghost" icon={<X />} />
+        right: |
+          <Button variant="ghost" icon={<X />} aria-label="닫기" />
+
+    - mistake: Disabling a button without explaining why
+      correct: Keep the button enabled and show what is missing when it is pressed.
+      example:
+        wrong: |
+          <Button disabled>제출</Button>
+        right: |
+          <Button onClick={submit}>제출</Button>
+          <p role="alert">필수 항목을 모두 입력해 주세요</p>
+
+    - mistake: Using the link style to navigate
+      correct: Render a real anchor or router Link for navigation.
+      example:
+        wrong: |
+          <Button variant="link" onClick={() => (location.href = "/terms")}>약관 보기</Button>
+        right: |
+          <a href="/terms">약관 보기</a>
+
+    - mistake: Putting a button inside a form without choosing its type
+      correct: Button defaults to type="button" and never submits. Set type="submit" on the submit button explicitly.
+      example:
+        wrong: |
+          <form onSubmit={save}>
+            <Button>저장</Button>   <!-- does not submit -->
+          </form>
+        right: |
+          <form onSubmit={save}>
+            <Button type="submit">저장</Button>
+          </form>
+
+# Keyed by Figma Style. Type=default has default, mute, outline, link, ghost;
+# Type=icon has default, ghost, ghost-rounded; Type=google has default only.
+variant_guidelines:
+  default:
+    description: |
+      Type=default: the highest-emphasis button, filled with
+      background/bold, text/invert label. Use for the single most important
+      action in a section. Type=icon: a 36×36 square icon button on
+      background/default with a border/default stroke, radius lg.
+    best_practices:
+      - Reserve the filled text button for the main action of a section
+      - Limit to one per section
+      - Keep its placement consistent across screens (e.g. bottom-right of a dialog)
+
+  mute:
+    description: |
+      A low-contrast filled text button (background/subtler, text/default).
+      The neutral partner of default for secondary actions such as cancel
+      or back. Type=default only.
+    best_practices:
+      - Pair with default for the alternative action
+      - Use when a bordered button would add visual noise in a dense area
+
+  outline:
+    description: |
+      A bordered text button on background/default (border/default stroke).
+      Medium emphasis — more visible than mute, less than default.
+      Type=default only.
+    best_practices:
+      - Use for secondary actions that still need to stand out
+      - Prefer over mute on busy or tinted surfaces where a fill would blend in
+
+  link:
+    description: |
+      Text (text/bold) with a border/invert underline, no container, 20px
+      tall. Supports a 12px icon after the label. Type=default only.
+    best_practices:
+      - Use for actions, not navigation (see link-variant-not-for-navigation)
+
+  ghost:
+    description: |
+      No fill and no border in two forms. Type=default: a text pill
+      (radius full, 36px tall, text/default) — used for menu items such as
+      the Button Group menu; no icon slot. Type=icon: a circular 36×36 icon
+      button.
+    best_practices:
+      - Use where the button should feel part of the surface, such as a close button in a dialog header or a menu row
+      - Icon form always needs aria-label
+
+  ghost-rounded:
+    description: |
+      A circular 36×36 icon button filled with background/default, no
+      border. Type=icon only.
+    best_practices:
+      - Use where a circular control fits the surrounding shapes, such as floating or media controls
+      - Always provide aria-label
+
+  google:
+    description: |
+      Figma Type=google. Sign-in button on background/bolder with a
+      border/muted stroke: the Google mark (16px, fixed brand colors), gap 6,
+      then the label in text/invert.
+    best_practices:
+      - Use only for "Sign in / Continue with Google"
+      - Do not recolor the mark
+
+shape_guidelines:
+  text_only:
+    description: |
+      A label without an icon — the default for every Type=default style.
+      Clearest way to communicate an action.
+    when_to_use:
+      - When an icon would be ambiguous or unfamiliar
+      - When the label alone describes the action
+
+  text_and_icon:
+    description: |
+      A label followed by an icon (icon prop) — Figma "Show icon" + "-> Icon".
+      16px; 12px on link.
+    when_to_use:
+      - When the icon reinforces direction or result, such as an arrow for "다음" or an external-link icon
+    not_supported:
+      - ghost (text pill) and google — no icon slot in Figma; rejected by the type
+
+  icon_only:
+    description: |
+      Figma Type=icon. A single 16px icon in a 36×36 box (default, ghost,
+      ghost-rounded). In code: no children, pass icon + aria-label.
+    when_to_use:
+      - When the icon is universally recognizable (close, search, menu, more)
+      - When space is limited
+    requirements:
+      - MUST provide aria-label or aria-labelledby (enforced by type)
+
+states_and_behaviors:
+  enabled:
+    description: Resting state. Figma Status=default.
+
+  hover:
+    description: |
+      Pointer is over the button. Shares the Figma Status=active visuals.
+      Only applied on devices with a hover-capable pointer
+      (@media (hover: hover)), so the style does not stick after a tap on
+      touch screens.
+
+  active:
+    description: |
+      Button is being pressed (mouse down, touch, or Space/Enter held).
+      Figma Status=active. Applied on all devices. Every style turns
+      background/mute with text/static/white (icon/static/white on Type=icon)
+      and drops its border, except link (text/subtle label,
+      border/mute-subtle underline, no fill). Type=default default and mute
+      also go to opacity 90. Icon ghost changes radius full → lg.
+
+  selected:
+    description: |
+      isSelected={true}. Keeps the Figma Status=active look while selected and
+      announces aria-pressed="true". A button given isSelected={false} is
+      announced as a toggle that is not pressed; a button without the prop is
+      a plain action button. For the current item of a button group. No Figma
+      variant exists for this state. Disabled wins over selected.
+
+  focus:
+    description: |
+      Keyboard focus (:focus-visible only, not on mouse click). Shows the
+      focus ring (ring/focus = Figma effect style "Box Shadow/Focus ring",
+      0 0 0 3px). No Figma variant exists for this state.
+
+  disabled:
+    description: |
+      Native disabled attribute. Figma Status=disabled. The button cannot be
+      clicked, does not receive focus, and shows a not-allowed cursor.
+      Filled and bordered styles turn background/disabled + border/overlay
+      with text/static/gray. ghost and ghost-rounded stay unfilled with no
+      border. Type=icon uses icon/static/gray. link keeps no fill and turns
+      its underline border/static/gray.
+    caution: |
+      Use sparingly. A disabled button does not explain why it is
+      unavailable.
+
+other_options:
+  flexible_width:
+    description: Width follows content (Figma HUG). Type=icon is fixed 36×36.
+
+  text_overflow:
+    description: Labels stay on one line (white-space nowrap). Keep labels short.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: button
+    description: |
+      The only container. Holds background, border (drawn as inset
+      box-shadow), radius, padding and the horizontal layout of its content.
+      Figma: the variant frame itself (auto layout HORIZONTAL; VERTICAL for
+      Type=icon). data-type and data-variant carry the Figma Type and Style.
+
+  google-logo:
+    type: icon
+    instanceOf: lucide/Google
+    nullable: true
+    description: Type=google only. 16px Google mark before the label, inline SVG with fixed brand colors, aria-hidden.
+
+  label:
+    type: text
+    nullable: true
+    description: Button text, passed as children. Absent in Type=icon. Figma "-> Label" text property (Type=google's text is not bound to it — Review Note 12).
+
+  icon:
+    type: instance
+    instanceOf: lucide/circle-dashed
+    nullable: true
+    description: |
+      Type=default: after the label, Figma "-> Icon" (instance swap) +
+      "Show icon" (boolean, default false); 16px, 12px on link; not on
+      ghost. Type=icon: the single 16px icon. Code: icon prop, any SVG,
+      colored with currentColor.
+
+  underline:
+    type: line
+    description: |
+      link only. Figma draws a 1px bottom stroke on the 20px frame; code
+      uses text-decoration underline (thickness stroke/1, offset 4px).
+
+props:
+  label:
+    type: string
+    default: "Button"
+    description: Button text (Figma "-> Label" text property)
+
+  icon:
+    type: instance
+    default: "lucide/circle-dashed"
+    description: Icon to display (Figma "-> Icon" instance swap)
+
+  showIcon:
+    type: boolean
+    default: false
+    description: Show the icon after the label (Figma "Show icon"). Type=default only.
+
+  type:
+    type: enum
+    default: default
+    enum:
+      - default
+      - icon
+      - google
+    description: 'Content form (Figma "Type"). Code — derived: no children = icon; variant="google" = google.'
+
+  style:
+    type: enum
+    default: default
+    enum:
+      - default
+      - mute
+      - outline
+      - link
+      - ghost
+      - ghost-rounded
+    description: Color role (Figma "Style"). Code — variant prop. Available per Type — default — default/mute/outline/link/ghost; icon — default/ghost/ghost-rounded; google — default.
+
+  status:
+    type: enum
+    default: default
+    enum:
+      - default
+      - active
+      - disabled
+    description: Interactive state (Figma "Status"). In code, active = :hover + :active (+ isSelected); disabled = disabled attribute.
+
+default:
+  name: Type=default, Style=default, Status=default
+  layout:
+    - root:
+        - label
+        - icon   # only when the icon prop is set
+  styles:
+    root:
+      display: inline-flex
+      alignItems: center
+      justifyContent: center
+      layoutMode: HORIZONTAL
+      layoutSizingHorizontal: HUG
+      height: var(--gb-space-36)                 # 36px
+      paddingLeft: var(--gb-space-16)
+      paddingRight: var(--gb-space-16)
+      gap: var(--gb-space-8)
+      borderRadius: var(--gb-radius-lg)          # 10px
+      backgroundColor: var(--gb-background-bold)
+      color: var(--gb-text-invert)
+      cursor: pointer
+
+    label:
+      textStyle: Text-sm/Medium               # font: var(--gb-typography-sm); font-weight: var(--gb-font-weight-medium) → 14px/20px Inter 500
+      whiteSpace: nowrap
+
+    icon:
+      width: var(--gb-space-16)                  # 16px
+      height: var(--gb-space-16)
+      color: currentColor
+
+variants:
+  # ============================================================
+  # Type=default — Status=default
+  # ============================================================
+
+  - name: default-default
+    configuration:
+      type: default
+      style: default
+    styles:
+      root:
+        backgroundColor: var(--gb-background-bold)
+      label:
+        color: var(--gb-text-invert)
+
+  - name: default-mute
+    configuration:
+      type: default
+      style: mute
+    styles:
+      root:
+        backgroundColor: var(--gb-background-subtler)
+      label:
+        color: var(--gb-text-default)
+
+  - name: default-outline
+    configuration:
+      type: default
+      style: outline
+    styles:
+      root:
+        backgroundColor: var(--gb-background-default)
+        border: 1px inside var(--gb-border-default)
+      label:
+        color: var(--gb-text-default)
+
+  - name: default-link
+    configuration:
+      type: default
+      style: link
+    styles:
+      root:
+        height: var(--gb-font-leading-5)         # 20px
+        padding: 0
+        backgroundColor: transparent
+      label:
+        color: var(--gb-text-bold)
+      underline:
+        color: var(--gb-border-invert)
+        thickness: var(--gb-stroke-1)
+      icon:
+        width: 12px
+        height: 12px
+
+  - name: default-ghost
+    configuration:
+      type: default
+      style: ghost
+    styles:
+      root:
+        backgroundColor: transparent
+        borderRadius: var(--gb-radius-full)
+      label:
+        color: var(--gb-text-default)
+
+  # ============================================================
+  # Type=icon — Status=default (36×36, padding 0)
+  # ============================================================
+
+  - name: icon-default
+    configuration:
+      type: icon
+      style: default
+    styles:
+      root:
+        width: 36px
+        height: 36px
+        padding: 0
+        backgroundColor: var(--gb-background-default)
+        border: 1px inside var(--gb-border-default)
+        borderRadius: var(--gb-radius-lg)
+      icon:
+        color: var(--gb-icon-default)
+
+  - name: icon-ghost
+    configuration:
+      type: icon
+      style: ghost
+    styles:
+      root:
+        width: 36px
+        height: 36px
+        padding: 0
+        backgroundColor: transparent
+        borderRadius: var(--gb-radius-full)
+      icon:
+        color: var(--gb-icon-default)
+
+  - name: icon-ghost-rounded
+    configuration:
+      type: icon
+      style: ghost-rounded
+    styles:
+      root:
+        width: 36px
+        height: 36px
+        padding: 0
+        backgroundColor: var(--gb-background-default)
+        borderRadius: var(--gb-radius-full)
+      icon:
+        color: var(--gb-icon-default)
+
+  # ============================================================
+  # Type=google — Status=default
+  # ============================================================
+
+  - name: google
+    configuration:
+      type: google
+      style: default
+    styles:
+      root:
+        gap: var(--gb-space-6)
+        backgroundColor: var(--gb-background-bolder)
+        border: 1px inside var(--gb-border-muted)
+      label:
+        color: var(--gb-text-invert)
+
+  # ============================================================
+  # Status=active  (code: :hover on hover-capable pointers, :active everywhere, isSelected)
+  # ============================================================
+
+  - name: active
+    configuration:
+      type: default | google
+      style: default | mute | outline | ghost
+      status: active
+    styles:
+      root:
+        backgroundColor: var(--gb-background-mute)
+        border: none
+      label:
+        color: var(--gb-text-static-white)
+
+  - name: active-opacity
+    configuration:
+      type: default
+      style: default | mute
+      status: active
+    styles:
+      root:
+        opacity: var(--gb-opacity-90)
+
+  - name: link-active
+    configuration:
+      type: default
+      style: link
+      status: active
+    styles:
+      root:
+        backgroundColor: transparent
+      label:
+        color: var(--gb-text-subtle)
+      underline:
+        color: var(--gb-border-mute-subtle)
+
+  - name: icon-active
+    configuration:
+      type: icon
+      style: default | ghost | ghost-rounded
+      status: active
+    styles:
+      root:
+        backgroundColor: var(--gb-background-mute)
+        border: none
+      icon:
+        color: var(--gb-icon-static-white)
+
+  - name: icon-ghost-active
+    configuration:
+      type: icon
+      style: ghost
+      status: active
+    styles:
+      root:
+        borderRadius: var(--gb-radius-lg)        # 10px — default and disabled are full
+
+  # ============================================================
+  # Status=disabled
+  # ============================================================
+
+  - name: disabled
+    configuration:
+      type: default | icon | google
+      style: default | mute | outline
+      status: disabled
+    styles:
+      root:
+        backgroundColor: var(--gb-background-disabled)
+        border: 1px inside var(--gb-border-overlay)
+        cursor: not-allowed
+      label:
+        color: var(--gb-text-static-gray)
+
+  - name: icon-disabled
+    configuration:
+      type: icon
+      status: disabled
+    styles:
+      icon:
+        color: var(--gb-icon-static-gray)
+
+  - name: ghost-disabled
+    configuration:
+      style: ghost | ghost-rounded
+      status: disabled
+    styles:
+      root:
+        backgroundColor: transparent
+        border: none
+      label:
+        color: var(--gb-text-static-gray)        # text ghost; icon forms use icon-disabled
+
+  - name: link-disabled
+    configuration:
+      type: default
+      style: link
+      status: disabled
+    styles:
+      root:
+        backgroundColor: transparent
+        border: none
+      label:
+        color: var(--gb-text-static-gray)
+      underline:
+        color: var(--gb-border-static-gray)
+
+  # ============================================================
+  # SELECTED (code only — isSelected reuses Status=active styles)
+  # ============================================================
+
+  - name: selected
+    configuration:
+      isSelected: true
+    styles:
+      root: same as the variant's Status=active (see above)
+
+  # ============================================================
+  # FOCUS (code only — no Figma variant)
+  # ============================================================
+
+  - name: focus-visible
+    configuration:
+      state: focus
+    styles:
+      root:
+        boxShadow: var(--gb-ring-focus)          # 0 0 0 3px rgb(161 161 161 / 50%), drawn outside, plus the variant's inset border
+
+  # ============================================================
+  # FORCED COLORS (Windows High Contrast)
+  # ============================================================
+
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+    styles:
+      root:
+        border: 1px solid ButtonText          # box-shadow is dropped in this mode; link keeps a transparent border
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: Button
+  import: 'import { Button } from "@gb/react"'
+  element: HTMLButtonElement
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+  types: |
+    ButtonProps = TextButtonProps | PlainButtonProps | IconButtonProps
+    TextButtonProps  — variant?: "default" | "mute" | "outline" | "link"; children; icon?   (Figma Type=default)
+    PlainButtonProps — variant: "ghost" | "google"; children; no icon                       (Type=default Style=ghost, Type=google)
+    IconButtonProps  — variant?: "default" | "ghost" | "ghost-rounded"; icon; no children; aria-label or aria-labelledby required  (Type=icon)
+
+  # figma: the Figma property this prop comes from, or "none" for code-only props.
+  # Every prop below with a Figma source or a playground control is editable in the
+  # playground (Controls → Figma properties / Code properties).
+  props:
+    - name: variant
+      type: '"default" | "mute" | "outline" | "link" | "ghost" | "ghost-rounded" | "google"'
+      default: default
+      figma: Style (and Type=google)
+      description: |
+        Figma Style. The allowed values depend on the props shape (see types):
+        with children — default, mute, outline, link, ghost, google; without
+        children (Type=icon) — default, ghost, ghost-rounded. "google" selects
+        Figma Type=google.
+
+    - name: children
+      type: ReactNode
+      required: "for Type=default and google"
+      figma: "-> Label"
+      description: The label. Omit it for an icon-only button (Figma Type=icon).
+
+    - name: icon
+      type: ReactNode
+      required: "for Type=icon"
+      figma: "-> Icon + Show icon (Type=default); -> Icon (Type=icon)"
+      description: |
+        Any SVG, colored with currentColor. With children it is rendered after
+        the label (16px, 12px on link); without children it is the only
+        content (16px). Not accepted with variant ghost (text) or google.
+
+    - name: disabled
+      type: boolean
+      default: false
+      figma: Status=disabled
+      description: Native disabled. Blocks click and focus. (Figma Status=active has no prop — it is :hover / :active.)
+
+    - name: isSelected
+      type: boolean
+      default: false
+      figma: none
+      description: |
+        Selected state, e.g. the current item of a button group.
+        true → Status=active look + aria-pressed="true". Passing the prop at all
+        (true or false) marks the button as a toggle for screen readers
+        (aria-pressed="false" when false); plain action buttons omit it.
+        Passing aria-current (navigation) suppresses aria-pressed. The parent
+        owns this state — Button does not toggle itself.
+
+    - name: aria-label
+      type: string
+      required: "for Type=icon (no children) — unless aria-labelledby is passed"
+      figma: none
+      description: Accessible name. Required at type level for icon-only buttons (aria-labelledby satisfies it too). Optional with a label, where it overrides the visible label for screen readers.
+
+    - name: aria-labelledby
+      type: string
+      required: "for Type=icon — unless aria-label is passed"
+      figma: none
+      description: Id of visible text that names an icon-only button.
+
+    - name: type
+      type: '"button" | "submit" | "reset"'
+      default: button
+      figma: none
+      description: Differs from the HTML default ("submit") so a Button inside a form never submits by accident. Set "submit" on the form's submit button.
+
+    - name: name
+      type: string
+      default: undefined
+      figma: none
+      description: Sent with the form data as name=value when this button submits the form.
+
+    - name: value
+      type: string
+      default: undefined
+      figma: none
+      description: Sent with name when this button submits the form — lets one form tell several submit buttons apart.
+
+    - name: className
+      type: string
+      figma: none
+      description: Appended after the component class. Use for layout (margin, width), not for colors.
+
+    - name: ref
+      type: Ref<HTMLButtonElement>
+      figma: none
+      description: Forwarded to the <button> (React 19 ref-as-prop).
+
+    - name: "...rest"
+      type: ComponentPropsWithRef<"button">
+      figma: none
+      description: Every other native <button> attribute is passed through (id, form, autoFocus, aria-*, data-*, tabIndex …).
+
+  slots:
+    - name: children
+      description: Label text
+
+    - name: icon
+      description: Icon after the label, or the only content of an icon-only button
+
+  events:
+    # Button defines no custom events. All native <button> events are passed
+    # through unchanged as React props; payloads are React synthetic events.
+    # onClick, onFocus, onBlur and onKeyDown are logged in the playground Actions panel.
+    - name: onClick
+      description: Fired on mouse click, tap, and Enter/Space when focused. Not fired when disabled.
+      payload:
+        event: React.MouseEvent<HTMLButtonElement>
+
+    - name: onFocus
+      description: Fired when the button receives focus. Never fires while disabled.
+      payload:
+        event: React.FocusEvent<HTMLButtonElement>
+
+    - name: onBlur
+      description: Fired when the button loses focus.
+      payload:
+        event: React.FocusEvent<HTMLButtonElement>
+
+    - name: onKeyDown / onKeyUp
+      description: Keyboard events. Enter and Space already trigger onClick — no handler needed for activation.
+      payload:
+        event: React.KeyboardEvent<HTMLButtonElement>
+
+    - name: onPointerDown / onPointerUp / onPointerEnter / onPointerLeave
+      description: Pointer events, e.g. for press analytics. Not fired when disabled.
+      payload:
+        event: React.PointerEvent<HTMLButtonElement>
+
+  methods:
+    # No custom methods. Use the ref to reach the native element.
+    - name: focus
+      signature: "ref.current.focus(options?: FocusOptions): void"
+      description: Native HTMLButtonElement.focus()
+
+    - name: blur
+      signature: "ref.current.blur(): void"
+      description: Native HTMLButtonElement.blur()
+
+  dataAttributes:
+    - name: data-type
+      values: [default, icon, google]
+      description: Figma Type, set by the component (no children → icon; variant google → google). Usable as a test selector.
+
+    - name: data-variant
+      values: [default, mute, outline, link, ghost, ghost-rounded, google]
+      description: Figma Style (the variant prop). Drives the style rules together with data-type.
+
+    - name: data-selected
+      values: [present when isSelected]
+      description: Set by the component while isSelected is true. Drives the selected styles.
+
+  tokensUsed:
+    color:
+      - --gb-background-bold
+      - --gb-background-bolder
+      - --gb-background-subtler
+      - --gb-background-default
+      - --gb-background-mute
+      - --gb-background-disabled
+      - --gb-text-invert
+      - --gb-text-default
+      - --gb-text-bold
+      - --gb-text-subtle
+      - --gb-text-static-white
+      - --gb-text-static-gray
+      - --gb-icon-default
+      - --gb-icon-static-white
+      - --gb-icon-static-gray
+      - --gb-border-default
+      - --gb-border-invert
+      - --gb-border-muted
+      - --gb-border-overlay
+      - --gb-border-mute-subtle
+      - --gb-border-static-gray
+    dimension:
+      - --gb-space-6
+      - --gb-space-8
+      - --gb-space-16
+      - --gb-space-36
+      - --gb-radius-lg
+      - --gb-radius-full
+      - --gb-stroke-1
+      - --gb-font-leading-5
+    other:
+      - --gb-typography-sm
+      - --gb-font-weight-medium
+      - --gb-opacity-90
+      - --gb-ring-focus
+
+examples:
+  basic:
+    description: Basic default button
+    code: |
+      <Button onClick={save}>저장</Button>
+
+  default-with-alternatives:
+    description: One default with supporting actions
+    code: |
+      <Button variant="mute" onClick={close}>취소</Button>
+      <Button onClick={confirm}>확인</Button>
+
+  submit-in-form:
+    description: Submit button inside a form
+    code: |
+      <form onSubmit={handleSubmit}>
+        <Button type="submit">제출</Button>
+      </form>
+
+  with-icon:
+    description: Label followed by an icon (Figma Show icon)
+    code: |
+      import { ArrowRight } from "lucide-react"
+
+      <Button variant="outline" icon={<ArrowRight />}>다음</Button>
+
+  link:
+    description: Inline text action, optionally with a 12px icon
+    code: |
+      <Button variant="link" onClick={openDetails}>자세히 보기</Button>
+      <Button variant="link" icon={<ExternalLink />} onClick={openDocs}>문서</Button>
+
+  ghost-menu-item:
+    description: Text ghost pill, e.g. a menu row item
+    code: |
+      <Button variant="ghost" isSelected={tab === "assets"} onClick={() => setTab("assets")}>Assets</Button>
+
+  icon-only:
+    description: Icon-only buttons (Figma Type=icon; aria-label required)
+    code: |
+      import { MoreHorizontal, Search, X } from "lucide-react"
+
+      <Button icon={<Search />} aria-label="검색" />
+      <Button variant="ghost" icon={<X />} aria-label="닫기" />
+      <Button variant="ghost-rounded" icon={<MoreHorizontal />} aria-label="더보기" />
+
+  google:
+    description: Google sign-in
+    code: |
+      <Button variant="google" onClick={signInWithGoogle}>Continue with Google</Button>
+
+  toggle:
+    description: Toggle button — the parent owns the selected state
+    code: |
+      const [bold, setBold] = useState(false)
+      <Button icon={<Bold />} aria-label="굵게" isSelected={bold} onClick={() => setBold(!bold)} />
+
+  name-value-submit:
+    description: Two submit buttons in one form, told apart by name/value
+    code: |
+      <form action="/posts" method="post">
+        <Button type="submit" variant="outline" name="intent" value="draft">임시 저장</Button>
+        <Button type="submit" name="intent" value="publish">게시</Button>
+      </form>
+
+  disabled-button:
+    description: Disabled button (use sparingly)
+    code: |
+      <Button disabled>제출</Button>
+
+  programmatic-focus:
+    description: Focus the button from code
+    code: |
+      const ref = useRef<HTMLButtonElement>(null)
+      // …
+      <Button ref={ref}>다시 시도</Button>
+      ref.current?.focus()
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/button/review
+# ================================================================
+#
+# FIGMA VS CODE DISCREPANCIES:
+#
+# 1. **State Representation**  ⚠ needs design decision
+#    - Figma: Status variant (default / active / disabled), no hover vs pressed split
+#    - Code: active → :hover (hover-capable pointers only) + :active;
+#            disabled → native disabled attribute
+#
+# 2. **Focus State**  ⚠ needs design decision
+#    - Figma: no focus variant on Button. Effect style "Box Shadow/Focus ring"
+#             exists and is used 290 times elsewhere.
+#    - Code: :focus-visible → var(--gb-ring-focus)
+#
+# 3. **Icon ghost radius per state**  ✅ resolved by the 2026-10-16 Figma restructure
+#    - Figma now: default radius/full, active radius/lg, disabled radius/full
+#      (was full · md · lg)
+#    - Code: same as Figma
+#
+# 4. **Icon button disabled icon color**  ✅ resolved by the 2026-10-16 Figma restructure
+#    - Figma now: icon/static/gray for all three icon styles
+#      (was icon/default on icon-rounded, icon/subtlest elsewhere)
+#    - Code: same as Figma
+#
+# 5. **Ghost disabled fill and border**  ✅ resolved by the 2026-10-16 Figma restructure
+#    - Figma now: icon ghost, icon ghost-rounded and text ghost stay unfilled with
+#      no border when disabled; only the label/icon turns static/gray (the
+#      review proposal "disabled도 투명")
+#    - Code: same as Figma
+#
+# 6. **Same active color for every filled style**  ⚠ needs design decision
+#    - Figma: default, mute, outline, ghost, google and all three icon styles turn
+#             background/mute on active, so they become indistinguishable on hover
+#    - Code: follows Figma
+#
+# 7. **Borders**
+#    - Figma: 1px stroke, INSIDE
+#    - Code: inset box-shadow, so bordered and borderless styles keep the
+#            same hug width (a CSS border would add 2px)
+#
+# 8. **Link underline**
+#    - Figma: 1px bottom stroke on the 20px frame — border/invert ·
+#             border/mute-subtle (active) · border/static/gray (disabled)
+#    - Code: text-decoration underline, offset 4px — visually equivalent, wraps with the text
+#
+# 9. **Width**
+#    - Figma 77×36; Chrome 76.61×36. Figma renders Inter 3.19 and
+#      @gb/tokens/fonts.css ships the same version. With Inter 4
+#      (Google Fonts) the width drops to 75.84.
+#
+# 10. **Selected state (isSelected)**  ✅ decided 2026-10-02: keep the Status=active look
+#    - Figma: no selected variant on Button. Floating pill (Button Group, 76:8691)
+#             draws its selected item as a separate frame filled background/mute
+#    - Code: isSelected → aria-pressed + data-selected, reusing Status=active styles.
+#            Since the 2026-10-16 restructure ghost active is a gray fill, so a
+#            selected ghost no longer looks dimmer — only link still does
+#
+# 11. **New style: text ghost pill**  ⚠ needs design decision
+#    - Figma: Type=default, Style=ghost — no fill, radius/full, padding 8/16,
+#             36 tall, no Show icon slot. Used by the Button Group menu items
+#    - Code: variant="ghost" + children; icon rejected at type level
+#
+# 12. **New Type: google — label is not a Figma property**  ⚠ needs design decision
+#    - Figma: Type=google, background/bolder + border/muted, Google mark (16px)
+#             + "Continue with Google" (gap 6). The text is not bound to
+#             "-> Label", so instances cannot change it
+#    - Code: variant="google" + children; the mark is built in with fixed brand colors
+#
+# 13. **API change for the Figma restructure**
+#    - Figma 2026-10-16: Type × Style × Status, 27 variants; Trailing icon → Show icon
+#    - Code: variant = Figma Style (primary → default, icon → omitted,
+#            icon-rounded → ghost-rounded); Type=icon = no children + icon +
+#            aria-label; trailingIcon → icon (link supports a 12px icon);
+#            data-type / data-variant expose the Figma values
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local} — a consumer compiling src/ with its own config gets other names
+#    - Priority: High before the first external consumer
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (Button.tsx, Button.module.css) and Figma component set 73:3681
+    after the 2026-10-16 restructure (Type × Style × Status, 27 variants).
+    Layer 1 guidelines are a first draft and need design review.
+    Open design questions: Review Notes 1, 2, 6, 11, 12.

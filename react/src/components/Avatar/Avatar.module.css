@@ -1,0 +1,104 @@
+/*
+ * Avatar — mirrors the Figma component set `Avatar` (3073:4051).
+ * Figma Type=Image | Initial | Icon → data-type on the root, derived from src / initials and the image load.
+ * Figma Style=rounded | rectangle | circle → data-shape on the root.
+ *
+ * One size (32px) in Figma. Types and shapes only reassign the --avatar-* properties below.
+ */
+
+.root {
+  --avatar-size: var(--gb-space-32);
+  --avatar-radius: var(--gb-radius-md);
+  --avatar-bg: var(--gb-background-default);
+  --avatar-border: var(--gb-border-subtler);
+  --avatar-fg: var(--gb-icon-default);
+
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  overflow: hidden;
+  border-radius: var(--avatar-radius);
+  background: var(--avatar-bg);
+  /* Figma stroke is INSIDE. */
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--avatar-border);
+  color: var(--avatar-fg);
+  vertical-align: middle;
+  user-select: none;
+}
+
+/* Figma: the initial is an outlined glyph — measured as Inter Black 20px (12.19 × 14.91 ink, exact). */
+.initial {
+  font: var(--gb-typography-xl);
+  font-weight: var(--gb-font-weight-black);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Figma: lucide/user-filled, 18px. */
+.icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The image is mounted while loading so its load can be detected; the fallback shows until it lands. */
+.root:not([data-type="image"]) .image {
+  visibility: hidden;
+}
+
+/* ── Clickable (onClick → <button>): code-only, Figma has no interactive state ── */
+
+button.root {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button.root:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--avatar-border);
+}
+
+button.root:disabled {
+  cursor: not-allowed;
+}
+
+/* ── Type=Image: no fill or stroke, the photo is clipped to the shape ── */
+
+.root[data-type="image"] {
+  --avatar-bg: transparent;
+  --avatar-border: transparent;
+}
+
+/* ── Style ─────────────────────────────────────────────────────────────── */
+
+.root[data-shape="rectangle"] {
+  --avatar-radius: var(--gb-radius-none);
+}
+
+.root[data-shape="circle"] {
+  --avatar-radius: var(--gb-radius-full);
+}
+
+/* Windows High Contrast drops box-shadow; keep the frame visible. */
+@media (forced-colors: active) {
+  .root:not([data-type="image"]) {
+    border: var(--gb-stroke-1) solid CanvasText;
+  }
+}

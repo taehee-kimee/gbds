@@ -1,7 +1,7 @@
 .rv {
   max-width: 1200px;
-  padding: var(--gs-space-32) var(--gs-space-16) var(--gs-space-64);
-  color: var(--gs-text-default);
+  padding: var(--gb-space-32) var(--gb-space-16) var(--gb-space-64);
+  color: var(--gb-text-default);
 }
 
 .rv code {
@@ -14,118 +14,118 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: var(--gs-space-16) var(--gs-space-32);
-  margin-bottom: var(--gs-space-32);
+  gap: var(--gb-space-16) var(--gb-space-32);
+  margin-bottom: var(--gb-space-32);
 }
 
 .rv-head h1 {
   margin: 0;
-  font: var(--gs-typography-2xl);
-  font-weight: var(--gs-font-weight-semibold);
+  font: var(--gb-typography-2xl);
+  font-weight: var(--gb-font-weight-semibold);
 }
 
 .rv-source {
-  margin: var(--gs-space-4) 0 0;
-  font: var(--gs-typography-xs);
-  color: var(--gs-text-subtle);
+  margin: var(--gb-space-4) 0 0;
+  font: var(--gb-typography-xs);
+  color: var(--gb-text-subtle);
 }
 
 .rv-summary {
   display: flex;
-  gap: var(--gs-space-24);
+  gap: var(--gb-space-24);
 }
 
 .rv-progress {
   display: grid;
-  gap: var(--gs-space-4);
-  font: var(--gs-typography-xs);
-  color: var(--gs-text-subtle);
+  gap: var(--gb-space-4);
+  font: var(--gb-typography-xs);
+  color: var(--gb-text-subtle);
 }
 
 .rv-progress strong {
-  color: var(--gs-text-default);
+  color: var(--gb-text-default);
 }
 
 .rv-progress progress {
   width: 140px;
   height: 6px;
-  accent-color: var(--gs-background-bold);
+  accent-color: var(--gb-background-bold);
 }
 
 .rv-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--gs-space-12);
+  gap: var(--gb-space-12);
   margin-left: auto;
-  font: var(--gs-typography-xs);
+  font: var(--gb-typography-xs);
 }
 
 .rv-reviewer {
   display: flex;
   align-items: center;
-  gap: var(--gs-space-8);
-  color: var(--gs-text-subtle);
+  gap: var(--gb-space-8);
+  color: var(--gb-text-subtle);
 }
 
 .rv-reviewer input,
 .rv-note {
   box-sizing: border-box;
-  padding: var(--gs-space-6) var(--gs-space-8);
-  border: var(--gs-stroke-1) solid var(--gs-border-default);
-  border-radius: var(--gs-radius-md);
-  background: var(--gs-background-default);
-  color: var(--gs-text-default);
-  font: var(--gs-typography-sm);
+  padding: var(--gb-space-6) var(--gb-space-8);
+  border: var(--gb-stroke-1) solid var(--gb-border-default);
+  border-radius: var(--gb-radius-md);
+  background: var(--gb-background-default);
+  color: var(--gb-text-default);
+  font: var(--gb-typography-sm);
 }
 
 .rv-copy {
-  padding: var(--gs-space-6) var(--gs-space-12);
-  border: var(--gs-stroke-1) solid var(--gs-border-default);
-  border-radius: var(--gs-radius-md);
-  background: var(--gs-background-default);
-  color: var(--gs-text-default);
-  font: var(--gs-typography-xs);
+  padding: var(--gb-space-6) var(--gb-space-12);
+  border: var(--gb-stroke-1) solid var(--gb-border-default);
+  border-radius: var(--gb-radius-md);
+  background: var(--gb-background-default);
+  color: var(--gb-text-default);
+  font: var(--gb-typography-xs);
   cursor: pointer;
 }
 
 .rv-save {
-  color: var(--gs-text-subtle);
+  color: var(--gb-text-subtle);
 }
 
 .rv-save[data-status="error"] {
-  color: var(--gs-text-error);
+  color: var(--gb-text-error);
 }
 
 /* ── Item card ──────────────────────────────────────────────────────────── */
 
 .rv-item {
-  margin-bottom: var(--gs-space-24);
-  padding: var(--gs-space-24);
-  border: var(--gs-stroke-1) solid var(--gs-border-default);
-  border-radius: var(--gs-radius-xl);
-  background: var(--gs-background-default);
+  margin-bottom: var(--gb-space-24);
+  padding: var(--gb-space-24);
+  border: var(--gb-stroke-1) solid var(--gb-border-default);
+  border-radius: var(--gb-radius-xl);
+  background: var(--gb-background-default);
 }
 
 .rv-item[data-bucket="todo"] {
-  border-color: var(--gs-border-warning);
+  border-color: var(--gb-border-warning);
 }
 
 .rv-item[data-reviewed] {
-  border-color: var(--gs-border-success);
+  border-color: var(--gb-border-success);
 }
 
 .rv-item-head {
   display: flex;
   align-items: center;
-  gap: var(--gs-space-12);
+  gap: var(--gb-space-12);
 }
 
 .rv-item-head h2 {
   flex: 1;
   margin: 0;
-  font: var(--gs-typography-lg);
-  font-weight: var(--gs-font-weight-semibold);
+  font: var(--gb-typography-lg);
+  font-weight: var(--gb-font-weight-semibold);
 }
 
 .rv-num {
@@ -133,35 +133,35 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: var(--gs-radius-full);
-  background: var(--gs-background-subtler);
-  font: var(--gs-typography-sm);
-  font-weight: var(--gs-font-weight-semibold);
+  border-radius: var(--gb-radius-full);
+  background: var(--gb-background-subtler);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-semibold);
 }
 
 .rv-badge {
-  padding: var(--gs-space-2) var(--gs-space-8);
-  border-radius: var(--gs-radius-full);
-  font: var(--gs-typography-xs);
-  font-weight: var(--gs-font-weight-medium);
-  background: var(--gs-background-subtler);
-  color: var(--gs-text-subtle);
+  padding: var(--gb-space-2) var(--gb-space-8);
+  border-radius: var(--gb-radius-full);
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-medium);
+  background: var(--gb-background-subtler);
+  color: var(--gb-text-subtle);
 }
 
 .rv-badge[data-bucket="todo"] {
-  background: var(--gs-background-warning-default);
-  color: var(--gs-text-static-white);
+  background: var(--gb-background-warning-default);
+  color: var(--gb-text-static-white);
 }
 
 .rv-badge[data-bucket="decided"],
 .rv-badge[data-bucket="reviewed"] {
-  background: var(--gs-background-success-subtle);
-  color: var(--gs-text-success);
+  background: var(--gb-background-success-subtle);
+  color: var(--gb-text-success);
 }
 
 .rv-badge[data-bucket="reviewed"] {
   background: transparent;
-  box-shadow: inset 0 0 0 var(--gs-stroke-1) var(--gs-border-success);
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--gb-border-success);
 }
 
 /* ── Status filter ──────────────────────────────────────────────────────── */
@@ -173,72 +173,72 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--gs-space-8);
-  margin: 0 calc(-1 * var(--gs-space-4)) var(--gs-space-24);
-  padding: var(--gs-space-8) var(--gs-space-4);
-  background: var(--gs-background-default);
+  gap: var(--gb-space-8);
+  margin: 0 calc(-1 * var(--gb-space-4)) var(--gb-space-24);
+  padding: var(--gb-space-8) var(--gb-space-4);
+  background: var(--gb-background-default);
 }
 
 .rv-filter button {
   display: inline-flex;
   align-items: center;
-  gap: var(--gs-space-6);
-  padding: var(--gs-space-6) var(--gs-space-12);
-  border: var(--gs-stroke-1) solid var(--gs-border-default);
-  border-radius: var(--gs-radius-full);
-  background: var(--gs-background-default);
-  color: var(--gs-text-subtle);
-  font: var(--gs-typography-sm);
+  gap: var(--gb-space-6);
+  padding: var(--gb-space-6) var(--gb-space-12);
+  border: var(--gb-stroke-1) solid var(--gb-border-default);
+  border-radius: var(--gb-radius-full);
+  background: var(--gb-background-default);
+  color: var(--gb-text-subtle);
+  font: var(--gb-typography-sm);
   cursor: pointer;
 }
 
 .rv-filter button[aria-pressed="true"] {
-  border-color: var(--gs-background-bold);
-  background: var(--gs-background-bold);
-  color: var(--gs-text-invert);
+  border-color: var(--gb-background-bold);
+  background: var(--gb-background-bold);
+  color: var(--gb-text-invert);
 }
 
 .rv-count {
   min-width: 18px;
-  padding: 0 var(--gs-space-4);
-  border-radius: var(--gs-radius-full);
-  background: var(--gs-background-subtler);
-  color: var(--gs-text-default);
-  font: var(--gs-typography-xs);
-  font-weight: var(--gs-font-weight-semibold);
+  padding: 0 var(--gb-space-4);
+  border-radius: var(--gb-radius-full);
+  background: var(--gb-background-subtler);
+  color: var(--gb-text-default);
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-semibold);
   text-align: center;
 }
 
 .rv-filter button[data-bucket="todo"] .rv-count {
-  background: var(--gs-background-warning-default);
-  color: var(--gs-text-static-white);
+  background: var(--gb-background-warning-default);
+  color: var(--gb-text-static-white);
 }
 
 .rv-hide {
   margin-left: auto;
-  color: var(--gs-text-subtle);
+  color: var(--gb-text-subtle);
 }
 
 .rv-empty {
-  padding: var(--gs-space-40);
-  border: var(--gs-stroke-1) dashed var(--gs-border-default);
-  border-radius: var(--gs-radius-xl);
-  color: var(--gs-text-subtle);
-  font: var(--gs-typography-sm);
+  padding: var(--gb-space-40);
+  border: var(--gb-stroke-1) dashed var(--gb-border-default);
+  border-radius: var(--gb-radius-xl);
+  color: var(--gb-text-subtle);
+  font: var(--gb-typography-sm);
   text-align: center;
 }
 
 .rv-facts {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: var(--gs-space-4) var(--gs-space-12);
-  margin: var(--gs-space-16) 0;
-  font: var(--gs-typography-sm);
+  gap: var(--gb-space-4) var(--gb-space-12);
+  margin: var(--gb-space-16) 0;
+  font: var(--gb-typography-sm);
 }
 
 .rv-facts dt {
-  font-weight: var(--gs-font-weight-semibold);
-  color: var(--gs-text-subtle);
+  font-weight: var(--gb-font-weight-semibold);
+  color: var(--gb-text-subtle);
 }
 
 .rv-facts dd {
@@ -250,7 +250,7 @@
 .rv-columns {
   display: grid;
   grid-template-columns: repeat(var(--rv-cols), minmax(0, 1fr));
-  gap: var(--gs-space-16);
+  gap: var(--gb-space-16);
 }
 
 @media (max-width: 760px) {
@@ -260,36 +260,36 @@
 }
 
 .rv-col h3 {
-  margin: 0 0 var(--gs-space-8);
-  font: var(--gs-typography-xs);
-  font-weight: var(--gs-font-weight-semibold);
-  color: var(--gs-text-subtle);
+  margin: 0 0 var(--gb-space-8);
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-semibold);
+  color: var(--gb-text-subtle);
 }
 
 .rv-stage {
   position: relative;
-  padding: var(--gs-space-28) var(--gs-space-16) var(--gs-space-16);
-  background: var(--gs-background-default);
-  color: var(--gs-text-default);
-  border: var(--gs-stroke-1) solid var(--gs-border-default);
+  padding: var(--gb-space-28) var(--gb-space-16) var(--gb-space-16);
+  background: var(--gb-background-default);
+  color: var(--gb-text-default);
+  border: var(--gb-stroke-1) solid var(--gb-border-default);
   overflow-x: auto;
 }
 
 .rv-stage:first-of-type {
-  border-radius: var(--gs-radius-lg) var(--gs-radius-lg) 0 0;
+  border-radius: var(--gb-radius-lg) var(--gb-radius-lg) 0 0;
 }
 
 .rv-stage:last-of-type {
   border-top: 0;
-  border-radius: 0 0 var(--gs-radius-lg) var(--gs-radius-lg);
+  border-radius: 0 0 var(--gb-radius-lg) var(--gb-radius-lg);
 }
 
 .rv-theme {
   position: absolute;
-  top: var(--gs-space-8);
-  left: var(--gs-space-12);
-  font: var(--gs-typography-xs);
-  color: var(--gs-text-subtlest);
+  top: var(--gb-space-8);
+  left: var(--gb-space-12);
+  font: var(--gb-typography-xs);
+  color: var(--gb-text-subtlest);
   text-transform: uppercase;
 }
 
@@ -298,69 +298,69 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: var(--gs-space-16) var(--gs-space-24);
+  gap: var(--gb-space-16) var(--gb-space-24);
 }
 
 .rv-spec {
   display: grid;
   justify-items: center;
-  gap: var(--gs-space-6);
+  gap: var(--gb-space-6);
 }
 
 .rv-spec-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--gs-space-8);
+  gap: var(--gb-space-8);
 }
 
 .rv-spec-label {
-  font: var(--gs-typography-xs);
-  color: var(--gs-text-subtle);
+  font: var(--gb-typography-xs);
+  color: var(--gb-text-subtle);
   white-space: nowrap;
 }
 
 .rv-measure {
   display: grid;
   justify-items: center;
-  gap: var(--gs-space-4);
+  gap: var(--gb-space-4);
 }
 
 .rv-measure code {
   font-size: 11px;
-  color: var(--gs-text-subtle);
+  color: var(--gb-text-subtle);
 }
 
 /* ── Decision ───────────────────────────────────────────────────────────── */
 
 .rv-decide {
   display: grid;
-  gap: var(--gs-space-12);
-  margin-top: var(--gs-space-16);
+  gap: var(--gb-space-12);
+  margin-top: var(--gb-space-16);
 }
 
 .rv-options {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gs-space-8) var(--gs-space-24);
+  gap: var(--gb-space-8) var(--gb-space-24);
   margin: 0;
-  padding: var(--gs-space-12) var(--gs-space-16);
-  border: var(--gs-stroke-1) solid var(--gs-border-default);
-  border-radius: var(--gs-radius-lg);
+  padding: var(--gb-space-12) var(--gb-space-16);
+  border: var(--gb-stroke-1) solid var(--gb-border-default);
+  border-radius: var(--gb-radius-lg);
 }
 
 .rv-options legend {
-  padding: 0 var(--gs-space-4);
-  font: var(--gs-typography-xs);
-  font-weight: var(--gs-font-weight-semibold);
-  color: var(--gs-text-subtle);
+  padding: 0 var(--gb-space-4);
+  font: var(--gb-typography-xs);
+  font-weight: var(--gb-font-weight-semibold);
+  color: var(--gb-text-subtle);
 }
 
 .rv-check {
   display: inline-flex;
   align-items: center;
-  gap: var(--gs-space-8);
-  font: var(--gs-typography-sm);
+  gap: var(--gb-space-8);
+  font: var(--gb-typography-sm);
   cursor: pointer;
 }
 
@@ -368,15 +368,15 @@
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: var(--gs-background-bold);
+  accent-color: var(--gb-background-bold);
 }
 
 .rv-rec {
-  padding: 0 var(--gs-space-6);
-  border-radius: var(--gs-radius-sm);
-  background: var(--gs-background-info-subtle);
-  color: var(--gs-text-info);
-  font: var(--gs-typography-xs);
+  padding: 0 var(--gb-space-6);
+  border-radius: var(--gb-radius-sm);
+  background: var(--gb-background-info-subtle);
+  color: var(--gb-text-info);
+  font: var(--gb-typography-xs);
 }
 
 .rv-note {
@@ -386,5 +386,25 @@
 
 .rv-done {
   justify-self: end;
-  font-weight: var(--gs-font-weight-medium);
+  font-weight: var(--gb-font-weight-medium);
+}
+
+/* AvatarReview item 3 — the initial at the Figma vector's position. */
+.rv-figma-offset .gb-avatar-initial {
+  transform: translateY(0.74px);
+}
+
+/* BadgeReview item 2 — the leading icon in Figma's fixed color. */
+.rv-figma-badge-icon .gb-badge-icon {
+  color: var(--gb-border-invert-strong);
+}
+
+/* BadgeReview item 3 — darker alarm / success colors, light theme only. */
+[data-theme="light"] .rv-light-contrast [data-variant="alarm"] {
+  --badge-fg: var(--gb-text-error);
+  --badge-border: var(--gb-text-error);
+}
+[data-theme="light"] .rv-light-contrast [data-variant="success"] {
+  --badge-fg: var(--gb-color-green-700);
+  --badge-border: var(--gb-color-green-700);
 }

@@ -1,61 +1,88 @@
-import type { ComponentPropsWithRef, ReactNode } from "react"
+import { useContext, type ComponentPropsWithRef, type ReactNode } from "react"
 
+import { ButtonGroupContext } from "../ButtonGroup/context"
 import styles from "./Button.module.css"
 
 type NativeButtonProps = Omit<ComponentPropsWithRef<"button">, "children"> & {
   /**
    * Selected state, e.g. the current item of a button group. Default false.
-   * true shows the Figma State=active look. Passing the prop (true or false) also marks the button
+   * true shows the Figma Status=active look. Passing the prop (true or false) also marks the button
    * as a toggle for screen readers (`aria-pressed`); a plain action button simply omits it.
    * With `aria-current` (navigation) no aria-pressed is added.
    */
   isSelected?: boolean
 }
 
-/** Figma `Type=primary | mute | outline | link` — a labelled button. */
+/**
+ * Required when nothing visible names the control: `aria-label`, or `aria-labelledby` pointing at
+ * text already on screen. Either one satisfies the type; omitting both is a compile error.
+ */
+export type AccessibleName =
+  | { "aria-label": string; "aria-labelledby"?: string }
+  | { "aria-labelledby": string; "aria-label"?: string }
+
+/** Figma `Type=default`, `Style=default | mute | outline | link` — a label, optionally followed by an icon. */
 export type TextButtonProps = NativeButtonProps & {
-  variant?: "primary" | "mute" | "outline" | "link"
+  variant?: "default" | "mute" | "outline" | "link"
   children: ReactNode
-  /** Figma `Trailing icon` + `Icon` swap. Rendered after the label at 16px. Not shown for `link`. */
-  trailingIcon?: ReactNode
+  /** Figma `Show icon` + `-> Icon`. Rendered after the label — 16px, 12px for `link`. Any SVG, colored with currentColor. */
+  icon?: ReactNode
 }
 
-/** Figma `Type=icon | ghost | icon rounded` — a single icon, no visible label. */
-export type IconButtonProps = NativeButtonProps & {
-  variant: "icon" | "ghost" | "icon-rounded"
-  /** The icon. Use an SVG; it is sized to 16px and colored with currentColor. */
+/** Figma `Type=default, Style=ghost` (a pill with no fill) and `Type=google` (sign-in). Label only — no icon slot in Figma. */
+export type PlainButtonProps = NativeButtonProps & {
+  variant: "ghost" | "google"
   children: ReactNode
-  /** Required: an icon-only button has no text for screen readers to announce. */
-  "aria-label": string
+  icon?: undefined
 }
 
-export type ButtonProps = TextButtonProps | IconButtonProps
+/** Figma `Type=icon`, `Style=default | ghost | ghost-rounded` — a single 16px icon, no visible label. */
+export type IconButtonProps = NativeButtonProps &
+  AccessibleName & {
+    variant?: "default" | "ghost" | "ghost-rounded"
+    icon: ReactNode
+    children?: undefined
+  }
+
+export type ButtonProps = TextButtonProps | PlainButtonProps | IconButtonProps
 
 export function Button(props: ButtonProps) {
-  const {
-    variant = "primary",
-    className,
-    type = "button",
-    children,
-    trailingIcon,
-    isSelected = false,
-    ...rest
-  } = props as ButtonProps & { trailingIcon?: ReactNode }
+  const { variant = "default", className, type = "button", children, icon, isSelected = false, ...rest } = props
   // Only buttons that take part in selection get aria-pressed — a plain button never announces "not pressed".
   // (Checks the raw prop, not the defaulted one: spreading `{ isSelected: undefined }` must stay a plain button.)
   const pressed = props.isSelected !== undefined && !rest["aria-current"] ? isSelected : undefined
+  // Figma Type: google is its own Type; a button with no children is Type=icon.
+  // Inside a disabled ButtonGroup (Figma Status=disabled) unless this button says otherwise.
+  const group = useContext(ButtonGroupContext)
+  const disabled = rest.disabled ?? group.disabled
+  const figmaType = variant === "google" ? "google" : children == null ? "icon" : "default"
 
   return (
     <button
       {...rest}
       type={type}
+      disabled={disabled}
       aria-pressed={rest["aria-pressed"] ?? pressed}
+      data-type={figmaType}
       data-variant={variant}
       data-selected={isSelected || undefined}
       className={className ? `${styles.root} ${className}` : styles.root}
     >
-      {children}
-      {variant !== "link" && trailingIcon}
+      {figmaType === "google" && <GoogleLogo />}
+      {figmaType === "icon" ? icon : children}
+      {figmaType === "default" && icon}
     </button>
+  )
+}
+
+/** lucide/Google — the brand mark from the Figma Lucide Icons page. Brand colors are fixed. */
+function GoogleLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#F44336" d="M11.6 2C12.3 1.9 12.8 1.9 13.7 2C15.6 2.3 17.4 3.2 18.8 4.6C17.8 5.5 16.9 6.4 16 7.4C14.2 5.9 12.3 5.5 10.1 6.3C8.5 7.1 7.4 8.3 6.8 9.9C5.8 9.2 4.8 8.4 3.8 7.6C3.7 7.5 3.6 7.5 3.5 7.5C5.1 4.4 7.6 2.6 10.9 2L11.6 2Z" />
+      <path fill="#FFC107" d="M3.8 7.6C4.8 8.4 5.8 9.2 6.8 9.9C6.6 10.6 6.5 11.3 6.5 11.9C6.5 12.6 6.6 13.2 6.8 13.8L3.6 16.4C2.2 13.5 2.2 10.5 3.5 7.5C3.6 7.5 3.7 7.5 3.8 7.6Z" />
+      <path fill="#448AFF" d="M12.2 10.1C15.3 10.1 18.3 10.1 21.4 10.2C21.9 13.4 21.3 16.2 19.4 18.8C19.1 19 18.9 19.3 18.6 19.5C17.7 18.6 16.6 17.8 15.5 17C16.6 16.2 17.3 15.2 17.5 13.8H12.2V10.1Z" />
+      <path fill="#43A047" d="M6.8 13.8C7.9 16.7 10.1 18.1 13.1 17.9C14 17.8 14.8 17.5 15.5 17C16.6 17.8 17.7 18.6 18.6 19.5C17.1 20.9 15.1 21.8 13 21.9C12.5 21.9 12 21.9 11.5 21.9C8 21.5 5.3 19.6 3.6 16.4L6.8 13.8Z" />
+    </svg>
   )
 }

@@ -1,0 +1,319 @@
+# ================================================================
+# ButtonGroup Component Specification
+# ================================================================
+# Last Updated: 2026-10-16
+# Updated By: taehee0150@gmail.com
+
+title: gb-button-group
+
+# ================================================================
+# Layer 1: UX Guidelines
+# ================================================================
+
+meta:
+  component: gb-button-group
+  description: |
+    A row of related Buttons presented as one unit. Two forms: an action
+    pair (secondary + primary) that closes a step or a dialog, and a
+    floating menu pill of ghost Buttons for top-level navigation. For a
+    single action use Button alone; for items that toggle independently use
+    Toggle.
+  source:
+    figma: "G9YNa2vjdqDjnML9y5hXJ4 · page Button Group (73:1980) · component set Button group (3466:29935)"
+    code: "react/src/components/ButtonGroup/ButtonGroup.tsx"
+
+usage:
+  when_to_use:
+    - At the end of a dialog or step, to offer the main action next to its alternative (Cancel / Save)
+    - For a small set of top-level destinations shown as one floating pill (menu)
+
+  when_not_to_use:
+    - For a single action → use Button
+    - For options the user switches on and off independently → use Toggle
+    - For choosing one of several values in a form → use radio controls or Select
+
+  rules:
+    - id: primary-last
+      rule: Put the primary action last
+      severity: warning
+      message: "Figma pairs are outline (secondary) then default (primary). Keep that order so the primary sits on the right."
+
+    - id: one-primary
+      rule: One primary Button per group
+      severity: warning
+      message: "Two default-style Buttons side by side compete; the second one should be outline."
+
+    - id: menu-current
+      rule: Mark the current page in a menu
+      severity: warning
+      message: "Pass isSelected and aria-current=\"page\" on the current item (Review Note 1)."
+
+    - id: menu-name
+      rule: Name the menu when a page has more than one nav
+      severity: warning
+      message: "variant=\"menu\" renders a <nav>; give it aria-label so landmarks can be told apart."
+
+  common_mistakes:
+    - mistake: Primary action first
+      correct: Secondary (outline) first, primary second.
+      example:
+        wrong: |
+          <ButtonGroup><Button>Save</Button><Button variant="outline">Cancel</Button></ButtonGroup>
+        right: |
+          <ButtonGroup><Button variant="outline">Cancel</Button><Button>Save</Button></ButtonGroup>
+
+    - mistake: Disabling each Button by hand
+      correct: Pass disabled to the group.
+      example:
+        wrong: |
+          <ButtonGroup><Button variant="outline" disabled>Cancel</Button><Button disabled>Save</Button></ButtonGroup>
+        right: |
+          <ButtonGroup disabled><Button variant="outline">Cancel</Button><Button>Save</Button></ButtonGroup>
+
+variant_guidelines:
+  actions:
+    description: |
+      Two Buttons of equal width, right-aligned, gap sp-10. Figma
+      Type=skippable | back or forth | save | confirm | Error — the five
+      differ only in their labels (Later/Go Next, Go back/Go Next,
+      Cancel/Save, Cancel/Confirm, Refresh/Back to Dashboard), so code has
+      one variant. Default.
+    best_practices:
+      - Secondary as Button variant="outline", primary as the default Button
+      - The group fills its container; set the width where it is used (Figma specimen is 344)
+
+  menu:
+    description: |
+      A pill (radius full) with background/sheer, a 1px border/default inside
+      stroke and an 8px backdrop blur, padding 8/10, gap 12. Holds an icon
+      ghost-rounded Button (home) and text ghost Buttons. Figma Type=menu.
+    best_practices:
+      - Use for a handful of top-level destinations
+      - Mark the current page with isSelected + aria-current="page"
+
+states_and_behaviors:
+  disabled:
+    description: |
+      Figma Status=disabled. The disabled prop disables every Button inside
+      through context; a Button that sets disabled={false} itself stays
+      enabled. The container does not change.
+
+  current:
+    description: |
+      Code only (Review Note 1). In a menu, isSelected on the current item
+      shows the Button Status=active look; aria-current="page" announces it.
+
+# ================================================================
+# Layer 2: Technical Spec
+# ================================================================
+
+anatomy:
+  root:
+    type: container
+    element: "div[role=group] (actions) | nav (menu)"
+    description: Figma variant frame (auto layout HORIZONTAL).
+
+  buttons:
+    type: slot
+    instanceOf: Button
+    description: |
+      actions — Button outline + Button default, each FILL (equal width).
+      menu — Button Type=icon Style=ghost-rounded (lucide/home) + Button
+      Type=default Style=ghost items.
+
+props:
+  type:
+    type: enum
+    default: menu
+    enum: [menu, skippable, back or forth, save, confirm, Error]
+    description: Figma "Type". Code — variant="menu", or the default actions variant for the five pair Types.
+
+  status:
+    type: enum
+    default: default
+    enum: [default, disabled]
+    description: Figma "Status". Code — disabled prop.
+
+default:
+  name: Type=skippable, Status=default (code default variant actions)
+  layout:
+    - root:
+        - buttons
+  styles:
+    root:
+      display: flex
+      justifyContent: flex-end
+      gap: var(--gb-space-10)                    # 10px
+    buttons:
+      flex: 1 1 0                                # equal widths (Figma FILL)
+
+variants:
+  - name: menu
+    configuration:
+      type: menu
+    styles:
+      root:
+        display: inline-flex
+        alignItems: center
+        gap: var(--gb-space-12)                  # 12px
+        padding: var(--gb-space-8) var(--gb-space-10)
+        borderRadius: var(--gb-radius-full)
+        backgroundColor: var(--gb-background-sheer)
+        border: 1px inside var(--gb-border-default)
+        backdropFilter: blur(var(--gb-blur-default))   # Figma effect style Backdrop Blur/backdrop-blur (8)
+
+  - name: forced-colors
+    configuration:
+      media: "(forced-colors: active)"
+      type: menu
+    styles:
+      root:
+        border: 1px solid CanvasText
+
+# ================================================================
+# Layer 3: Interface Contract
+# ================================================================
+
+api:
+  component: ButtonGroup
+  import: 'import { Button, ButtonGroup } from "@gb/react"'
+  element: "HTMLDivElement (actions) | HTMLElement (menu, <nav>)"
+  requires:
+    - '@gb/tokens/fonts.css and @gb/tokens/tokens.css loaded once at the app root'
+
+  props:
+    - name: children
+      type: ReactNode
+      required: true
+      figma: the Button instances
+      description: The Buttons.
+
+    - name: variant
+      type: '"actions" | "menu"'
+      default: actions
+      figma: "Type (menu → menu; skippable, back or forth, save, confirm, Error → actions)"
+
+    - name: disabled
+      type: boolean
+      default: false
+      figma: Status=disabled
+      description: Disables every Button inside unless a Button sets disabled itself.
+
+    - name: aria-label
+      type: string
+      figma: none
+      description: Name of the group (actions) or the navigation landmark (menu).
+
+    - name: className
+      type: string
+      figma: none
+      description: Appended to the root. Use for layout (width, margin).
+
+    - name: ref
+      type: "Ref<HTMLDivElement> | Ref<HTMLElement>"
+      figma: none
+      description: Forwarded to the root (React 19 ref-as-prop).
+
+    - name: "...rest"
+      type: 'ComponentPropsWithRef<"div"> | ComponentPropsWithRef<"nav">'
+      figma: none
+      description: Other native attributes go to the root (id, style, data-*).
+
+  slots:
+    - name: children
+      description: Buttons
+
+  events:
+    # ButtonGroup defines no events; put handlers on the Buttons. In the
+    # playground, onClick of each Button is logged.
+    []
+
+  methods: []
+
+  dataAttributes:
+    - name: data-variant
+      values: [actions, menu]
+    - name: data-disabled
+      values: ["true"]
+      description: Present when the group is disabled.
+
+  tokensUsed:
+    color:
+      - --gb-background-sheer
+      - --gb-border-default
+    dimension:
+      - --gb-space-8
+      - --gb-space-10
+      - --gb-space-12
+      - --gb-radius-full
+      - --gb-stroke-1
+      - --gb-blur-default
+
+examples:
+  dialog-actions:
+    description: Secondary + primary at the end of a dialog
+    code: |
+      <ButtonGroup>
+        <Button variant="outline" onClick={close}>Cancel</Button>
+        <Button type="submit">Save</Button>
+      </ButtonGroup>
+
+  disabled:
+    description: Whole group disabled while saving
+    code: |
+      <ButtonGroup disabled={saving}>
+        <Button variant="outline">Cancel</Button>
+        <Button>Save</Button>
+      </ButtonGroup>
+
+  menu:
+    description: Top-level navigation with the current page marked
+    code: |
+      <ButtonGroup variant="menu" aria-label="주 메뉴">
+        <Button variant="ghost-rounded" icon={<House />} aria-label="Home" />
+        <Button variant="ghost">Assets</Button>
+        <Button variant="ghost" isSelected aria-current="page">Compass</Button>
+        <Button variant="ghost">Content Studio</Button>
+      </ButtonGroup>
+
+# ================================================================
+# Review Notes (Figma vs Code)
+# Reviewed visually in the playground: #/button-group/review
+# ================================================================
+# 1. ⚠ needs design decision — menu has no current-page state in Figma.
+#    Code uses Button Status=active via isSelected + aria-current="page".
+# 2. ⚠ needs design decision — menu items are <button>, not links; Button
+#    has no href yet, so navigation is onClick-only.
+# 3. ⚠ needs design decision — menu height is fixed at 53 in Figma (items
+#    at y=8.5); code is 52 from the padding tokens. x positions match.
+# 4. ⚠ needs design decision — the five pair Types differ only in labels;
+#    code has one actions variant.
+# 5. Pair width: Figma 344 fixed; code fills its container. At 344 the
+#    buttons measure 167 at x 0 / 177, as in Figma.
+# 6. Status=disabled disables every Button through context.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Debt Notes
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# KNOWN ISSUES IN THE CURRENT IMPLEMENTATION:
+#
+# 1. Library Build
+#    - Description: package exports src/*.ts directly; needs a Vite library build for use outside the workspace.
+#      That build must set css.modules.generateScopedName to gbScopedName (react/css-modules.mjs) so
+#      class names stay gb-{component} (root) and gb-{component}-{local}
+#    - Priority: High before the first external consumer
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ================================================================
+# Metadata
+# ================================================================
+
+metadata:
+  lastUpdated: "2026-10-16"
+  status: draft
+  notes: |
+    Drafted from code (ButtonGroup.tsx, ButtonGroup.module.css) and Figma component set 3466:29935.
+    Layer 1 guidelines are a first draft and need design review.
+    Open design questions: Review Notes 1–4.

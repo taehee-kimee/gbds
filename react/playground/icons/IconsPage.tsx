@@ -24,7 +24,7 @@ function canonicalName(component: Icon) {
   return Object.keys(all).find((k) => all[k] === component)
 }
 
-type GsIcon = {
+type GbIcon = {
   figma: string
   /** Figma stroke weight (lucide-matched icons only). */
   stroke?: 1 | 2
@@ -35,9 +35,9 @@ type GsIcon = {
   brand?: boolean
 }
 
-function buildGsIcons(): { group: string; icons: GsIcon[] }[] {
-  const single: GsIcon[] = []
-  const sets: { group: string; icons: GsIcon[] }[] = []
+function buildGbIcons(): { group: string; icons: GbIcon[] }[] {
+  const single: GbIcon[] = []
+  const sets: { group: string; icons: GbIcon[] }[] = []
   for (const name of figmaIconNames) {
     const variants = figmaIconSets[name]
     if (variants) {
@@ -69,15 +69,15 @@ function buildGsIcons(): { group: string; icons: GsIcon[] }[] {
 /* ── Page ──────────────────────────────────────────────────────────────── */
 
 export function IconsPage() {
-  const [tab, setTab] = useState<"gs" | "all">("gs")
+  const [tab, setTab] = useState<"gb" | "all">("gb")
   const [query, setQuery] = useState("")
   const [size, setSize] = useState(24)
   const [weight, setWeight] = useState<"figma" | "1" | "2">("figma")
   const [copied, setCopied] = useState("")
   const q = useDeferredValue(query.trim().toLowerCase())
 
-  const gs = useMemo(buildGsIcons, [])
-  const gsCount = gs.reduce((n, g) => n + g.icons.length, 0)
+  const gb = useMemo(buildGbIcons, [])
+  const gbCount = gb.reduce((n, g) => n + g.icons.length, 0)
   const lucideCount = Object.keys(all).length
 
   const copy = (text: string) =>
@@ -91,14 +91,14 @@ export function IconsPage() {
       <header className="ic-head">
         <h1>Icons</h1>
         <p>
-          Figma <code>📐 Lucide Icons</code> 페이지(135:2)의 GS 세트와 lucide-react 전체 목록. 기본 굵기는 Figma 값(대부분 stroke 1). 아이콘을 누르면 코드가 복사됩니다.
+          Figma <code>📐 Lucide Icons</code> 페이지(135:2)의 GB 세트와 lucide-react 전체 목록. 기본 굵기는 Figma 값(대부분 stroke 1). 아이콘을 누르면 코드가 복사됩니다.
         </p>
       </header>
 
       <div className="ic-bar">
         <div className="ic-tabs" role="tablist">
-          <button type="button" role="tab" aria-selected={tab === "gs"} onClick={() => setTab("gs")}>
-            GS 세트 <span>{gsCount}</span>
+          <button type="button" role="tab" aria-selected={tab === "gb"} onClick={() => setTab("gb")}>
+            GB 세트 <span>{gbCount}</span>
           </button>
           <button type="button" role="tab" aria-selected={tab === "all"} onClick={() => setTab("all")}>
             lucide 전체 <span>{lucideCount.toLocaleString()}</span>
@@ -132,21 +132,21 @@ export function IconsPage() {
         {copied && <span className="ic-copied">복사됨: {copied}</span>}
       </div>
 
-      {tab === "gs" ? <GsSet groups={gs} q={q} size={size} weight={weight} copy={copy} /> : <AllLucide q={q} size={size} weight={weight === "figma" ? 1 : Number(weight)} copy={copy} />}
+      {tab === "gb" ? <GbSet groups={gb} q={q} size={size} weight={weight} copy={copy} /> : <AllLucide q={q} size={size} weight={weight === "figma" ? 1 : Number(weight)} copy={copy} />}
     </div>
   )
 }
 
-/* ── GS set (Figma) ────────────────────────────────────────────────────── */
+/* ── GB set (Figma) ────────────────────────────────────────────────────── */
 
-function GsSet({
+function GbSet({
   groups,
   q,
   size,
   weight,
   copy,
 }: {
-  groups: { group: string; icons: GsIcon[] }[]
+  groups: { group: string; icons: GbIcon[] }[]
   q: string
   size: number
   weight: "figma" | "1" | "2"
@@ -162,7 +162,7 @@ function GsSet({
         <ul>
           <li>
             lucide-react와 이름이 일치 <b>{lucideCount}</b>개 → 코드에서 <code>lucide-react</code>로 사용. 커스텀(lucide에 없음){" "}
-            <b>{customCount}</b>개 → Figma에서 SVG로 내보낸 모양을 표시 (아직 <code>@gs/react</code>에 컴포넌트로 들어가지 않음).
+            <b>{customCount}</b>개 → Figma에서 SVG로 내보낸 모양을 표시 (아직 <code>@gb/react</code>에 컴포넌트로 들어가지 않음).
           </li>
           {figmaIconIssues.map((t) => (
             <li key={t}>{t}</li>

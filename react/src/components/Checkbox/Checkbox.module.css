@@ -1,25 +1,26 @@
 /*
  * Checkbox — mirrors the Figma component set `Checkbox` (76:8617).
- * Figma Type=default | Checked | Part | Disabled → :checked, :indeterminate, :disabled on a native input.
- * Figma Style=default | muted → data-variant on the root.
+ * Figma Status=default | checked | part | disabled | disabled-checked | disabled-part
+ *   → :checked, :indeterminate, :disabled on a native input.
+ * Figma Type=default | mute → data-variant on the root.
  *
  * The native input itself is the 16px box (appearance: none); the check and dash SVGs sit on top of it.
  * States only reassign the --checkbox-* properties below.
  */
 
 .root {
-  --checkbox-bg: var(--gs-background-bolder);
-  --checkbox-border: var(--gs-border-muted);
-  --checkbox-fg: var(--gs-icon-default);
-  --checkbox-label: var(--gs-text-default);
-  --checkbox-size: var(--gs-space-16);
+  --checkbox-bg: var(--gb-background-bolder);
+  --checkbox-border: var(--gb-border-muted);
+  --checkbox-fg: var(--gb-icon-default);
+  --checkbox-label: var(--gb-text-default);
+  --checkbox-size: var(--gb-space-16);
 
   display: inline-flex;
   align-items: center;
-  gap: var(--gs-space-8);
+  gap: var(--gb-space-8);
   color: var(--checkbox-label);
-  font: var(--gs-typography-sm);
-  font-weight: var(--gs-font-weight-medium);
+  font: var(--gb-typography-sm);
+  font-weight: var(--gb-font-weight-medium);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -39,16 +40,16 @@
   height: 100%;
   margin: 0;
   border: 0;
-  border-radius: var(--gs-radius-sm);
+  border-radius: var(--gb-radius-sm);
   background: var(--checkbox-bg);
   /* Figma stroke is INSIDE + effect style Box Shadow/shadow-xs. */
-  box-shadow: inset 0 0 0 var(--gs-stroke-1) var(--checkbox-border), var(--gs-shadow-xs);
+  box-shadow: inset 0 0 0 var(--gb-stroke-1) var(--checkbox-border), var(--gb-shadow-xs);
   cursor: inherit;
 }
 
 .input:focus-visible {
   outline: none;
-  box-shadow: var(--gs-ring-focus), inset 0 0 0 var(--gs-stroke-1) var(--checkbox-border), var(--gs-shadow-xs);
+  box-shadow: var(--gb-ring-focus), inset 0 0 0 var(--gb-stroke-1) var(--checkbox-border), var(--gb-shadow-xs);
 }
 
 /* Figma: 12px lucide icon, stroke/2 at 24px viewBox → 1px rendered. */
@@ -61,7 +62,7 @@
   height: 12px;
   fill: none;
   stroke: var(--checkbox-fg);
-  stroke-width: var(--gs-stroke-2);
+  stroke-width: var(--gb-stroke-2);
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
@@ -77,35 +78,37 @@
   min-width: 0;
 }
 
-/* ── Style=muted ───────────────────────────────────────────────────────── */
+/* ── Type=mute: same box and label in every Status ────────────────────── */
 
-.root[data-variant="muted"] {
-  --checkbox-bg: var(--gs-background-default);
-  --checkbox-border: var(--gs-border-mute);
-  --checkbox-label: var(--gs-text-subtler);
+.root[data-variant="mute"] {
+  --checkbox-bg: var(--gb-background-default);
+  --checkbox-border: var(--gb-border-mute-subtle);
+  --checkbox-label: var(--gb-text-subtle);
 }
 
-/* ── Type=Checked / Type=Part ──────────────────────────────────────────── */
+/* ── Status=checked / part (Type=default) ──────────────────────────────── */
 
-.root:has(.input:is(:checked, :indeterminate)) {
-  --checkbox-bg: var(--gs-background-default);
-  --checkbox-border: var(--gs-border-subtler);
-  --checkbox-label: var(--gs-text-default);
+.root[data-variant="default"]:has(.input:is(:checked, :indeterminate)) {
+  --checkbox-bg: var(--gb-background-default);
+  --checkbox-border: var(--gb-border-subtler);
+  --checkbox-label: var(--gb-text-default);
 }
 
-/* ── Type=Disabled ─────────────────────────────────────────────────────── */
+/* ── Status=disabled / disabled-checked / disabled-part ──────────────────
+ * Figma has these for Type=default only; code applies them to mute too (review 3). */
 
-.root:has(.input:disabled) {
-  --checkbox-bg: var(--gs-background-disabled-bold);
-  --checkbox-border: var(--gs-border-default);
-  --checkbox-label: var(--gs-text-subtle);
+.root[data-variant]:has(.input:disabled) {
+  --checkbox-bg: var(--gb-background-disabled-bold);
+  --checkbox-border: var(--gb-border-default);
+  --checkbox-fg: var(--gb-icon-subtlest);
+  --checkbox-label: var(--gb-text-static-gray);
   cursor: not-allowed;
 }
 
 /* Windows High Contrast drops box-shadow and custom colors; keep the box and mark visible. */
 @media (forced-colors: active) {
   .input {
-    border: var(--gs-stroke-1) solid CanvasText;
+    border: var(--gb-stroke-1) solid CanvasText;
   }
   .check,
   .dash {
